@@ -1,43 +1,25 @@
-import React, { useEffect, useMemo, useCallback, useRef } from "react";
-import { Slate, Editable, withReact } from "slate-react";
-import { createEditor } from "slate";
-import { selectOnEditorEntry } from "../../helpers/slateHelpers/selectOnEditorEntry.js";
-import { withInlineVoidIcons } from "../../helpers/slateHelpers/editorSchemaRules.js";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  updateFieldValue,
-  setActiveEditorId,
-  setActiveEditorSelection,
-} from "../../store/resumeSlice.js";
+import React, { useCallback } from "react";
+import { Slate, Editable } from "slate-react";
+import { useSelector } from "react-redux";
+import { updateFieldValue } from "../../store/resumeSlice.js";
+import { useResumeSlateEditor } from "./useResumeSlateEditor.js";
 
 import Leaf from "./renderLeaf.jsx";
 import RenderElement from "./RenderElement.jsx";
 
-import { editorRegistry } from "../../helpers/editorRegistry.js";
 import { getNodeString } from "@/helpers/getNodeString.js";
 import { getMinWidth } from "@/helpers/getMinWidth.js";
 import {
   getCascadedFontSize,
   getCascadedLineHeight,
 } from "@/helpers/leafHelpers.js";
-import { handleHotKey } from "@/utils/hotKeys.js";
-import { useSlateHistoryGrouping } from "@/hooks/useSlateHistoryGrouping.js";
 
 const SlateField = ({ field }) => {
-  // Stable editor instance
   const fieldPlainText = getNodeString(field);
   const fieldMinWidth = !fieldPlainText ? getMinWidth(field.label) : "auto";
 
-  const editorId = field.id;
-  const editor = useMemo(
-    () => withReact(withInlineVoidIcons(createEditor())),
-    [],
-  );
-
-  const dispatch = useDispatch();
   const reduxResume = useSelector((state) => state.resume.present);
-  const resumeGap = reduxResume.layout.gap;
-  const resumeStyling = useSelector((state) => reduxResume.styling);
+  const resumeStyling = reduxResume.styling;
   const subsection = useSelector(
     (state) => state.resume.present.subsections.byId[field.subsectionId],
   );
@@ -66,35 +48,11 @@ const SlateField = ({ field }) => {
     fieldStyling,
   });
 
-  const {
-    getHistoryGroup,
-    endHistoryGroup,
-    onKeyDown: groupHistoryKeyDown,
-    editableProps: historyInputProps,
-  } = useSlateHistoryGrouping(editor, editorId);
-
-  const isRestoringFromRedux = useRef(false);
-
-  useEffect(() => {
-    if (!field.value || editor.children === field.value) return;
-    if (JSON.stringify(editor.children) === JSON.stringify(field.value)) return;
-
-    endHistoryGroup();
-    isRestoringFromRedux.current = true;
-    try {
-      editor.selection = null;
-      editor.marks = null;
-      editor.children = structuredClone(field.value);
-      editor.onChange();
-    } finally {
-      isRestoringFromRedux.current = false;
-    }
-  }, [editor, field.value, endHistoryGroup]);
-
-  useEffect(() => {
-    editorRegistry.set(editorId, editor);
-    return () => editorRegistry.delete(editorId);
-  }, [editorId, editor]);
+  const { editor, onChange, activate, editableProps } = useResumeSlateEditor({
+    editorId: field.id,
+    value: field.value,
+    createValueAction: (newValue) => updateFieldValue({ fieldId: field.id, newValue }),
+  });
 
   const renderLeaf = useCallback(
     (props) => {
@@ -118,11 +76,6 @@ const SlateField = ({ field }) => {
     ],
   );
 
-  const handleActivateEditor = () => {
-    endHistoryGroup();
-    dispatch(setActiveEditorId(editorId));
-  };
-
   const renderElement = useCallback(
     (props) => {
       return (
@@ -137,15 +90,8 @@ const SlateField = ({ field }) => {
         />
       );
     },
-    [inheritedFontSize, inheritedLineHeight],
+    [inheritedFontSize, inheritedLineHeight, field],
   );
-
-  const handleUpdateFieldValue = (newValue, historyGroup) => {
-    dispatch({
-      ...updateFieldValue({ fieldId: field.id, newValue }),
-      meta: { historyGroup },
-    });
-  };
 
   if (!field.value) return null;
 
@@ -161,27 +107,13 @@ const SlateField = ({ field }) => {
       <Slate
         editor={editor}
         initialValue={field.value ?? null}
-        onChange={(value) => {
-          if (isRestoringFromRedux.current) return;
-          const contentChanged = editor.operations.some(
-            (operation) => operation.type !== "set_selection",
-          );
-          const historyGroup = getHistoryGroup();
-          if (contentChanged) handleUpdateFieldValue(value, historyGroup);
-          dispatch(setActiveEditorSelection([...editor.children]));
-        }}
-        onMouseDown={(event) => selectOnEditorEntry(editor, event)}
-        onClick={handleActivateEditor}
+        onChange={onChange}
+        onMouseDown={editableProps.onMouseDown}
+        onClick={activate}
       >
         <Editable
-          {...historyInputProps}
-          onKeyDown={(event) => {
-            groupHistoryKeyDown(event);
-            handleHotKey(editor, event);
-          }}
-          onMouseDown={(event) => selectOnEditorEntry(editor, event)}
-          onFocus={handleActivateEditor}
-          onClick={handleActivateEditor}
+          {...editableProps}
+          onClick={activate}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           placeholder={field.label}
