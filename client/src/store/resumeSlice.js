@@ -141,6 +141,7 @@ export const initialState = {
    id: null,
    title: '',
    userId: null,
+   tags: [],
 
    columns: {
       byId: {},

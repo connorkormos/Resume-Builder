@@ -11,6 +11,7 @@ const normalizeResumeFromApi = (apiResume) => {
     id: apiResume.id ?? null,
     title: apiResume.title ?? '',
     userId: apiResume.userId ?? null,
+    tags: [...(apiResume.tags ?? [])],
 
     columns: {
       byId: {},
