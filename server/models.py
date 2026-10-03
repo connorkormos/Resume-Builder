@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.dialects.postgresql import JSONB
 
 from config import db
 
@@ -96,6 +97,7 @@ class Resume(db.Model):
     styling = db.Column(db.JSON, nullable=False, default=dict)
     layout = db.Column(db.JSON, nullable=False, default=dict)
     plain_text = db.Column(db.Text, nullable=False, default="", server_default="")
+    tags = db.Column(db.JSON().with_variant(JSONB(), "postgresql"), nullable=False, default=list, server_default="[]")
     is_official_template = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     
     created_at = created_at_column()
@@ -119,6 +121,7 @@ class Resume(db.Model):
             "styling": self.styling,
             "layout": self.layout,
             "plainText": self.plain_text,
+            "tags": self.tags,
             "isOfficialTemplate": self.is_official_template,
             "createdAt": serialize_datetime(self.created_at),
             "updatedAt": serialize_datetime(self.updated_at),

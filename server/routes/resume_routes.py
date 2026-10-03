@@ -15,6 +15,7 @@ from services.builders import (
 )
 from services.resume_updater import update_resume_with_form_data
 from services.resume_sorting import apply_resume_sort
+from services.resume_tags import InvalidResumeTags
 
 from utils.authorization import check_resume_access
 from utils.responses import (
@@ -220,7 +221,10 @@ def search_resumes():
     query = Resume.query.filter(accessible_resumes_filter)
     if search_term:
         search_term_pattern = f"%{search_term.lower()}%"
-        query = query.filter(db.func.lower(Resume.plain_text).like(search_term_pattern))
+        query = query.filter(db.or_(
+            db.func.lower(Resume.plain_text).like(search_term_pattern),
+            db.func.lower(db.cast(Resume.tags, db.Text)).like(search_term_pattern),
+        ))
 
     total_count = query.count()
 
@@ -270,6 +274,14 @@ def update_resume(resume_id):
         db.session.commit()
         print_successful_request("Updated resume of ID:", resume_id)
         return jsonify(updated_resume.to_dict()), 200
+
+    except InvalidResumeTags as e:
+        db.session.rollback()
+        return generate_error(
+            error_type="BAD_REQUEST",
+            code="INVALID_RESUME_TAGS",
+            message=str(e),
+        )
 
     except ValueError as e:
         db.session.rollback()

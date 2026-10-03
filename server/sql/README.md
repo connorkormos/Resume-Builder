@@ -1,5 +1,16 @@
 # Resume template preferences
 
+## Latest collection: October 3, 2026
+
+[100 official templates](10/03/2026/README.md) cover 100 professions in two batches, with design-only titles and individual PostgreSQL insert files.
+Every file targets user 1 and follows the result-returning statement format below.
+The October files now include curated `tags` and populated `plain_text`; apply
+migration `c31d82ab690f` first. [Tag usage counts](10/03/2026/TAGS.md) document the
+full vocabulary and each template's assignments.
+The collection has passed static data, schema, relationship, and color-contrast
+checks; it has not been executed against a database or visually reviewed in the app.
+These designs await user review and do not change the approved preferences below.
+
 ## Latest feedback and batch: September 16, 2026
 
 The user's current kept set is **Modern Teal, Midnight Sidebar, Editorial Classic,
@@ -8,7 +19,7 @@ Minimal is now an approved reference; the user did not specify which version was
 kept. Blueprint and Terracotta are not in this latest kept list; do not infer a
 new explicit rejection from their omission.
 
-The current delivery is [10 new official templates](9-16-2026/README.md). All use
+The September delivery is [10 new official templates](9-16-2026/README.md). All use
 `user_id = 1`, `is_official_template = TRUE`, and `source_resume_id = NULL` under
 the current schema. The user now prefers short design-only file names and resume
 titles, while Jane Doe / John Doe remain in the actual resume content.

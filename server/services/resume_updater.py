@@ -2,6 +2,7 @@ from models import db, Resume, Column, Section, Subsection, Field
 
 from services.updaters import update_column_widths
 from services.plain_text import build_resume_plain_text
+from services.resume_tags import normalize_resume_tags
 
 def update_resume_with_form_data(resume_id, data):
     # ! Condiser potentially mismatched form data, where incoming column/section/subsection IDs may not match those actually belonging to the resume..
@@ -9,6 +10,9 @@ def update_resume_with_form_data(resume_id, data):
 
     if not resume:
         raise ValueError(f"Could not find resume of ID {resume_id}.")
+
+    if "tags" in data:
+        resume.tags = normalize_resume_tags(data["tags"])
 
     # * ------------------------
     # * Top Level Resume Updates
