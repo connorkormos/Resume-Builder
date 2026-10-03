@@ -13,7 +13,7 @@ from services.resume_tags import normalize_resume_tags
 
 class TemplateTagsTest(unittest.TestCase):
     def test_all_inserts_have_tags_matching_report_and_complete_search_text(self):
-        directory = Path(__file__).resolve().parents[1] / 'sql/10/03/2026'
+        directory = Path(__file__).resolve().parents[1] / 'sql/10-03-2026'
         paths = list(directory.glob('*.sql'))
         self.assertEqual(len(paths), 100)
         counts = Counter()
