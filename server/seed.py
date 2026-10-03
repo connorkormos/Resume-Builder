@@ -69,7 +69,9 @@ def add_template_resumes_from_sql_queries(*, dry_run=False):
                 inserted.append(title)
                 continue
             try:
-                row = connection.exec_driver_sql(sql).one()._mapping
+                # psycopg scans percent signs as placeholders, even inside SQL literals.
+                # Escape them for the driver while leaving the template files unchanged.
+                row = connection.exec_driver_sql(sql.replace("%", "%%")).one()._mapping
                 if row["title"] != title or row["user_id"] != 1 or not row["is_official_template"]:
                     raise RuntimeError("The insert returned an unexpected resume.")
                 inserted.append(title)

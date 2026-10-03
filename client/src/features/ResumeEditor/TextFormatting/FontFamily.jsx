@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import TextFormatDropdown from "./shared/TextFormatDropdown";
 
 const FontFamily = () => {
+  const isMobile = window.innerWidth <= 768;
   const dispatch = useDispatch();
 
   const fontFamilies = [
@@ -73,7 +74,6 @@ const FontFamily = () => {
         onClick={() => handleFontFamilyChange(fontFamily.value)}
       >
         {fontFamily.label}
-
         {/* <div style={{position: 'absolute', marginTop: '5%', height: '1px', width: '80%', backgroundColor: 'rgba(255, 255, 255, 0.1)'}}></div> */}
       </p>
     );
@@ -82,9 +82,16 @@ const FontFamily = () => {
   const selectedFontFamily = useSelector(
     (state) => state.resume.present.styling.fontFamily ?? fontFamilies[0].value,
   );
+
+  
   const selectedFontFamilyLabel =
     fontFamilies.find((fontFamily) => fontFamily.value === selectedFontFamily)
       ?.label ?? selectedFontFamily;
+  const displayedFontFamilyLabel = isMobile
+    ? selectedFontFamilyLabel.length > 7
+      ? `${selectedFontFamilyLabel.slice(0, 4)}...`
+      : selectedFontFamilyLabel
+    : selectedFontFamilyLabel;
 
   return (
     <div style={{ whiteSpace: "nowrap" }} data-toolbar-label="Font Family">
@@ -93,15 +100,15 @@ const FontFamily = () => {
         className="buttonMain"
         onClick={() => setShowDropdown(!showDropdown)}
       >
-        {selectedFontFamilyLabel}
+        {displayedFontFamilyLabel}
         <MdArrowDropDown style={{ margin: "auto -0.25rem auto 0.25rem" }} />
       </button>
       {showDropdown && (
         <TextFormatDropdown
-            isOpen={showDropdown}
-            setIsOpen={setShowDropdown}
+          isOpen={showDropdown}
+          setIsOpen={setShowDropdown}
           dropdownOptions={fontFamiliesArr}
-            containerStyling={{ height: '30rem', overflowY: 'scroll', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent' }}
+          containerStyling={{ height: '30rem', overflowY: 'scroll', scrollbarWidth: 'thin', scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent' }}
           wrapperClassName="flexColumn"
         />
       )}

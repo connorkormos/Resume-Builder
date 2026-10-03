@@ -70,7 +70,7 @@ export default function Indentation() {
   const isOutdented = marginLeft < 0;
 
   return (
-    <div className={styles.toolbarFlexRow}>
+    <div className={styles.toolbarFlexWrapper}>
       <button
         data-toolbar-label="Indent"
         aria-label="Indent"
