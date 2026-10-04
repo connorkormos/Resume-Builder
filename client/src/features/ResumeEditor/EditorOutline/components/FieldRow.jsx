@@ -150,9 +150,10 @@ const FieldRow = ({
             : styles.placeholderFieldText
         }
       >
-        {fieldValueText.length < 50
+        {fieldValueText.length > 0 ? fieldValueText.length < 50
           ? fieldValueText
-          : fieldValueText.slice(0, 50) + "..." || placeholderFieldText}
+          : fieldValueText.slice(0, 50) + "..." || placeholderFieldText
+          : placeholderFieldText}
         {/* {fieldValueText || placeholderFieldText} */}
         {/* {fieldValueText.length ? fieldValueText : placeholderFieldText} */}
       </p>

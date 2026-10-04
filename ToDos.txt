@@ -84,6 +84,10 @@ MEDIUM FEATURES:
    -Allowing different font families to be applied to different sections, subsections, fields, and slate leaves
 
 -Allow addition of new subsections and fields through settings modal
+   -And deletion
+
+-Allow drag and drop reorganization of fields in settings modal
+   -And for subsections?
 
 
 SMALL FEATURES:
