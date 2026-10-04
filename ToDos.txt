@@ -83,6 +83,9 @@ MEDIUM FEATURES:
 -Font Family
    -Allowing different font families to be applied to different sections, subsections, fields, and slate leaves
 
+-Allow addition of new subsections and fields through settings modal
+
+
 SMALL FEATURES:
 
 -Borders Customization

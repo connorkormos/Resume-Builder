@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
+import { resolveEditorContext } from "@/helpers/resumeContext.js";
 
 import LineHeight from "@/features/ResumeEditor/TextFormatting/LineHeight.jsx";
 import FontSize from "@/features/ResumeEditor/TextFormatting/FontSize.jsx";
@@ -43,15 +44,21 @@ const RichTextToolbar = ({ editor }) => {
     (state) => state.resume.present.activeEditorSelection,
   );
 
+  // Keep the context stable during local input edits and unrelated UI updates.
+  const editorContext = useMemo(
+    () => resolveEditorContext({
+      fields, subsections, sections, columns, styling: resumeStyling,
+    }, activeEditorId),
+    [fields, subsections, sections, columns, resumeStyling, activeEditorId],
+  );
+
   const lineHeightComponent = (
     <LineHeight
       editor={editor}
       selection={selection}
-      fields={fields}
-      subsections={subsections}
+      context={editorContext}
       activeSectionId={activeSectionId}
       activeSectionIds={activeSectionIds}
-      activeEditorId={activeEditorId}
       resumeStyling={resumeStyling}
     />
   );
@@ -59,13 +66,10 @@ const RichTextToolbar = ({ editor }) => {
     <FontSize
       editor={editor}
       selection={selection}
-      sections={sections}
       columns={columns}
-      fields={fields}
-      subsections={subsections}
+      context={editorContext}
       activeSectionId={activeSectionId}
       activeSectionIds={activeSectionIds}
-      activeEditorId={activeEditorId}
       resumeStyling={resumeStyling}
     />
   );
@@ -73,7 +77,7 @@ const RichTextToolbar = ({ editor }) => {
     <FontColor
       editor={editor}
       selection={selection}
-      activeSectionId={activeSectionId}
+      context={editorContext}
       activeSectionIds={activeSectionIds}
     />
   );

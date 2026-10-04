@@ -4,24 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateResume, updateSection } from '@/store/resumeSlice.js';
 import { getActiveMark, setFontSizeOffset } from "@/helpers/marks.js";
 
-import TextFormatInput from './shared/TextFormatInput';
+import { getCascadedFontSize } from "@/helpers/leafHelpers.js";
 
 import styles from './TextFormatting.module.css';
-import AutoWidthInput from '@/components/AutoWidthInput';
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
 const FontSize = ({
    editor,
    selection,
-   section,
-   column,
    columns,
-   fields,
-   subsections,
+   context,
    activeSectionId,
    activeSectionIds,
-   activeEditorId,
    resumeStyling
 }) => {
    const isMobile = window.innerWidth <= 768;
@@ -39,64 +34,32 @@ const FontSize = ({
       [resumeStyling]
    );
 
-   const effectiveSectionId = section?.id ?? activeSectionId;
+   const effectiveSectionId = activeSectionId;
+   const { editorId: activeEditorId } = context;
+   const hasEditorAncestry = Boolean(context.section && (!context.field || context.subsection));
    
-   const getSection = useCallback(
-      () => section ?? reduxSections.byId[effectiveSectionId],
-      [section, reduxSections, effectiveSectionId]
-   );
-
    const getSectionTotalFontSize = useCallback((sectionData) => {
       if (!sectionData) return getResumeFontSize();
 
       const columnData = columns.byId[sectionData.columnId];
-      const baseFontSize = getResumeFontSize();
-      const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
-      const sectionFontSizeOffset = sectionData?.styling?.fontSizeOffset ?? 0;
-
-      return baseFontSize + columnFontSizeOffset + sectionFontSizeOffset;
+      return getCascadedFontSize({
+         resumeStyling: { fontSize: getResumeFontSize() },
+         columnStyling: columnData?.styling,
+         sectionStyling: sectionData.styling,
+      });
    }, [columns, getResumeFontSize]);
 
    const [fontSizeInputValue, setFontSizeInputValue] = useState(getResumeFontSize());
 
    useEffect(() => {
-      // Case 1: Editing field in rich text editor
-      if (editor && selection && activeEditorId && fields) {
-         const field = fields.byId[activeEditorId];
-         if (field) {
-            // Look up the hierarchy: field > subsection > section > column
-            const subsection = subsections.byId[field.subsectionId];
-            if (subsection) {
-               const sectionData = reduxSections.byId[subsection.sectionId];
-               if (sectionData) {
-                  const columnData = columns.byId[sectionData.columnId];
-                  const baseFontSize = getResumeFontSize();
-                  const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
-                  const sectionFontSizeOffset = sectionData?.styling?.fontSizeOffset ?? 0;
-                  const subsectionFontSizeOffset = subsection?.styling?.fontSizeOffset ?? 0;
-                  const fieldFontSizeOffset = field?.styling?.fontSizeOffset ?? 0;
-                  const leafFontSizeOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
-                  const totalSize = baseFontSize + columnFontSizeOffset + sectionFontSizeOffset + subsectionFontSizeOffset + fieldFontSizeOffset + leafFontSizeOffset;
-                  setFontSizeInputValue(totalSize);
-                  return;
-               }
-            }
-         }
-      }
-
-      // Case 1b: Editing a section heading editor
-      if (editor && selection && activeEditorId && !fields?.byId?.[activeEditorId]) {
-         const headingSection = reduxSections.byId[activeEditorId];
-         if (headingSection) {
-            const columnData = columns.byId[headingSection.columnId];
-            const baseFontSize = getResumeFontSize();
-            const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
-            const sectionFontSizeOffset = headingSection?.styling?.fontSizeOffset ?? 0;
-            const leafFontSizeOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
-            const totalSize = baseFontSize + columnFontSizeOffset + sectionFontSizeOffset + leafFontSizeOffset;
-            setFontSizeInputValue(totalSize);
-            return;
-         }
+      if (editor && selection && activeEditorId && hasEditorAncestry) {
+         setFontSizeInputValue(getCascadedFontSize({
+            ...context.styling,
+            // Keep the toolbar's existing base-size parsing and fallback.
+            resumeStyling: { fontSize: getResumeFontSize() },
+            leafStyling: { fontSizeOffset: getActiveMark(editor, 'fontSizeOffset') ?? 0 },
+         }));
+         return;
       }
 
       // Case 2: Multiple sections selected
@@ -108,7 +71,7 @@ const FontSize = ({
 
       // Case 4: Default - resume only
       setFontSizeInputValue(getResumeFontSize());
-   }, [editor, selection, activeEditorId, effectiveSectionId, activeSectionIds, getSection, getSectionTotalFontSize, getResumeFontSize, resumeStyling, reduxSections, columns, fields, subsections]);
+   }, [editor, selection, activeEditorId, hasEditorAncestry, context, activeSectionIds, getSectionTotalFontSize, getResumeFontSize, reduxSections]);
 
    const setNewFontSize = (newFontSize) => {
       const parsedFontSize = (value) => {
@@ -134,68 +97,23 @@ const FontSize = ({
 
       const sectionIdToUse = effectiveSectionId;
 
-      // Case 1: Editing in field (editor active)
-      if (editor && activeEditorId && fields) {
-         const field = fields.byId[activeEditorId];
-         if (field) {
-            const subsection = subsections.byId[field.subsectionId];
-            if (subsection) {
-               const sectionData = reduxSections.byId[subsection.sectionId];
-               if (sectionData) {
-                  const columnData = columns.byId[sectionData.columnId];
-                  const baseFontSize = getResumeFontSize();
-                  const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
-                  const sectionFontSizeOffset = sectionData?.styling?.fontSizeOffset ?? 0;
-                  const subsectionFontSizeOffset = subsection?.styling?.fontSizeOffset ?? 0;
-                  const fieldFontSizeOffset = field?.styling?.fontSizeOffset ?? 0;
-
-                  // When incrementing/decrementing, update the leaf mark offset
-                  if (newFontSize === 'increment' || newFontSize === 'decrement') {
-                     const currentLeafOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
-                     let newLeafOffset = currentLeafOffset;
-                     if (newFontSize === 'increment') {
-                        newLeafOffset += 1;
-                     } else {
-                        newLeafOffset -= 1;
-                     }
-                     setFontSizeOffset(editor, newLeafOffset);
-                  } else {
-                     // Direct value set: compute required leaf offset to reach target
-                     const calculatedLeafOffset = targetFontSize - baseFontSize - columnFontSizeOffset - sectionFontSizeOffset - subsectionFontSizeOffset - fieldFontSizeOffset;
-                     setFontSizeOffset(editor, calculatedLeafOffset);
-                  }
-                  setFontSizeInputValue(targetFontSize);
-                  return;
-               }
-            }
+      // Fields and headings use the same leaf operation with different ancestry.
+      if (editor && activeEditorId && hasEditorAncestry) {
+         if (newFontSize === 'increment' || newFontSize === 'decrement') {
+            const currentLeafOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
+            setFontSizeOffset(editor, currentLeafOffset + (newFontSize === 'increment' ? 1 : -1));
+         } else {
+            const { columnStyling, sectionStyling, subsectionStyling, fieldStyling } = context.styling;
+            // Preserve the existing subtraction order and mark conversion.
+            const leafOffset = targetFontSize - getResumeFontSize()
+               - (columnStyling?.fontSizeOffset ?? 0)
+               - (sectionStyling?.fontSizeOffset ?? 0)
+               - (subsectionStyling?.fontSizeOffset ?? 0)
+               - (fieldStyling?.fontSizeOffset ?? 0);
+            setFontSizeOffset(editor, leafOffset);
          }
-      }
-
-      // Case 1b: Editing a section heading editor
-      if (editor && activeEditorId && !fields?.byId?.[activeEditorId]) {
-         const headingSection = reduxSections.byId[activeEditorId];
-         if (headingSection) {
-            const columnData = columns.byId[headingSection.columnId];
-            const baseFontSize = getResumeFontSize();
-            const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
-            const sectionFontSizeOffset = headingSection?.styling?.fontSizeOffset ?? 0;
-            
-            if (newFontSize === 'increment' || newFontSize === 'decrement') {
-               const currentLeafOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
-               let newLeafOffset = currentLeafOffset;
-               if (newFontSize === 'increment') {
-                  newLeafOffset += 1;
-               } else {
-                  newLeafOffset -= 1;
-               }
-               setFontSizeOffset(editor, newLeafOffset);
-            } else {
-               const calculatedLeafOffset = targetFontSize - baseFontSize - columnFontSizeOffset - sectionFontSizeOffset;
-               setFontSizeOffset(editor, calculatedLeafOffset);
-            }
-            setFontSizeInputValue(targetFontSize);
-            return;
-         }
+         setFontSizeInputValue(targetFontSize);
+         return;
       }
 
       // Case 0: Sections selected (no editor)

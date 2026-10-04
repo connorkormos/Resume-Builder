@@ -1,46 +1,29 @@
 import React, { useState, useEffect } from "react";
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { getCascadedColor } from '@/helpers/leafHelpers.js';
 
 import { getActiveMark, setFontColor } from "../../../helpers/marks.js";
 import { updateResume, updateSection } from "@/store/resumeSlice.js";
 
 import ColorDropdown from "./shared/ColorDropdown.jsx";
 
-const FontColor = ({ editor, selection, activeSectionId, activeSectionIds }) => {
+const FontColor = ({ editor, selection, context, activeSectionIds }) => {
 
    const dispatch = useDispatch();
 
-   const resume = useSelector(state => state.resume.present);
-
-   const activeEditorId = useSelector(state => state.resume.present.activeEditorId)
-
-   const activeField = useSelector(state => state.resume.present.fields.byId[activeEditorId])
-   const activeSubsection = useSelector(state => state.resume.present.subsections.byId[activeField?.subsectionId])
-   const activeSection = useSelector(state => state.resume.present.sections.byId[activeSectionId])
-   const activeColumn = useSelector(state => state.resume.present.columns.byId[activeSection?.columnId]);
-
    const [currentFontColor, setCurrentFontColor] = useState('rgba(0, 0, 0, 1)');
 
+   // Synchronize the swatch with the current Slate selection.
+   /* eslint-disable react-hooks/set-state-in-effect */
    useEffect(() => {
       if (!editor || !selection) return;
-      const editorFontColor = getActiveMark(editor, 'color');
-      const fieldFontColor = activeField?.styling?.color;
-      const subsectionFontColor = activeSubsection?.styling?.color;
-      const sectionFontColor = activeSection?.styling?.color;
-      const columnFontColor = activeColumn?.styling?.color;
-      const resumeFontColor = resume?.styling?.color;
-
-      if (editorFontColor) setCurrentFontColor(editorFontColor);
-      else if (fieldFontColor) setCurrentFontColor(fieldFontColor);
-      else if (subsectionFontColor) setCurrentFontColor(subsectionFontColor);
-      else if (sectionFontColor) setCurrentFontColor(sectionFontColor);
-      else if (columnFontColor) setCurrentFontColor(columnFontColor);
-      else if (resumeFontColor) setCurrentFontColor(resumeFontColor);
-      else setCurrentFontColor('rgba(0, 0, 0, 0)');
-
-
-   }, [editor, selection, activeEditorId, activeField, activeSubsection, activeSection, activeColumn])
+      setCurrentFontColor(getCascadedColor({
+         ...context.styling,
+         leafStyling: { color: getActiveMark(editor, 'color') },
+      }) || 'rgba(0, 0, 0, 0)');
+   }, [editor, selection, context]);
+   /* eslint-enable react-hooks/set-state-in-effect */
 
    const setNewFontColor = (newFontColor = currentFontColor) => {
       if (editor) {

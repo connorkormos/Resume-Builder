@@ -26,11 +26,9 @@ const parseLineHeight = (value, fallback = null) => {
 const LineHeight = ({
   editor,
   selection,
-  fields,
-  subsections,
+  context,
   activeSectionId,
   activeSectionIds,
-  activeEditorId,
   resumeStyling,
 }) => {
   const isMobile = window.innerWidth <= 768;
@@ -44,6 +42,8 @@ const LineHeight = ({
   );
 
   const effectiveSectionId = activeSectionId;
+  const { editorId: activeEditorId } = context;
+  const hasEditorAncestry = Boolean(context.section && (!context.field || context.subsection));
 
   const getSection = useCallback(
     () => reduxSections.byId[effectiveSectionId],
@@ -61,56 +61,12 @@ const LineHeight = ({
   );
 
   useEffect(() => {
-    if (editor && selection && activeEditorId && fields) {
-      const field = fields.byId[activeEditorId];
-      if (field) {
-        const subsection = subsections.byId[field.subsectionId];
-        const sectionData = subsection
-          ? reduxSections.byId[subsection.sectionId]
-          : null;
-        const columnData = sectionData
-          ? reduxColumns.byId[sectionData.columnId]
-          : null;
-
-        if (subsection && sectionData) {
-          const leafStyling = {
-            lineHeightOffset: getActiveMark(editor, "lineHeightOffset") ?? 0,
-          };
-          const totalLineHeight = getCascadedLineHeight({
-            resumeStyling,
-            columnStyling: columnData?.styling,
-            sectionStyling: sectionData?.styling,
-            subsectionStyling: subsection?.styling,
-            fieldStyling: field?.styling,
-            leafStyling,
-          });
-          setLineHeightInputValue(totalLineHeight);
-          return;
-        }
-      }
-    }
-
-    if (
-      editor &&
-      selection &&
-      activeEditorId &&
-      !fields?.byId?.[activeEditorId]
-    ) {
-      const headingSection = reduxSections.byId[activeEditorId];
-      if (headingSection) {
-        const columnData = reduxColumns.byId[headingSection.columnId];
-        const leafStyling = {
-          lineHeightOffset: getActiveMark(editor, "lineHeightOffset") ?? 0,
-        };
-        const totalLineHeight = getCascadedLineHeight({
-          resumeStyling,
-          columnStyling: columnData?.styling,
-          sectionStyling: headingSection?.styling,
-          leafStyling,
-        });
-        setLineHeightInputValue(totalLineHeight);
-        return;
-      }
+    if (editor && selection && activeEditorId && hasEditorAncestry) {
+      setLineHeightInputValue(getCascadedLineHeight({
+        ...context.styling,
+        leafStyling: { lineHeightOffset: getActiveMark(editor, "lineHeightOffset") ?? 0 },
+      }));
+      return;
     }
 
     if (effectiveSectionId && !editor) {
@@ -129,7 +85,6 @@ const LineHeight = ({
   }, [
     editor,
     selection,
-    activeEditorId,
     effectiveSectionId,
     getSection,
     getColumn,
@@ -137,8 +92,9 @@ const LineHeight = ({
     resumeStyling,
     reduxSections,
     reduxColumns,
-    fields,
-    subsections,
+    context,
+    activeEditorId,
+    hasEditorAncestry,
   ]);
 
   const getTargetLineHeight = (newLineHeight) => {
@@ -164,87 +120,18 @@ const LineHeight = ({
 
     const sectionIdToUse = effectiveSectionId;
 
-    // Case:  A Slate Field is Selected
-    if (editor && activeEditorId && fields) {
-      const field = fields.byId[activeEditorId];
-      if (field) {
-        const subsection = subsections.byId[field.subsectionId];
-        const sectionData = subsection
-          ? reduxSections.byId[subsection.sectionId]
-          : null;
-        const columnData = sectionData
-          ? reduxColumns.byId[sectionData.columnId]
-          : null;
-
-        if (subsection && sectionData) {
-          const inheritedLineHeight = getCascadedLineHeight({
-            resumeStyling,
-            columnStyling: columnData?.styling,
-            sectionStyling: sectionData?.styling,
-            subsectionStyling: subsection?.styling,
-            fieldStyling: field?.styling,
-          });
-
-          if (newLineHeight === "increment" || newLineHeight === "decrement") {
-            const currentLeafOffset = getNumber(
-              getActiveMark(editor, "lineHeightOffset"),
-              0,
-            );
-            const offsetChange =
-              newLineHeight === "increment"
-                ? LINE_HEIGHT_STEP
-                : -LINE_HEIGHT_STEP;
-            setLineHeightOffset(
-              editor,
-              roundToTenth(currentLeafOffset + offsetChange),
-            );
-          } else {
-            setLineHeightOffset(
-              editor,
-              roundToTenth(targetLineHeight - inheritedLineHeight),
-            );
-          }
-
-          setLineHeightInputValue(targetLineHeight);
-          return;
-        }
+    // Fields and headings share the same operation; context supplies their ancestors.
+    if (editor && activeEditorId && hasEditorAncestry) {
+      const inheritedLineHeight = getCascadedLineHeight(context.styling);
+      if (newLineHeight === "increment" || newLineHeight === "decrement") {
+        const currentLeafOffset = getNumber(getActiveMark(editor, "lineHeightOffset"), 0);
+        const offsetChange = newLineHeight === "increment" ? LINE_HEIGHT_STEP : -LINE_HEIGHT_STEP;
+        setLineHeightOffset(editor, roundToTenth(currentLeafOffset + offsetChange));
+      } else {
+        setLineHeightOffset(editor, roundToTenth(targetLineHeight - inheritedLineHeight));
       }
-    }
-
-    // Case:  Section Heading is Selected
-    if (editor && activeEditorId && !fields?.byId?.[activeEditorId]) {
-      const headingSection = reduxSections.byId[activeEditorId];
-      if (headingSection) {
-        const columnData = reduxColumns.byId[headingSection.columnId];
-        const inheritedLineHeight = getCascadedLineHeight({
-          resumeStyling,
-          columnStyling: columnData?.styling,
-          sectionStyling: headingSection?.styling,
-        });
-
-        if (newLineHeight === "increment" || newLineHeight === "decrement") {
-          const currentLeafOffset = getNumber(
-            getActiveMark(editor, "lineHeightOffset"),
-            0,
-          );
-          const offsetChange =
-            newLineHeight === "increment"
-              ? LINE_HEIGHT_STEP
-              : -LINE_HEIGHT_STEP;
-          setLineHeightOffset(
-            editor,
-            roundToTenth(currentLeafOffset + offsetChange),
-          );
-        } else {
-          setLineHeightOffset(
-            editor,
-            roundToTenth(targetLineHeight - inheritedLineHeight),
-          );
-        }
-
-        setLineHeightInputValue(targetLineHeight);
-        return;
-      }
+      setLineHeightInputValue(targetLineHeight);
+      return;
     }
 
     // Case:  Sections are Selected (no editor)

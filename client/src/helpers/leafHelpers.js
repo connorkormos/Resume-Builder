@@ -16,6 +16,22 @@ export const getNumber = (value, fallback) => {
 
 export const roundToTenth = (value) => Number(getNumber(value, 0).toFixed(1));
 
+export const getCascadedColor = ({
+  resumeStyling,
+  columnStyling,
+  sectionStyling,
+  subsectionStyling,
+  fieldStyling,
+  leafStyling,
+}) => (
+  leafStyling?.color ||
+  fieldStyling?.color ||
+  subsectionStyling?.color ||
+  sectionStyling?.color ||
+  columnStyling?.color ||
+  resumeStyling?.color
+);
+
 export const getCascadedFontSize = ({
   resumeStyling,
   columnStyling = {},

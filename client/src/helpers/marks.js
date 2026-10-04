@@ -1,6 +1,8 @@
 import { Editor, Element, Range, Transforms } from "slate";
 
 import { store } from "../store/store.js";
+import { resolveEditorContext } from "./resumeContext.js";
+import { getCascadedColor } from "./leafHelpers.js";
 
 const getResumeStyling = (style) => {
   const state = store.getState();
@@ -15,22 +17,9 @@ const getActiveEditorColor = (editor) => {
     return activeMarkColor;
   }
 
-  const state = store.getState();
-  const activeEditorId = state.resume.present.activeEditorId;
-  const activeField = state.resume.present.fields.byId[activeEditorId];
-  const activeSection =
-    state.resume.present.sections.byId[activeEditorId] ||
-    state.resume.present.sections.byId[state.resume.present.activeSectionIds[0]];
-  const activeSubsection = state.resume.present.subsections.byId[activeField?.subsectionId];
-  const activeColumn = state.resume.present.columns.byId[activeSection?.columnId];
-
-  return (
-    activeField?.styling?.color ||
-    activeSubsection?.styling?.color ||
-    activeSection?.styling?.color ||
-    activeColumn?.styling?.color ||
-    getResumeStyling('color')
-  );
+  const resume = store.getState().resume.present;
+  const context = resolveEditorContext(resume, resume.activeEditorId);
+  return getCascadedColor(context.styling);
 };
 
 const syncIconColorsInSelection = (editor, color) => {
