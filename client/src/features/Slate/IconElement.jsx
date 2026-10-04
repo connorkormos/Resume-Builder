@@ -48,8 +48,10 @@ const IconElement = ({ element, attributes, children, inheritedFontSize, inherit
             display: 'inline-block',
             verticalAlign: 'bottom',
             color: element.iconColor ?? 'currentColor',
-            fontSize: `${inheritedFontSize + (element.children[0]?.fontSizeOffset ?? 0)}px`,
-            lineHeight:  1,
+            height: inheritedFontSize,
+            fontSize: inheritedFontSize,
+            // fontSize: `${inheritedFontSize + (element.children[0]?.fontSizeOffset ?? 0)}px`,
+            lineHeight:  inheritedLineHeight,
          }}
       >
          {children}
