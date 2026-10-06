@@ -66,6 +66,17 @@ export default function ResumePreviewCard({
     return () => observer.disconnect();
   }, []);
 
+  const updateViewCount = async () => {
+    try {
+      await fetchApi({
+        endpoint: `/resumes/${encodeURIComponent(resumeId)}/view`,
+        options: { method: "POST" },
+      });
+    } catch (error) {
+      console.error("Could not record resume view:", error);
+    }
+  };
+
   const title = resume?.title || "Resume template";
   const { width, height, ...cardStyling } = styling;
   const cssHeight = typeof height === "number" ? `${height}px` : height;
@@ -75,12 +86,13 @@ export default function ResumePreviewCard({
     <figure
       className={styles.resumePreviewCard}
       style={{ ...cardStyling, marginBottom: styling.marginBottom, ...(cardWidth != null && { width: cardWidth }) }}
-      //   onClick={() => navigate(`/editor/${resumeId}`)}
+    //   onClick={() => navigate(`/editor/${resumeId}`)}
     >
       <Link
         to={`/editor/${resumeId}`}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={updateViewCount}
       >
         <div
           ref={viewportRef}
@@ -125,7 +137,7 @@ export default function ResumePreviewCard({
           )}
         </div>
         {caption && (
-          <figcaption className={styles.resumeTitle} style={{ fontSize: styling.fontSize || '1.5rem'}}>
+          <figcaption className={styles.resumeTitle} style={{ fontSize: styling.fontSize || '1.5rem' }}>
             {title}
             <TbExternalLink
               style={{ marginLeft: "0.5rem", verticalAlign: "-10%" }}

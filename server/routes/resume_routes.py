@@ -308,3 +308,17 @@ def update_resume(resume_id):
             code="ERROR_UPDATING_RESUME",
             message=f"Failed to update resume of ID {resume_id}.",
         )
+
+@resume_bp.route("/<int:resume_id>/view", methods=["POST"])
+def record_resume_view(resume_id):
+    user_id = session.get("user_id")
+    error = check_resume_access(user_id, resume_id, "GET")
+    if error is not None:
+        return error
+
+    resume = db.session.get(Resume, resume_id)
+    if resume.user_id != user_id:
+        resume.view_count = Resume.view_count + 1
+        db.session.commit()
+
+    return "", 204
