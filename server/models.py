@@ -132,6 +132,85 @@ class Resume(db.Model):
         return f"<Resume {self.id}: {self.title}>"
 
 
+# class Container(db.Model):
+#     """Proposed layout container; not yet used by the existing column editor.
+
+#     A row arranges children horizontally; a column stacks them vertically.
+#     A null parent_id identifies a root container. Width and other sizing options
+#     live in layout and are interpreted relative to the immediate parent.
+
+#     Integration will add Section.container_id and an ordered sections
+#     relationship. Sections and child containers must share a sibling position
+#     sequence so they can be interleaved. The layout service must enforce one
+#     root per resume, same-resume parenting, and no ancestor cycles when moving
+#     containers; the checks below only reject direct self-parenting.
+#     """
+
+#     __tablename__ = "containers"
+#     __table_args__ = (
+#         db.CheckConstraint(
+#             "direction IN ('row', 'column')",
+#             name="ck_containers_direction",
+#         ),
+#         db.CheckConstraint(
+#             "parent_id IS NULL OR parent_id <> id",
+#             name="ck_containers_not_own_parent",
+#         ),
+#         db.CheckConstraint("position >= 0", name="ck_containers_position"),
+#         db.Index("ix_containers_resume_parent_position", "resume_id", "parent_id", "position"),
+#     )
+
+#     id = id_column()
+#     resume_id = db.Column(db.Integer, db.ForeignKey("resumes.id"), nullable=False)
+#     parent_id = db.Column(db.Integer, db.ForeignKey("containers.id"), nullable=True)
+#     direction = db.Column(
+#         db.String(6), nullable=False, default="column", server_default="column"
+#     )
+#     position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+#     styling = db.Column(db.JSON, nullable=False, default=dict, server_default='{}')
+#     layout = db.Column(db.JSON, nullable=False, default=dict, server_default='{}')
+#     created_at = created_at_column()
+#     updated_at = updated_at_column()
+
+#     # No backref yet: keep Resume's existing relationships unchanged until the
+#     # migration also defines container cleanup when a resume is deleted.
+#     resume = db.relationship("Resume", foreign_keys=[resume_id])
+#     parent = db.relationship(
+#         "Container",
+#         remote_side=[id],
+#         foreign_keys=[parent_id],
+#         back_populates="children",
+#     )
+#     children = db.relationship(
+#         "Container",
+#         foreign_keys=[parent_id],
+#         back_populates="parent",
+#         cascade="all, delete-orphan",
+#         single_parent=True,
+#         lazy=True,
+#         order_by="(Container.position, Container.id)",
+#     )
+
+#     def to_dict(self):
+#         # Serialize parent IDs, not the parent object, to avoid recursion back
+#         # up the tree. Section serialization will be added with Section's FK.
+#         return {
+#             "id": self.id,
+#             "resumeId": self.resume_id,
+#             "parentId": self.parent_id,
+#             "direction": self.direction,
+#             "position": self.position,
+#             "styling": self.styling,
+#             "layout": self.layout,
+#             "createdAt": serialize_datetime(self.created_at),
+#             "updatedAt": serialize_datetime(self.updated_at),
+#             "children": [child.to_dict() for child in self.children],
+#         }
+
+#     def __repr__(self):
+#         return f"<Container {self.id}: {self.direction}>"
+
+
 class Column(db.Model):
     __tablename__ = "columns"
 

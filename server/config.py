@@ -16,6 +16,10 @@ ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://free-resume-builder.up.railway.app",
+    "http://actuallyfreeresume.com",
+    "https://actuallyfreeresume.com",
+    "http://www.actuallyfreeresume.com",
+    "https://www.actuallyfreeresume.com",
 ]
 
 database_url = os.getenv("DATABASE_URL", "sqlite:///app.db")

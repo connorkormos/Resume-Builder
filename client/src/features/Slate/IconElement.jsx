@@ -46,16 +46,18 @@ const IconElement = ({ element, attributes, children, inheritedFontSize, inherit
          onClick={handleClick}
          style={{
             display: 'inline-block',
-            verticalAlign: 'bottom',
+            // verticalAlign: 'middle',
             color: element.iconColor ?? 'currentColor',
-            height: inheritedFontSize,
+            // height: inheritedFontSize,
+            // height: inheritedLineHeight,
+            maxHeight: 'auto',
             fontSize: inheritedFontSize,
             // fontSize: `${inheritedFontSize + (element.children[0]?.fontSizeOffset ?? 0)}px`,
             lineHeight:  inheritedLineHeight,
          }}
       >
          {children}
-         {Icon && <Icon aria-hidden="true" focusable="false" />}
+         {Icon && <Icon aria-hidden="true" focusable="false" style={{transform: 'translateY(25%)'}} />}
       </span>
    );
 };
