@@ -30,13 +30,13 @@ const Account = () => {
       }
       dispatch(clearUser());
       confirm('You have been logged out successfully.');
-      navigate('/home');
+      navigate('/');
    };
    return (
       <div className={styles.accountContainer}>
          <div className={styles.navLinksWrapper}>
             <Link
-               to='/home'
+               to='/'
                className={styles.homeButton}
             >
                Home

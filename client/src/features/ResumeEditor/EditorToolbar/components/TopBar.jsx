@@ -92,7 +92,7 @@ const TopBar = ({ handlePrint }) => {
   return (
     <div className={styles.topBarContainer}>
       {isMobile && (
-        <Link to="/home" data-toolbar-label="Home" className={styles.homeLink}>
+        <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
           Home
         </Link>
       )}

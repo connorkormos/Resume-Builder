@@ -24,13 +24,13 @@ const AccountOutline = () => {
       }
       dispatch(clearUser());
       confirm('You have been logged out successfully.');
-      navigate('/home');
+      navigate('/');
    };
    return (
       <div className={styles.accountOutlineWrapper}>
          <AccountOutlineRow
             text="Home"
-            linkTo="/home"
+            linkTo="/"
             styling={{ marginTop: '-5vh', marginBottom: '10vh', fontSize: '3vh' }}
          />
          <AccountOutlineRow

@@ -40,8 +40,8 @@ const App = () => {
       )} */}
       <Routes>
         <Route element={<NavbarLayout />}>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/browse" element={<Templates />} />

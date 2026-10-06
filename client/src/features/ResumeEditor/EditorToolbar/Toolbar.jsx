@@ -49,7 +49,7 @@ const Toolbar = ({ handlePrint }) => {
       onKeyDown={(event) => event.key === "Escape" && setTooltip(null)}
     >
       {!isMobile && (
-        <Link to="/home" data-toolbar-label="Home" className={styles.homeLink}>
+        <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
           Home
         </Link>
       )}
