@@ -5,6 +5,7 @@ from pytz import timezone
 from models import db, Resume, Column, Section, Subsection, Field
 
 from services.builders import (
+    ResumeNotFoundError,
     build_resume_with_defaults,
     build_resume_copy,
     add_column,
@@ -96,6 +97,13 @@ def copy_resume(resume_id):
     try:
         copied_resume = build_resume_copy(resume_id, user_id=user_id)
 
+    except ResumeNotFoundError as e:
+        db.session.rollback()
+        return generate_error(
+            error_type="NOT_FOUND",
+            code="RESUME_NOT_FOUND",
+            message=str(e),
+        )
     except Exception as e:
         db.session.rollback()
         return generate_error(

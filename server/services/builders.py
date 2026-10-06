@@ -5,6 +5,11 @@ from services.updaters import update_column_widths
 from services.plain_text import build_resume_plain_text
 from utils.formatting import format_label
 
+
+class ResumeNotFoundError(Exception):
+    """Raised when the resume requested for copying does not exist."""
+
+
 DEFAULT_RESUME_STYLING = {
     "display": "flex",
     "fontSize": "12px",
@@ -250,7 +255,7 @@ def build_resume_copy(resume_id, *, user_id):
     original_resume = Resume.query.get(resume_id)
     
     if original_resume is None:
-        return None
+        raise ResumeNotFoundError(f"Resume with ID {resume_id} not found.")
 
     # Helper function to create deep-copies of a models column-values in a new instance
     def copy_instance(instance, model, excluded_names):
@@ -265,7 +270,7 @@ def build_resume_copy(resume_id, *, user_id):
     resume_copy = copy_instance(
         original_resume,
         Resume,
-        {"id", "title", "user_id", "is_official_template", "created_at", "updated_at"},
+        {"id", "title", "user_id", "is_official_template", "copy_count", "view_count", "created_at", "updated_at"},
     )
     resume_copy.user_id = user_id
     resume_copy.is_official_template = False
@@ -349,6 +354,9 @@ def build_resume_copy(resume_id, *, user_id):
 
     db.session.flush()
     resume_copy.plain_text = build_resume_plain_text(resume_copy)
+
+    if original_resume.user_id != user_id:
+        original_resume.copy_count = Resume.copy_count + 1
 
     db.session.commit()
     return resume_copy

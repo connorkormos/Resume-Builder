@@ -99,6 +99,8 @@ class Resume(db.Model):
     plain_text = db.Column(db.Text, nullable=False, default="", server_default="")
     tags = db.Column(db.JSON().with_variant(JSONB(), "postgresql"), nullable=False, default=list, server_default="[]")
     is_official_template = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+    view_count = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    copy_count = db.Column(db.Integer, nullable=False, default=0, server_default="0")
     
     created_at = created_at_column()
     updated_at = updated_at_column()
@@ -123,6 +125,8 @@ class Resume(db.Model):
             "plainText": self.plain_text,
             "tags": self.tags,
             "isOfficialTemplate": self.is_official_template,
+            "viewCount": self.view_count,
+            "copyCount": self.copy_count,
             "createdAt": serialize_datetime(self.created_at),
             "updatedAt": serialize_datetime(self.updated_at),
             "columns": [column.to_dict() for column in self.columns],
