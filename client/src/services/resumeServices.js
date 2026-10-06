@@ -182,7 +182,7 @@ export const deleteLastColumnFromApi = async (resumeId) => {
 
 export const getResumesBySearchFromApi = async (query = "", sortBy, count = 10, offset = 0, resumeTypes = ["personal"]) => {
    const resumeTypeOptions = ["personal", "officialTemplate"]
-   const sortByOptions = ["recent", "copyCount"];
+   const sortByOptions = ["recent", "copyCount", "viewCount"];
    try {
       const searchParams = new URLSearchParams({ query, count, offset });
       resumeTypes.forEach(type => {
@@ -214,7 +214,7 @@ export const getResumesBySearchFromApi = async (query = "", sortBy, count = 10, 
 }
 
 export const getOfficialResumeTemplatesFromApi = async (templateCount = 10, orderBy, offset = 0) => {
-   const orderByOptions = ["copyCount", "recent"];
+   const orderByOptions = ["copyCount", "viewCount", "recent"];
    try {
       const query = new URLSearchParams({ templateCount, offset });
       if (orderBy && !orderByOptions.includes(orderBy)) {
