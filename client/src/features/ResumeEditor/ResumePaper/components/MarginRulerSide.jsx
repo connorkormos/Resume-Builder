@@ -28,9 +28,15 @@ export default function MarginRulerSide({
   const topInset = Math.max(
     0,
     parseRemValue(sectionPadding?.top) +
-      parseRemValue(resume.layout.gap?.vertical),
+    parseRemValue(resume.layout.gap?.vertical),
   );
 
+  const sectionInset = (side) =>
+    Math.max(
+      0,
+      parseRemValue(sectionPadding?.[side]) +
+      parseRemValue(resume.layout.gap?.vertical),
+    );
 
   return (
     <div className={styles.marginRulerSideWrapper} data-prevent-blur="true">
@@ -88,7 +94,8 @@ export default function MarginRulerSide({
               transform: `translateY(-50%)`,
             }}
           >
-            {parseFloat(sectionPadding?.top || 0).toFixed(2) + "rem"}
+            {/* {parseFloat(sectionPadding?.top || 0).toFixed(2) + "rem"} */}
+            {parseFloat(sectionInset("top") || 0).toFixed(2) + "rem"}
           </span>
         </>
       )}
@@ -116,7 +123,8 @@ export default function MarginRulerSide({
               transform: `translateY(-50%)`,
             }}
           >
-            {parseFloat(sectionPadding?.bottom || 0).toFixed(2) + "rem"}
+            {/* {parseFloat(sectionPadding?.bottom || 0).toFixed(2) + "rem"} */}
+            {parseFloat(sectionInset("bottom") || 0).toFixed(2) + "rem"}
           </span>
         </>
       )}

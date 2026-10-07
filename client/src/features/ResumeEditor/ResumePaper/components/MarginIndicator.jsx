@@ -16,13 +16,22 @@ export default function MarginIndicator({
   ...props
 }) {
   const dispatch = useDispatch();
-  const resumePadding = useSelector(
-    (state) => state.resume.present.layout.padding,
-  );
+  const reduxResume = useSelector((state) => state.resume.present);
+  const resumePadding = reduxResume.layout.padding;
+  const resumeGap = reduxResume.layout.gap;
+  // const resumePadding = useSelector(
+  // (state) => state.resume.present.layout.padding,
+  // );
   const { setPreview } = useContext(PaddingPreviewContext);
   const drag = useRef(null);
   const hovered = useRef(false);
   const horizontal = side === "left" || side === "right";
+  const minimumPadding =
+    target === "resume"
+      ? 0
+      : -parseRemValue(
+        resumeGap?.[horizontal ? "horizontal" : "vertical"],
+      );
   // Section bottom handles grow the section down; page bottom moves inward.
   const direction =
     side === "right" || (side === "bottom" && target === "resume") ? -1 : 1;
@@ -31,13 +40,13 @@ export default function MarginIndicator({
     dispatch(
       target === "resume"
         ? updateResume({
-            key: "layout",
-            changes: { padding: { ...resumePadding, ...padding } },
-          })
+          key: "layout",
+          changes: { padding: { ...resumePadding, ...padding } },
+        })
         : (target === "column" ? updateColumn : updateSection)({
-            id,
-            changes: { layout: { padding } },
-          }),
+          id,
+          changes: { layout: { padding } },
+        }),
     );
   };
   useEffect(
@@ -48,11 +57,12 @@ export default function MarginIndicator({
   );
   const nextValue = (event) =>
     Math.max(
-      0,
+      // 0,  // Commented out but leaving, as this is the original lower bound for padding according to resume gap defaults
+      minimumPadding,
       drag.current.startValue +
-        (direction *
-          ((horizontal ? event.clientX : event.clientY) - drag.current.start)) /
-          drag.current.pixelsPerRem,
+      (direction *
+        ((horizontal ? event.clientX : event.clientY) - drag.current.start)) /
+      drag.current.pixelsPerRem,
     );
   const finish = (event, canceled = false) => {
     if (!drag.current || event.pointerId !== drag.current.pointerId) return;
@@ -124,8 +134,12 @@ export default function MarginIndicator({
         event.stopPropagation();
         if (drag.current) return;
         const current = parseRemValue(value);
+
+
+
         const next = Math.max(
-          0,
+          // 0,  // Commented out but leaving, as this is the original lower bound for padding according to resume gap defaults
+          minimumPadding,
           Math.round(
             (current + direction * (event.key === keys[1] ? 0.1 : -0.1)) * 1000,
           ) / 1000,

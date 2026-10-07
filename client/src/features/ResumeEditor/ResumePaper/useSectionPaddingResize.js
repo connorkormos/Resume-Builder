@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
 
 export default function useSectionPaddingResize(section) {
   const dispatch = useDispatch();
+  const verticalGap = useSelector((state) => state.resume.present.layout.gap?.vertical);
+  const minimumBottom = -parseRemValue(verticalGap);
   const dragRef = useRef(null);
   const [previewBottom, setPreviewBottom] = useState(null);
 
@@ -18,7 +20,7 @@ export default function useSectionPaddingResize(section) {
   }));
 
   const valueAtPointer = (event, drag) => Math.max(
-    0,
+    minimumBottom,
     drag.startBottom + (event.clientY - drag.startY) / drag.pixelsPerRem,
   );
 
@@ -71,7 +73,7 @@ export default function useSectionPaddingResize(section) {
         event.preventDefault();
         if (dragRef.current) return;
         const current = parseRemValue(section.layout?.padding?.bottom);
-        const bottom = Math.max(0, Math.round((current + (event.key === "ArrowDown" ? 0.1 : -0.1)) * 1000) / 1000);
+        const bottom = Math.max(minimumBottom, Math.round((current + (event.key === "ArrowDown" ? 0.1 : -0.1)) * 1000) / 1000);
         if (bottom !== current) commit(bottom);
       },
     },
