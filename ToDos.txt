@@ -9,11 +9,15 @@ QUICK BUGS:
 
 MAJOR BUGS:
 
+-Links don't work on PDF, even when saved on desktop
+
 -Printing/Downloading on Mobile is totally Non Functional
    -Scale on Desktop also messes with it, but need to investigate if that's really an issue on my end or the user's end
       -Ideally being able to reset scale to the default/100 just in case would be good
 
 MEDIUM BUGS:
+
+-FontSizeOffset Appears to be restricted to round numbers (i.e. it can't be 1.5 as the offset)
 
 -Check Nav Links for bugginess on mobile when deployed.
    -Click events seem like they act as drags on mobile device dev tools
@@ -91,6 +95,10 @@ MEDIUM FEATURES:
 
 
 SMALL FEATURES:
+
+-Remove "Are you sure you want to create this resume" after creating the resume
+
+-Make The "Resume Saved" indicator a temporary pop up on the page rather than a window alert
 
 -Borders Customization
    -Moving them in/out/left/right/up/down/etc

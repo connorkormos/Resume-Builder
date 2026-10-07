@@ -26,13 +26,13 @@ export default function Indentation() {
       activeTarget = reduxSections?.byId[activeSectionId];
     }
     if (!activeTarget) return;
-    let currentMarginLeft = parseFloat(activeTarget.layout?.marginLeft || 0);
-    const indentationStep = 0.25;
+    let currentMarginLeft = parseFloat(activeTarget.layout?.marginLeft || 0).toFixed(1);
+    const indentationStep = 0.1;
 
     if (indentOrOutdent === "indent") {
-      currentMarginLeft += indentationStep;
+      currentMarginLeft = (parseFloat(currentMarginLeft) + indentationStep).toFixed(1);
     } else if (indentOrOutdent === "outdent") {
-      currentMarginLeft -= indentationStep;
+      currentMarginLeft = (parseFloat(currentMarginLeft) - indentationStep).toFixed(1);
     }
 
     if (isSectionHeading) {
