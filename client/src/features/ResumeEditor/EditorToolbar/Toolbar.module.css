@@ -1,7 +1,11 @@
 .toolbarContainer {
-  position: fixed;
+  position: sticky;
   height: var(--height-toolbar);
   width: 100%;
+  /* margin: 0; */
+  /* top: 0; */
+  /* left: 0; */
+  display: flex;
 
   color: var(--color-main);
   background-color: var(--background-toolbar);
@@ -9,52 +13,55 @@
   z-index: var(--z-sticky);
 }
 
-@media (min-width: 2560px) {
-  .toolbarContainer {
-    /* font-size: 24px; */
-    /* transform: translateY(-50%) scale(1.5); */
-  }
-}
-
 .toolbarContent {
   display: flex;
   flex-direction: column;
-  padding: 0 7.5vw;
-  width: max-content;
+  /* padding: 0 7.5vw; */
+  height: 100%;
+  /* width: fit-content; */
+  gap: 0.5rem;
   margin: auto;
+  padding: 0.25rem 0;
 }
 
 .homeLink {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  /* top: 0; */
+  /* left: 0; */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   height: calc(var(--height-toolbar));
-  margin: auto;
+  /* margin: auto; */
   font-size: calc(var(--height-toolbar) * 0.5);
-  transform: translateX(50%);
+  margin-left: 2.5rem;
+  /* transform: translateX(75%); */
 }
 
 .richTextToolbarContainer {
   height: calc(var(--height-toolbar) / 2);
+  /* height: fit-content; */
   width: 100%;
-}
-
-.richTextToolbarWrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 0.5vh;
+  margin: auto;
+  
+  .richTextToolbarWrapper {
+    height: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+  }
 }
 
 .topBarContainer {
   height: calc(var(--height-toolbar) / 2);
+  /* height: fit-content; */
   width: 100%;
-
+  
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -83,7 +90,6 @@
   
 }
 
-
 .dropdownContainer {
   padding: 0.25em 1em;
   background-color: var(--background-main);
@@ -93,17 +99,17 @@
   padding: 0;
   margin-top: 1rem;
   z-index: var(--z-dropdown);
-}
-
-.dropdownOption {
-  background-color: var(--background-main);
-  border-radius: var(--border-radius-main);
-  padding: 0.5em 1em;
-}
-
-.dropdownOption:hover {
-  cursor: pointer;
-  filter: brightness(1.1);
+  
+  .dropdownOption {
+    background-color: var(--background-main);
+    border-radius: var(--border-radius-main);
+    padding: 0.5em 1em;
+  }
+  
+  .dropdownOption:hover {
+    cursor: pointer;
+    filter: brightness(1.1);
+  }
 }
 
 .tooltip {
@@ -128,42 +134,57 @@
   }
 }
 
+
+@media (min-width: 2560px) {
+  .toolbarContainer {    
+    .toolbarContent {
+      .richTextToolbarContainer {
+        .richTextToolbarWrapper {
+          /* scale: 1.25; */
+        }
+      }
+    }
+    /* font-size: 24px; */
+    /* transform: translateY(-50%) scale(1.5); */
+  }
+}
+
 @media (max-width: 768px) {
   .toolbarContainer {
     height: fit-content;
     position: relative;
     padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+    /* padding-bottom: 0.25rem; */
     margin-bottom: 5%;
-
+    
   }
-
+  
   .toolbarContent {
     gap: 0.25rem;
     padding: 0 0.5rem;
   }
-
+  
   .homeLink {
     /* top: 0; */
     /* top: calc(var(--height-toolbar) / 4.5); */
     /* top: 50%; */
     /* transform: translateY(-50%); */
-
-    /* margin-left: 0; */
-    position: relative;
+    
+    margin-left: 0;
+    /* position: relative; */
     height: calc(var(--height-toolbar) * 0.4);
     font-size: calc(var(--height-toolbar) * 0.35);
-
+    
     display: inline-block;
     transform: none;
     /* font-size: 1.5rem; */
   }
-
+  
   .richTextToolbarContainer {
     height: fit-content;
     width: 100%;
   }
-
+  
   .richTextToolbarWrapper {
     display: flex;
     align-items: center;
@@ -171,19 +192,19 @@
     flex-wrap: wrap;
     /* gap: 0.5rem; */
   }
-
+  
   .topBarContainer {
     width: 100%;
     gap: 0.5rem;
   }
-
+  
   .topBarContainer .buttonMain {
     margin: 0;
     padding: 0;
     font-size: 1rem;
     width: fit-content;
   }
-
+  
   .resumeTitle {
     /* max-width: 50%; */
     max-width: max-content;
@@ -192,11 +213,11 @@
     white-space: nowrap;
     text-align: left;
   }
-
+  
   .resumeTitle span {
     width: 100%;
   }
-
+  
   .saveCopyPrintButtonsWrapper {
     gap: 0;
   }
@@ -212,42 +233,42 @@
   min-width: 0;
   flex-wrap: wrap;
   gap: 0.25rem;
-
+  
   >div,
   >button,
   >input {
     max-width: 100%;
     flex: 1 1 0;
   }
-
+  
   >div {
     display: flex;
     align-items: center;
     gap: 0.15rem;
     min-width: min-content;
   }
-
+  
   >div:has(> :is(button, input):nth-child(2)) {
     flex: 2 1 0.15rem;
   }
-
+  
   >div:has(> :is(button, input):nth-child(3)) {
     flex: 3 1 0.3rem;
   }
-
+  
   >div>button,
   >div>input {
     max-width: 100%;
     flex: 1 1 0;
   }
-
+  
   >button,
   >div>button {
     min-width: max-content;
     padding: 0 0.25rem;
     white-space: nowrap;
   }
-
+  
   >input,
   >div>input {
     min-width: 2rem;

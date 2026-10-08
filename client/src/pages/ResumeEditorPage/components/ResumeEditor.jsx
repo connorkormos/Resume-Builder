@@ -14,11 +14,12 @@ import ResumePaper from '@/features/ResumeEditor/ResumePaper/ResumePaper.jsx';
 import { getResumeFromApi } from '@/services/resumeServices';
 import { useReactToPrint } from 'react-to-print';
 
-import styles from './ResumeEditor.module.css';
 import MarginRuler from '@/features/ResumeEditor/ResumePaper/components/MarginRuler';
 import { PaddingPreviewContext } from '@/features/ResumeEditor/ResumePaper/PaddingPreviewContext';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { ActionCreators as UndoActionCreators } from "redux-undo";
+
+import styles from './ResumeEditor.module.css';
 
 const ResumeEditor = () => {
 
@@ -128,7 +129,7 @@ const ResumeEditor = () => {
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
             <ResumePaper ref={resumeRef} editorPageRef={editorPageRef} isPrinting={isPrinting} />
-            {!isMobile && <MarginRuler pageRef={editorPageRef} />}
+            {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
          </PaddingPreviewContext.Provider>
          {showNewResumeModal &&
             <NewResumeModal />

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { BsBorderOuter } from "react-icons/bs";
 import { FaBorderAll, FaSquare } from "react-icons/fa";
 import {
@@ -27,6 +28,7 @@ import { updateSection } from "@/store/resumeSlice";
 import styles from "../../TextFormatting/TextFormatting.module.css";
 
 const Borders = ({ activeSectionId, activeSectionIds }) => {
+  const isMobile = useMediaQuery("(max-width: 768px)"); 
   const dispatch = useDispatch();
   const sectionsById = useSelector(
     (state) => state.resume.present.sections.byId,
@@ -418,9 +420,9 @@ const Borders = ({ activeSectionId, activeSectionIds }) => {
             gap: "0.5rem",
           }}
           // containerStyling={{ display: "flex", flexDirection: "column",
-          containerStyling={{
-            transform: "translateX(-80%)",
-          }}
+          containerStyling={ 
+            isMobile ? {} 
+            : { transform: "translateX(-80%)" }}
         />
       )}
     </div>

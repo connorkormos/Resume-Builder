@@ -5,33 +5,71 @@
   width: 100%;
   color: white;
   z-index: var(--z-base);
-}
 
-.marginRulerTopWrapper {
-  position: fixed;
-  height: 1rem;
-  width: 5.95in;
-  display: flex;
-  justify-content: space-between;
-  background-color: grey;
+  .marginRulerTopWrapper {
+    /* position: fixed; */
+    position: sticky;
+    /* top: calc(var(--height-toolbar)); */
+    /* top: 5rem; */
 
-  left: 49.5%;
-  transform: translateX(-49.65%);
-}
+    height: 1rem;
+    /* width: 5.95in; */
+    width: var(--width-editor-page);
+    display: flex;
+    justify-content: space-between;
+    background-color: grey;
+    /* margin: auto; */
+    /* margin-top: -5rem; */
+    margin-top: calc(var(--height-toolbar) * -1);
+    /* left: 49.5%; */
+    /* transform: translateX(-49.65%); */
 
-.marginRulerSideWrapper {
-  position: relative !important;
-  height: 7.7in;
-  width: 1rem;
-  left: 0;
-  margin: auto auto auto calc(60% - var(--width-editor-page));
-  /* margin: auto auto auto 22.5vw; */
-  top: calc(var(--height-toolbar));
 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  background-color: grey;
+    .topMarginRulerSpan {
+      font-size: 0.5rem;
+      width: 0px;
+      transform: translateX(-0.125rem);
+    }
+
+    .topHiddenMarginSpan {
+      height: 0.25rem;
+      width: 0;
+      border-right: 0.1px solid rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  .marginRulerSideWrapper {
+    position: sticky;
+    /* height: 7.7in; */
+    height: var(--height-editor-page);
+    width: 1rem;
+    left: 0;
+    /* margin-left: -5rem; */
+    margin-left: calc(var(--height-toolbar) * -1);
+    /* margin: auto auto auto calc(60% - var(--width-editor-page)); */
+    /* margin: auto auto auto 22.5vw; */
+    top: calc(var(--height-toolbar) * 2);
+    /* top: auto; */
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: grey;
+
+    .sideMarginRulerSpan {
+      font-size: 0.5rem;
+      height: 0px;
+      transform: translateY(-0.375rem);
+      width: 100%;
+    }
+
+    .sideHiddenMarginSpan {
+      height: 0;
+      width: 0.25rem;
+      border-bottom: 0.1px solid rgba(0, 0, 0, 0.25);
+    }
+
+  }
 }
 
 .indentationIndicator {
@@ -46,45 +84,20 @@
   cursor: default;
 }
 
-.topMarginRulerSpan {
-  font-size: 0.5rem;
-  width: 0px;
-  transform: translateX(-0.125rem);
-}
-
-.sideMarginRulerSpan {
-  font-size: 0.5rem;
-  height: 0px;
-  transform: translateY(-0.375rem);
-  width: 100%;
-}
-
-.topHiddenMarginSpan {
-  height: 0.25rem;
-  width: 0;
-  border-right: 0.1px solid rgba(0, 0, 0, 0.25);
-}
-
-.sideHiddenMarginSpan {
-  height: 0;
-  width: 0.25rem;
-  border-bottom: 0.1px solid rgba(0, 0, 0, 0.25);
-}
-
 .marginIndicatorLabel {
-   opacity: 0;
-   pointer-events: none;
-   transition: opacity 250ms ease-in;
-   position: absolute;
-   background-color: var(--background-toolbar);
-   padding: 0.25rem 0.5rem;
-   border: var(--border-main);
-   border-radius: var(--border-radius-main);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease-in;
+  position: absolute;
+  background-color: var(--background-toolbar);
+  padding: 0.25rem 0.5rem;
+  border: var(--border-main);
+  border-radius: var(--border-radius-main);
 }
 
 .marginIndicatorLabelVisible {
-   opacity: 1;
-   transition-duration: 150ms;
+  opacity: 1;
+  transition-duration: 150ms;
 }
 
 .resumeMarginIndicatorLeft,
@@ -95,11 +108,11 @@
 .sectionMarginIndicatorRight,
 .sectionMarginIndicatorTop,
 .sectionMarginIndicatorBottom {
-   position: absolute;
-   padding: 0;
-   border: 0;
-   touch-action: none;
-   user-select: none;
+  position: absolute;
+  padding: 0;
+  border: 0;
+  touch-action: none;
+  user-select: none;
 }
 
 .resumeMarginIndicatorLeft,
@@ -142,7 +155,9 @@
 }
 
 @media print {
-  .marginsContainer { display: none; }
+  .marginsContainer {
+    display: none;
+  }
 }
 
 .resumeMarginIndicatorLeft,
@@ -172,11 +187,11 @@
 .resumeMarginIndicatorTop,
 .sectionMarginIndicatorTop,
 .sectionMarginIndicatorBottom {
-   top: 0;
+  top: 0;
 }
 
 .resumeMarginIndicatorBottom {
-   bottom: 0;
+  bottom: 0;
 }
 
 .marginIndicatorLabelVisible {

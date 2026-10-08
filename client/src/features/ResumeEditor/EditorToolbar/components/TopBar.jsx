@@ -96,10 +96,13 @@ const TopBar = ({ handlePrint }) => {
 
   return (
     <div className={styles.topBarContainer}>
+      {isMobile && (
+
         <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
           <FaArrowLeft />
           {/* Home */}
         </Link>
+      )}
       <div
         className={`buttonMain ${styles.resumeTitle}`}
         // className="buttonMain"

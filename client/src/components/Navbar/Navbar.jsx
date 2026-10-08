@@ -17,13 +17,6 @@ const Navbar = () => {
   const isLoginPage = location.pathname === "/login";
   const isSignupPage = location.pathname === "/signup";
   const isAccountPage = location.pathname === "/account";
-  //   const [screenType, setScreenType] = useState(useMediaQuery());
-
-  //   useEffect(() => {
-  //     if (screenType !== useMediaQuery()) {
-  //       setScreenType(useMediaQuery());
-  //     }
-  //   }, [screenType]);
 
   const user = useSelector((state) => state.user);
 

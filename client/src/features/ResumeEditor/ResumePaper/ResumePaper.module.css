@@ -22,8 +22,10 @@
   word-break: break-word;
 
   z-index: var(--z-main);
-  top: calc(var(--height-toolbar) + 5rem);
+  top: calc(var(--height-toolbar));
+  /* top: 5rem; */
 }
+
 
 .printingPageContainer {
   position: absolute;

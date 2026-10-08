@@ -60,7 +60,7 @@ const Home = () => {
     <div className={styles.homePageContainer}>
       <div className={styles.homePageContent}>
         <h2 className={styles.homeH2}>
-          Hi {user.firstName || "there"}. Welcome{user.id && " back"}
+          Hi {user.firstName || "there"}.{isMobile ? <br></br> : '  '}Welcome{user.id && " back"}
           {isMobile ? "!" : " to ActuallyFreeResume.com."}
         </h2>
         {/* <p className={styles.homeP}> */}

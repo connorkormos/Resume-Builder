@@ -8,7 +8,7 @@ import { move } from "@dnd-kit/helpers";
 
 import Column from "./Column.jsx";
 import EndPageMarker from "./components/EndPageMarker.jsx";
-
+import MarginRuler from "./components/MarginRuler.jsx";
 
 import styles from "./ResumePaper.module.css";
 import { dndReorderSections, resizeColumnPair } from "@/store/resumeSlice.js";
@@ -189,8 +189,10 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
   return (
     <div className={styles.printPageRef} ref={ref}
-   //  style={{ scale: Math.min(1, window.innerWidth / parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--width-editor-page'))) }}
+    
+    //  style={{ scale: Math.min(1, window.innerWidth / parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--width-editor-page'))) }}
     >
+      {!isMobile && <MarginRuler pageRef={editorRef} />}
       <div
         className={`${props.isPrinting ? styles.printingPageContainer : styles.editingPageContainer}`}
         style={{ ...resumeStyling }}

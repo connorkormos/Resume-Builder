@@ -42,6 +42,7 @@ const Toolbar = ({ handlePrint }) => {
   const editor = editorRegistry.get(activeEditorId);
 
   return (
+    <>
     <div
       className={styles.toolbarContainer}
       onMouseOver={showTooltip}
@@ -50,28 +51,29 @@ const Toolbar = ({ handlePrint }) => {
       onBlur={() => setTooltip(null)}
       onMouseDown={() => setTooltip(null)}
       onKeyDown={(event) => event.key === "Escape" && setTooltip(null)}
-    >
-      {/* {!isMobile && (
-        <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
-          <FaArrowLeft style={{ marginRight: "0.5rem" }} />
-        </Link>
-      )} */}
+      >
       {tooltip &&
         createPortal(
           <div
-            role="tooltip"
-            className={styles.tooltip}
-            style={{ left: tooltip.left, top: tooltip.top }}
+          role="tooltip"
+          className={styles.tooltip}
+          style={{ left: tooltip.left, top: tooltip.top }}
           >
             {tooltip.label}
           </div>,
           document.body,
+        )}
+        {!isMobile && (
+          <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
+            <FaArrowLeft />
+          </Link>
         )}
       <div className={styles.toolbarContent}>
         <TopBar handlePrint={handlePrint} />
         <RichTextToolbar editor={editor} />
       </div>
     </div>
+        </>
   );
 };
 

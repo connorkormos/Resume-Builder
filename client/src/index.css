@@ -78,12 +78,19 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   
-    /* @media (min-width: 2560px) {
-      --height-toolbar: clamp(2.5rem, 6rem, 12.5rem);
-      --height-editor-page: 9.625in;
-      --width-editor-page: 7.4375in;
-      font-size: 24px;
-    } */
+
+  /* @media (min-width: 2560px) {
+  --height-toolbar: clamp(2rem, 5rem, 10rem);
+  --height-editor-page: 7.7in;
+  --width-editor-page: 5.95in;
+
+
+
+    --height-toolbar: clamp(2.2rem, 5.5rem, 11rem);
+    --height-editor-page: 9.625in;
+    --width-editor-page: 7.4375in;
+    font-size: 22px;
+  } */
 }
 
 html,
@@ -172,16 +179,16 @@ a {
 .inputMain {
   height: 2rem;
   width: auto;
-
+  
   display: flex;
   align-items: center;
   justify-content: center;
-
+  
   text-align: center;
-
+  
   border: var(--border-button-main);
   border-radius: var(--border-radius-button-main);
-
+  
   background: var(--background-main);
 }
 
