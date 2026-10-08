@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
@@ -5,13 +6,15 @@ import { Link } from "react-router-dom";
 
 import { editorRegistry } from "@/helpers/editorRegistry.js";
 
+import { FaArrowLeft } from "react-icons/fa6";
+
 import RichTextToolbar from "./components/RichTextToolbar.jsx";
 import TopBar from "./components/TopBar";
 
 import styles from "./Toolbar.module.css";
 
 const Toolbar = ({ handlePrint }) => {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [tooltip, setTooltip] = useState(null);
 
@@ -48,11 +51,11 @@ const Toolbar = ({ handlePrint }) => {
       onMouseDown={() => setTooltip(null)}
       onKeyDown={(event) => event.key === "Escape" && setTooltip(null)}
     >
-      {!isMobile && (
+      {/* {!isMobile && (
         <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
-          Home
+          <FaArrowLeft style={{ marginRight: "0.5rem" }} />
         </Link>
-      )}
+      )} */}
       {tooltip &&
         createPortal(
           <div

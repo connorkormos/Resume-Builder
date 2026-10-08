@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { resolveEditorContext } from "@/helpers/resumeContext.js";
@@ -26,7 +27,7 @@ import UndoRedo from "./UndoRedo.jsx";
 import styles from "../Toolbar.module.css";
 
 const RichTextToolbar = ({ editor }) => {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const resumeStyling = useSelector((state) => state.resume.present.styling);
   const sections = useSelector((state) => state.resume.present.sections);
   const columns = useSelector((state) => state.resume.present.columns);
@@ -153,12 +154,12 @@ const RichTextToolbar = ({ editor }) => {
   return (
     <div className={styles.richTextToolbarContainer}>
       <div className={styles.richTextToolbarWrapper}>
+        {fontSizeComponent}
         {lineHeightComponent}
+        {fontFamilyComponent}
         {fontColorComponent}
         {highlightColorComponent}
         {backgroundColorComponent}
-        {fontSizeComponent}
-        {fontFamilyComponent}
         {marksComponent}
         {textAlignComponent}
         {listsComponent}

@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useCallback } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -11,8 +12,12 @@ import {
   copyResumeToApi,
 } from "@/services/resumeServices";
 
+import { FaArrowLeft } from "react-icons/fa6";
+
 import CurrentlyEditing from "./CurrentlyEditing";
 import AddSection from "./AddSection";
+
+
 
 import styles from "../Toolbar.module.css";
 
@@ -83,7 +88,7 @@ const TopBar = ({ handlePrint }) => {
     );
   };
 
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   //   const resumeTitleString = !isMobile
   //     ? resumeTitle
@@ -91,11 +96,10 @@ const TopBar = ({ handlePrint }) => {
 
   return (
     <div className={styles.topBarContainer}>
-      {isMobile && (
         <Link to="/" data-toolbar-label="Home" className={styles.homeLink}>
-          Home
+          <FaArrowLeft />
+          {/* Home */}
         </Link>
-      )}
       <div
         className={`buttonMain ${styles.resumeTitle}`}
         // className="buttonMain"
@@ -113,7 +117,7 @@ const TopBar = ({ handlePrint }) => {
       {user?.id === resume?.userId ? (
         <button
           data-toolbar-label="Save Resume"
-          className="buttonMain"
+          className={`buttonMain ${styles.saveCopyButton}`}
           onClick={saveResume}
         >
           Save {!isMobile && "Resume"}
@@ -121,7 +125,7 @@ const TopBar = ({ handlePrint }) => {
       ) : (
         <button
           data-toolbar-label="Copy Resume"
-          className="buttonMain"
+          className={`buttonMain ${styles.saveCopyButton}`}
           onClick={copyResume}
         >
           Copy {!isMobile && "Resume"}
@@ -129,7 +133,7 @@ const TopBar = ({ handlePrint }) => {
       )}
       <button
         data-toolbar-label="Print Resume"
-        className="buttonMain"
+        className={`buttonMain ${styles.printButton}`}
         onClick={handlePrint}
       >
         Print

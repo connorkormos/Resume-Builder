@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +18,7 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const user = useSelector((state) => state.user);
 
   const handleEditResume = () => {

@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useRef } from "react";
 
 import styles from "../Toolbar.module.css";
@@ -7,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addSection, addSubsection } from "@/store/resumeSlice";
 
 const AddSection = () => {
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const resume = useSelector((state) => state.resume.present);
 

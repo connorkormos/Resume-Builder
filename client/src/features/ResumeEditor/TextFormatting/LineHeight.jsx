@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useEffect, useState, useCallback } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +32,7 @@ const LineHeight = ({
   activeSectionIds,
   resumeStyling,
 }) => {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const reduxSections = useSelector((state) => state.resume.present.sections);
   const reduxColumns = useSelector((state) => state.resume.present.columns);
@@ -194,7 +195,7 @@ const LineHeight = ({
   };
 
   return (
-    <div className={styles.toolbarFlexWrapper} data-toolbar-label="Line Height">
+    <div className={`${styles.toolbarFlexWrapper} ${styles.incrementDecrementToolbarWrapper}`} data-toolbar-label="Line Height">
       <button
         className="buttonMain"
         onClick={() => setNewLineHeight("decrement")}

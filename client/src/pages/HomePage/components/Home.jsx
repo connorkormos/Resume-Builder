@@ -16,8 +16,7 @@ const Home = () => {
   const user = useSelector((state) => state.user);
   const [previewResumes, setPreviewResumes] = useState([]);
 
-  const screenSize = useMediaQuery();
-  const isMobile = screenSize === "mobile";
+  const isMobile = useMediaQuery("(width < 768px)");
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -62,7 +61,7 @@ const Home = () => {
       <div className={styles.homePageContent}>
         <h2 className={styles.homeH2}>
           Hi {user.firstName || "there"}. Welcome{user.id && " back"}
-          {screenSize !== "desktop" ? "!" : " to ActuallyFreeResume.com."}
+          {isMobile ? "!" : " to ActuallyFreeResume.com."}
         </h2>
         {/* <p className={styles.homeP}> */}
         {/* Welcome {user.id && " back"} to ActuallyFreeResume.com */}

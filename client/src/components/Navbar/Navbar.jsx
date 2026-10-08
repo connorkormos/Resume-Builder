@@ -9,8 +9,8 @@ import styles from "./Navbar.module.css";
 
 const Navbar = () => {
   const location = useLocation();
-  const isMobile = useMediaQuery() === "mobile";
-  const isDesktop = useMediaQuery() === "desktop";
+  const isMobile = useMediaQuery("(width < 768px)");
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const isHomePage = location.pathname === "/" || location.pathname === "/home";
   const isBrowsePage = location.pathname === "/browse";

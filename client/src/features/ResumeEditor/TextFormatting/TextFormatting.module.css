@@ -4,6 +4,10 @@
   gap: var(--gap-toolbar);
 }
 
+.incrementDecrementToolbarWrapper {
+  gap: calc(var(--gap-toolbar) / 2);
+}
+
 .textFormatButton,
 .textFormatInput,
 .textFormatDropdownSelect {

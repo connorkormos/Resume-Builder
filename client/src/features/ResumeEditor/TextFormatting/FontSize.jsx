@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -19,7 +20,7 @@ const FontSize = ({
    activeSectionIds,
    resumeStyling
 }) => {
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
 
    const dispatch = useDispatch();
    const reduxSections = useSelector(state => state.resume.present.sections);
@@ -159,7 +160,7 @@ const FontSize = ({
    }
 
    return (
-      <div className={styles.toolbarFlexWrapper} data-toolbar-label="Font Size">
+      <div className={`${styles.toolbarFlexWrapper} ${styles.incrementDecrementToolbarWrapper}`} data-toolbar-label="Font Size">
          <button data-toolbar-label="Decrease Font Size" className='buttonMain' onClick={() => setNewFontSize('decrement')}>-</button>
          <input
             className='inputMain'

@@ -63,7 +63,7 @@ const Columns = () => {
   const columnInputLabel = columnInputValue == 1 ? "Column" : "Columns";
 
   return (
-    <div className={styles.toolbarFlexWrapper}>
+    <div className={`${styles.toolbarFlexWrapper} ${styles.incrementDecrementToolbarWrapper}`}>
       <button className="buttonMain" data-toolbar-label="Remove Column" onClick={() => removeLastColumn()}>
         -
       </button>

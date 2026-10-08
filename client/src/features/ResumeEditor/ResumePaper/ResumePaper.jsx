@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +17,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
    const dispatch = useDispatch();
   const localEditorRef = useRef(null);
   const editorRef = props.editorPageRef ?? localEditorRef;

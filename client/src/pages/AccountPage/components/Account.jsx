@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,7 +13,7 @@ import styles from './Account.module.css';
 
 const Account = () => {
 
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
    const location = useLocation();
 
    const user = useSelector(state => state.user);

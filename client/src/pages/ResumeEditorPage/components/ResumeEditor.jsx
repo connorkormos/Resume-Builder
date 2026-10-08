@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -21,7 +22,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 const ResumeEditor = () => {
 
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
    const location = useLocation();
    const dispatch = useDispatch();
    const { resumeId } = useParams();

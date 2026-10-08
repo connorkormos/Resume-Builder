@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Node } from 'slate';
@@ -6,9 +7,11 @@ import { setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 import { editorRegistry } from '@/helpers/editorRegistry.js';
 import { getNodeString } from '@/helpers/getNodeString';
 
+import styles from "../Toolbar.module.css";
+
 const CurrentlyEditing = () => {
 
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
    const dispatch = useDispatch();
 
    const sections = useSelector(state => state.resume.present.sections);
@@ -48,7 +51,7 @@ const CurrentlyEditing = () => {
       dispatch(setActiveSectionId(null));
    }
    return (
-      <button data-toolbar-label="Edit Full Resume" className='buttonMain' onClick={() => clearToolbarSelection()}>{`${!isMobile ? `Currently Editing: ${currentlyEditingText || "Unknown Error"}` : currentlyEditingText || "Unknown Error"}`}</button>
+      <button data-toolbar-label="Edit Full Resume" className={`buttonMain ${styles.currentlyEditingButton}`} onClick={() => clearToolbarSelection()}>{`${!isMobile ? `Currently Editing: ${currentlyEditingText || "Unknown Error"}` : currentlyEditingText || "Unknown Error"}`}</button>
    )
 }
 

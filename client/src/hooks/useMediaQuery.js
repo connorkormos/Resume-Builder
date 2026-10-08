@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
-export function useMediaQuery() {
-   const windowWidth = window.innerWidth;
-   if (windowWidth < 768) {
-      return "mobile"
-   // } else if (windowWidth < 1024) {
-      // return "tablet"
-   } else {
-      return "desktop"
-   }
+export function useMediaQuery(query) {
+   const subscribe = useCallback((onChange) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener('change', onChange);
+      return () => mediaQuery.removeEventListener('change', onChange);
+   }, [query]);
+
+   return useSyncExternalStore(
+      subscribe,
+      () => window.matchMedia(query).matches,
+      () => false,
+   );
 }

@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState } from "react";
 import styles from "@/features/ResumeEditor/TextFormatting/TextFormatting.module.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,7 +8,7 @@ import TextFormatDropdown from "../../TextFormatting/shared/TextFormatDropdown";
 import { MdArrowDropDown } from "react-icons/md";
 
 const Gap = () => {
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const resumeGap = useSelector((state) => state.resume.present.layout.gap);
 

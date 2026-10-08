@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState } from "react";
 
 import { useDispatch } from "react-redux";
@@ -9,7 +10,7 @@ import { useSelector } from "react-redux";
 import TextFormatDropdown from "./shared/TextFormatDropdown";
 
 const FontFamily = () => {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
 
   const fontFamilies = [

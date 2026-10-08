@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MdArrowDropDown } from "react-icons/md";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -13,7 +14,7 @@ import TextFormatDropdown from "../../TextFormatting/shared/TextFormatDropdown";
 import { initialState } from "@/store/resumeSlice";
 
 export default function ResetStyling() {
-   const isMobile = window.innerWidth <= 768;
+   const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const initialResumeStyling = initialState.styling;
   const reduxResume = useSelector((state) => state.resume.present);
