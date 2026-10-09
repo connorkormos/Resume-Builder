@@ -153,9 +153,25 @@
             display: inline-flex;
             font-size: 1.5rem;
 
-            .upOrDownArrow {
+            .upOrDownArrowWrapper {
+              width: 15%;
+              /* width: 6rem; */
+
+              display: flex;
+              justify-content: space-between;
+              /* gap: 0.5rem; */
               margin-right: 1rem;
+
+              cursor: pointer;
+
             }
+
+            span {
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
           }
 
           .deleteButton {
@@ -172,23 +188,26 @@
         flex: 1;
         font-size: 1rem;
 
-        .upOrDownArrowWrapper {
-          width: 3rem;
-
-          display: flex;
-          gap: 0.5rem;
-          /* margin-right: 1rem; */
-          
-          cursor: pointer;
-
-        }
+        
         .fieldRowWrapper {
           width: 95%;
           margin-left: auto;
-
+          
           display: flex;
           align-items: center;
-
+          
+          .upOrDownArrowWrapper {
+            /* width: 2.5rem; */
+            width: 10%;
+  
+            display: flex;
+            justify-content: space-between;
+            /* gap: 0.5rem; */
+            margin-right: 1rem;
+  
+            cursor: pointer;
+  
+          }
           /* height: 1.5rem; */
 
           .deleteButton {
@@ -207,6 +226,7 @@
 
           .subFieldText,
           .placeholderFieldText {
+            width: 75%;
             color: #ffffff;
             overflow-wrap: break-word;
             word-break: break-word;
@@ -253,6 +273,7 @@
 
   .addButton {
     width: fit-content;
+    margin: 0.5rem 0;
 
     background: var(--bootstrap-blue);
     border: none;
@@ -293,54 +314,43 @@
     height: 100dvh;
     position: fixed;
     top: 0;
-    /* left: -50%; */
-    /* left: 0; */
-    /* right: 100%; */
-    /* transform: translateX(0); */
+    padding: 1rem;
+
+    .outlineTitle {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .outlineWrapper {
+      max-width: 100%;
+      margin: auto;
+      gap: 1rem;
+
+      /* .sectionBlock {
+        
+      padding: 1rem;
+      
+      background: #2a2a2a;
+      border-radius: 0.75rem;
+      } */
+      .sectionTitle {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
   }
-
-  .hiddenOutlineContainer {
-    left: -10rem;
-    /* right: 100%; */
-  }
-
-
-
-  .outlineWrapper {
-    max-width: 95%;
-    margin: auto;
-    padding: 0;
-
-
-
-    /* margin-top: 0; */
-  }
-
-  /* .hideOutlineButton,
-  .showOutlineButton {
-    top: 95dvh;
-    margin: 0;
-    right: auto;
-    transition: left 0.25s ease-in-out;
-  } */
 
   .showOutlineButton,
   .hideOutlineButton {
     position: fixed;
-    /* top: 90vh; */
     left: calc(50vh + 5%);
     z-index: var(--z-outline);
     bottom: 2.5%;
-    ;
-    /* left: 0; */
-    /* height: 3.5rem; */
-    /* left: 2.5rem; */
-    /* bottom: 2.5rem; */
   }
 
   .hideOutlineButton {
     left: auto;
     right: 0;
-    /* left: calc(95% - 5vh); */
   }
 }

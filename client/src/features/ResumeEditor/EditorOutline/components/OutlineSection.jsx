@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 import { useSelector } from "react-redux";
 import { addField, addSubsection } from "@/store/resumeSlice";
@@ -26,6 +27,9 @@ const OutlineSection = ({
   setDragItem,
   renderFieldRow,
 }) => {
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   const subsections = useSelector((state) => state.resume.present.subsections);
 
   // Collapse state for SUBSECTIONS
@@ -229,7 +233,7 @@ const OutlineSection = ({
               </div>
               {/* ⋮⋮ */}
               <span className={styles.subsectionHeaderSpan}>
-                {sectionTitle} {subIndex + 1}
+                {!isMobile ? sectionTitle : "Subsection"} {subIndex + 1}
               </span>
 
               <button
