@@ -42,14 +42,62 @@ const SignUp = () => {
       navigate('/account');
    }
 
+   const authInputs = ['First Name', 'Last Name', 'Email', 'Password'].map((input) => {
+      let inputName = input.charAt(0).toLowerCase() + input.split(' ').join('').slice(1);
+      return (
+         <div className={styles.authFormGroup} key={input}>
+            {inputName !== 'password' ? (
+               <label
+                  htmlFor={inputName}
+                  className={styles.authLabel}
+               >
+                  {input}:
+               </label>
+            ) : (
+               <div className={styles.showPasswordWrapper}>
+                  <label
+                     htmlFor={inputName}
+                     className={styles.authLabel}
+                  >
+                     {input.charAt(0).toUpperCase() + input.slice(1)}:
+                  </label>
+                  <label
+                     htmlFor='showPassword'
+                     className={styles.showPasswordLabel}
+                  >
+                     <input
+                        id='showPassword'
+                        type="checkbox"
+                        className={styles.showPasswordCheckBox}
+                        checked={showPassword}
+                        onChange={() => setShowPassword(prev => !prev)}
+                     />
+                     <span>
+                        (Show Password)
+                     </span>
+                  </label>
+               </div>
+            )}
+            <input
+               id={inputName}
+               type={input.toLowerCase() === 'password' ? (showPassword ? 'text' : 'password') : input.toLowerCase() === 'email' ? 'email' : 'text'}
+               name={inputName}
+               className={styles.authInput}
+               value={newUser[inputName]}
+               onChange={(e) => changeNewUser(e)}
+            />
+         </div>
+      );
+   });
+
    return (
       <div className={styles.authContainer}>
-         <div className={styles.authContent}>
-            <form
-               className={styles.authForm}
-               onSubmit={(e) => createUser(e)}
-            >
-               <div className={styles.authItemRow}>
+         <form
+            className={styles.authForm}
+            onSubmit={(e) => createUser(e)}
+         >
+            {authInputs}
+            {/* <div className={styles.authItemRow}>
                   <label
                      htmlFor='firstName'
                      className={styles.authLabel}
@@ -127,12 +175,11 @@ const SignUp = () => {
                      value={newUser.password}
                      onChange={(e) => changeNewUser(e)}
                   />
-               </div>
-               <button className={styles.submitButton}>
-                  Create Account
-               </button>
-            </form>
-         </div >
+               </div> */}
+            <button className={styles.submitButton}>
+               Create Account
+            </button>
+         </form>
       </div >
    );
 };

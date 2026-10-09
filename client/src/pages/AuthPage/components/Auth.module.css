@@ -1,13 +1,131 @@
+/* 1. Global Reset & Box-Sizing */
+*,
+*::before,
+*::after {}
+
+@media(min-width: 2560px) {
+  .authContainer {
+    font-size: 20px;
+  }
+}
+
+@media(max-width: 768px) {
+  .authContainer {
+    font-size: 12px;
+  }
+}
+
 .authContainer {
+  box-sizing: border-box;
+
   height: 100%;
   width: 100%;
-  position: relative;
-  padding-inline: var(--padding-x-main);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   background-image: url("@/assets/backgrounds/signUpLoginBackground.png");
   background-size: cover;
-  background-position-y: 30%;
+
+  /* background-position-y: 30%; */
 }
+
+.authForm {
+  width: clamp(10%, 35em, 90%);
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  padding: 2.5em;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+
+.authFormGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+
+  label {
+    line-height: 1.5;
+    font-size: 0.9em;
+    display: inline-flex;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  @media(max-width: 768px) {
+    label {
+      font-size: 1rem;
+    }
+  }
+
+  input {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.675em 1em;
+
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    outline: none;
+
+    color: #1f2937;
+    background-color: #f9fafb;
+
+    transition: all 0.2s ease-in-out;
+  }
+
+  input:not([type="checkbox"]):focus {
+    border-color: var(--bootstrap-purple);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  input[type="checkbox"] {
+    width: 1em;
+    accent-color: var(--bootstrap-purple);
+  }
+
+  .showPasswordWrapper {
+    display: inline-flex;
+    justify-content: space-between;
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.submitButton {
+  display: block;
+  width: clamp(25%, 50%, 100%);
+  margin: auto;
+  margin-top: 1em;
+  font-size: 1rem;
+  padding: 0.75em 0.5em;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--bootstrap-purple);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #4338ca;
+}
+
+.submitButton:active {
+  transform: scale(0.98);
+}
+
+
+
+/* 
 
 .authContent {
   position: relative;
@@ -72,4 +190,4 @@
   border-radius: 5vh;
   
   cursor: pointer;
-}
+} */

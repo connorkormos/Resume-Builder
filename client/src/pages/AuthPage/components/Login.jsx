@@ -39,67 +39,67 @@ const Login = () => {
       navigate('/account');
    }
 
+
+
    return (
       <div className={styles.authContainer}>
-         <div className={styles.authContent}>
-            <form
-               className={styles.authForm}
-               onSubmit={(e) => logUserIn(e)}
-            >
-               <div className={styles.authItemRow}>
+         <form
+            className={styles.authForm}
+            onSubmit={(e) => logUserIn(e)}
+         >
+            <div className={styles.authFormGroup}>
+               <label
+                  htmlFor='email'
+                  className={styles.authLabel}
+               >
+                  Email:
+               </label>
+               <input
+                  id='email'
+                  type='email'
+                  name='email'
+                  className={styles.authInput}
+                  value={userCredentials.email}
+                  onChange={(e) => changeUserCredentials(e)}
+               />
+            </div>
+            <div className={styles.authFormGroup}>
+               <div className={styles.showPasswordWrapper}>
                   <label
-                     htmlFor='email'
+                     htmlFor='password'
                      className={styles.authLabel}
                   >
-                     Email:
+                     Password:
                   </label>
-                  <input
-                     id='email'
-                     type='email'
-                     name='email'
-                     className={styles.authInput}
-                     value={userCredentials.email}
-                     onChange={(e) => changeUserCredentials(e)}
-                  />
-               </div>
-               <div className={styles.authItemRow}>
-                  <div className={styles.showPasswordWrapper}>
-                     <label
-                        htmlFor='password'
-                        className={styles.authLabel}
-                     >
-                        Password:
-                     </label>
-                     <label
-                        htmlFor='showPassword'
-                        className={styles.showPasswordLabel}
-                     >
-                        <input
-                           id='showPassword'
-                           type="checkbox"
-                           className={styles.showPasswordCheckBox}
-                           checked={showPassword}
-                           onChange={() => setShowPassword(prev => !prev)}
-                        />
-                        (Show Password)
-                     </label>
-                  </div>
-                  <input
-                     id='password'
-                     type={showPassword ? 'text' : 'password'}
-                     name='password'
-                     className={styles.authInput}
-                     value={userCredentials.password}
-                     onChange={(e) => changeUserCredentials(e)}
-                  />
-               </div>
-               <button
-                  className={styles.submitButton}
+                  <label
+                     htmlFor='showPassword'
+                     className={styles.showPasswordLabel}
                   >
-                  Log In
-               </button>
-            </form>
-         </div>
+                     <input
+                        id='showPassword'
+                        type="checkbox"
+                        className={styles.showPasswordCheckBox}
+                        checked={showPassword}
+                        onChange={() => setShowPassword(prev => !prev)}
+                     />
+                     (Show Password)
+                  </label>
+               </div>
+               <input
+                  id='password'
+                  type={showPassword ? 'text' : 'password'}
+                  name='password'
+                  className={styles.authInput}
+                  value={userCredentials.password}
+                  onChange={(e) => changeUserCredentials(e)}
+               />
+            </div>
+            <button
+               className={styles.submitButton}
+            >
+               Log In
+            </button>
+         </form>
       </div>
    );
 };

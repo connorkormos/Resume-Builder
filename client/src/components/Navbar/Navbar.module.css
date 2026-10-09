@@ -24,7 +24,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  vertical-align: middle;
 }
 
 .navbarGroup {
@@ -42,7 +41,7 @@
 
 @media (max-width: 768px) {
    .navbarContent {
-      width: 80%;
+      width: 100%;
    }
    .navbarGroup .navbarLink {
       width: 100%;
@@ -53,7 +52,7 @@
 
    .navbarLink {
       /* width: 100%; */
-      min-width: fit-content;
+      width: fit-content;
       text-align: center;
    }
 }
