@@ -64,9 +64,7 @@ const Outline = () => {
 
   return (
     <div
-      className={`${styles.outlineWrapper} ${
-        showOutline ? styles.visible : styles.hidden
-      }`}
+      className={`${showOutline ? styles.outlineContainer : styles.hiddenOutlineContainer}`}
     >
       <DragDropProvider
         onDragOver={({ operation }) => {
@@ -95,7 +93,9 @@ const Outline = () => {
           );
         }}
       >
-        <div className={styles.outlineContainer}>
+        <div className={styles.outlineWrapper}>
+          <div className={styles.outlineHeaderRow}>
+
           <div className={styles.outlineTitle}>Resume Outline</div>
 
           <button
@@ -103,9 +103,10 @@ const Outline = () => {
               showOutline ? styles.hideOutlineButton : styles.showOutlineButton
             }
             onClick={() => setShowOutline(!showOutline)}
-          >
+            >
             {showOutline ? "⟨⟨⟨" : "⟩⟩⟩"}
           </button>
+            </div>
 
           {!sections.allIds.length ? (
             <h2>No Sections to Display</h2>

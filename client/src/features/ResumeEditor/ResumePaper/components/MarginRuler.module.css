@@ -48,7 +48,7 @@
     margin-left: calc(var(--height-toolbar) * -1);
     /* margin: auto auto auto calc(60% - var(--width-editor-page)); */
     /* margin: auto auto auto 22.5vw; */
-    top: calc(var(--height-toolbar) * 2);
+    margin-top: calc(var(--height-toolbar) - 1rem);
     /* top: auto; */
 
     display: flex;

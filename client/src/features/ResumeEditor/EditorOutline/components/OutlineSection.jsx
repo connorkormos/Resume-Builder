@@ -190,7 +190,7 @@ const OutlineSection = ({
         return (
           <div
             key={subId}
-            className={`${styles.subsectionItem} ${styles.subsectionRow}`}
+            className={`${styles.subsectionRow}`}
             draggable={true}
             onDragStart={(e) => handleOnDragStart(e, subIndex, subId)}
             onDragOver={(e) => handleOnDragOver(e, subIndex)}
@@ -205,7 +205,7 @@ const OutlineSection = ({
           >
             {/* <div className={styles.dragHandle}> */}
             <div className={styles.subsectionHeaderRowWrapper}>
-              <div className={styles.upArrowDownArrowWrapper}>
+              <div className={styles.upOrDownArrowWrapper}>
                 {subIndex !== 0 && (
                   <span
                     className={styles.upOrDownArrow}
@@ -250,7 +250,7 @@ const OutlineSection = ({
                 })}
 
                 <button
-                  className={`${styles.addButton} ${styles.addFieldButton}`}
+                  className={`${styles.addButton}`}
                   onClick={() => handleAddField(subId)}
                 >
                   + Add Field

@@ -76,7 +76,7 @@ const FieldRow = ({
   return (
     <div
       key={fieldId}
-      className={`${styles.fieldInputRow} ${styles.fieldRow}`}
+      className={`${styles.fieldRow}`}
       draggable={true}
       onDragStart={(e) => {
         e.stopPropagation();

@@ -1,11 +1,12 @@
 import { useSortable } from "@dnd-kit/react/sortable";
 import React, { useEffect } from "react";
 
-import styles from "../Outline.module.css";
 import OutlineSection from "./OutlineSection";
 import { useDispatch } from "react-redux";
 import { deleteSectionFromApi } from "@/services/resumeServices";
 import { deleteSection } from "@/store/resumeSlice.js";
+
+import styles from "../Outline.module.css";
 
 const SortableOutlineSection = ({
   id,
@@ -49,7 +50,7 @@ const SortableOutlineSection = ({
   };
   return (
     <div ref={ref}
-      className={`${styles.sectionBlock} ${styles.sectionRow}`}
+      className={`${styles.sectionBlock}`}
     >
       <div className={styles.sectionHeader}>
         <div className={styles.dragHandle}>⋮⋮</div>
