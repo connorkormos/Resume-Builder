@@ -1,8 +1,3 @@
-/* 1. Global Reset & Box-Sizing */
-*,
-*::before,
-*::after {}
-
 @media(min-width: 2560px) {
   .authContainer {
     font-size: 20px;
@@ -16,8 +11,6 @@
 }
 
 .authContainer {
-  box-sizing: border-box;
-
   height: 100%;
   width: 100%;
 

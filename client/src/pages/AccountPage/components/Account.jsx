@@ -35,7 +35,47 @@ const Account = () => {
    };
    return (
       <div className={styles.accountContainer}>
-         <div className={styles.navLinksWrapper}>
+         <div className={styles.accountSideBar}>
+            <div className={styles.sideBarRow}>
+               <Link
+                  to='/'
+                  className={styles.homeButton}
+               >
+                  Home
+               </Link>
+            </div>
+            {/* <div className={styles.sideBarDivider}></div> */}
+            <div className={styles.sideBarRow}>
+               <Link
+                  // className={styles.accountTabLink}
+                  to='/account/my-resumes'
+               >
+                  {!isMobile && "View "}Resumes
+               </Link>
+            </div>
+            {/* <div className={styles.sideBarDivider}></div> */}
+            <div className={styles.sideBarRow}>
+               <Link
+                  // className={styles.accountTabLink}
+                  to='/account/settings'
+               >
+                  Settings
+               </Link>
+            </div>
+            <div className={styles.sideBarRow}>
+               <Link
+                  // className={styles.accountTabLink}
+                  onClick={handleLogUserOut}
+               >
+                  Logout
+               </Link>
+            </div>
+         </div>
+         <div className={styles.accountContentWrapper}>
+            <Outlet />
+         </div>
+
+         {/* <div className={styles.navLinksWrapper}>
             <Link
                to='/'
                className={styles.homeButton}
@@ -79,7 +119,7 @@ const Account = () => {
                )}
                <Outlet />
             </div>
-         </div>
+         </div> */}
       </div>
    );
 };

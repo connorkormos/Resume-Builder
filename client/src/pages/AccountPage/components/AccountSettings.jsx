@@ -5,9 +5,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { updateUser } from '@/store/userSlice';
 
 // import styles from './Account.module.css';
-import styles from './AccountSettings.module.css';
 import { updateUserApi } from '@/services/userServices';
 import { formatDateTime } from '@/utils/formatters';
+
+import styles from './AccountSettings.module.css';
 
 const AccountSettings = () => {
 
@@ -57,52 +58,67 @@ const AccountSettings = () => {
 
    return (
       <>
-         <h1 className={styles.accountSettingsH1}>Account Settings</h1>
-         <p className={styles.accountSettingsH2}>Here you can update your account information, change your password, and manage other account settings.</p>
+         <div className={styles.accountSettingsHeaderWrapper}>
+            <h1>Account Settings</h1>
+            {/* <p>Here you can update your account information, change your password, and manage other account settings.</p> */}
+         </div>
          <form
             className={styles.accountSettingsForm}
             onSubmit={(e) => submitUserAccountSettings(e)}
          >
-            <input
-               className={styles.accountSettingsInput}
-               type='text'
-               name='firstName'
-               value={userFormData.firstName}
-               placeholder='First Name'
-               onChange={changeUserFormData}
-            />
-            <input
-               className={styles.accountSettingsInput}
-               type='text'
-               name='lastName'
-               value={userFormData.lastName}
-               placeholder='Last Name'
-               onChange={changeUserFormData}
-            />
-            <input
-               className={styles.accountSettingsInput}
-               type='email'
-               name='email'
-               value={userFormData.email}
-               placeholder='Email'
-               onChange={changeUserFormData}
-            />
-            <label htmlFor='currentPassword'>Current password (required to change your email)</label>
-            <input
-               id='currentPassword'
-               className={styles.accountSettingsInput}
-               type='password'
-               name='currentPassword'
-               autoComplete='current-password'
-               value={userFormData.currentPassword}
-               onChange={changeUserFormData}
-               required={userFormData.email.trim().toLowerCase() !== user.email}
-            />
+            <div className={styles.accountFormGroup}>
+               <label htmlFor="firstName">
+                  First Name:
+               </label>
+               <input
+                  id="firstName"
+                  name='firstName'
+                  type='text'
+                  value={userFormData.firstName}
+                  placeholder='First Name'
+                  onChange={changeUserFormData}
+               />
+            </div>
+            <div className={styles.accountFormGroup}>
+               <label htmlFor="lastName">Last Name:</label>
+               <input
+                  id="lastName"
+                  name='lastName'
+                  type='text'
+                  value={userFormData.lastName}
+                  placeholder='Last Name'
+                  onChange={changeUserFormData}
+               />
+            </div>
+            <div className={styles.accountFormGroup}>
+               <label htmlFor="email">Email:</label>
+               <input
+                  id="email"
+                  name='email'
+                  type='email'
+                  value={userFormData.email}
+                  placeholder='Email'
+                  onChange={changeUserFormData}
+               />
+            </div>
+            <div className={styles.accountFormGroup}>
+
+               <label htmlFor='currentPassword'>Current password:</label>
+               <input
+                  id='currentPassword'
+                  type='password'
+                  name='currentPassword'
+                  autoComplete='current-password'
+                  value={userFormData.currentPassword}
+                  onChange={changeUserFormData}
+                  required={userFormData.email.trim().toLowerCase() !== user.email}
+               />
+            </div>
             <span className={styles.accountTimeStampsSpan}>
-               Your account was created on {formatDateTime(userFormData.createdAt)}
+               Areated on {formatDateTime(userFormData.createdAt)}
             </span>
             <span className={styles.accountTimeStampsSpan}>
-               Your account was last updated on {formatDateTime(userFormData.updatedAt)}.
+               Account last updated on {formatDateTime(userFormData.updatedAt)}.
             </span>
             <button
                className={styles.accountSubmitButton}
