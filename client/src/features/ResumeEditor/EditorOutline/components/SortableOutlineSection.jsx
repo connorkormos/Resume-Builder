@@ -79,7 +79,7 @@ const SortableOutlineSection = ({
           />
 
           <button
-            className={styles.deleteSectionButton}
+            className={styles.deleteButton}
             onClick={() => handleDeleteSection(sectionId)}
           >
             Delete Section

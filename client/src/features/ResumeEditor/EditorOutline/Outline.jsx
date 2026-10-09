@@ -2,21 +2,23 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { reorderSections } from "@/store/resumeSlice.js";
 
+import { useMediaQuery } from '@/hooks/useMediaQuery.js';
 import FieldRow from "./components/FieldRow.jsx";
 
-import styles from "./Outline.module.css";
 import { Node } from "slate";
 
 import { DragDropProvider } from "@dnd-kit/react";
 import SortableOutlineSection from "@/features/ResumeEditor/EditorOutline/components/SortableOutlineSection.jsx";
+import styles from "./Outline.module.css";
 
 const Outline = () => {
+  const isMobile = useMediaQuery('(max-width: 768px');
   const dispatch = useDispatch();
   const resume = useSelector((state) => state.resume.present);
   const sections = resume.sections;
   // const sections = useSelector((state) => state.resume.present.sections);
 
-  const [showOutline, setShowOutline] = useState(false);
+  const [showOutline, setShowOutline] = useState(true);
 
   // Collapse state for SECTIONS
   const [collapsedSections, setCollapsedSections] = useState({});
@@ -66,6 +68,34 @@ const Outline = () => {
     <div
       className={`${showOutline ? styles.outlineContainer : styles.hiddenOutlineContainer}`}
     >
+
+      {!isMobile ? (
+        <div className={styles.outlineHeaderRow}>
+          <h1 className={styles.outlineTitle}>Resume Outline</h1>
+
+          <button
+            className={
+              showOutline ? styles.hideOutlineButton : styles.showOutlineButton
+            }
+            onClick={() => setShowOutline(!showOutline)}
+          >
+            <span>{showOutline ? "⟨⟨⟨" : "⟩⟩⟩"}</span>
+          </button>
+        </div>
+      )
+        : (
+          <>
+            <h1 className={styles.outlineTitle}>Resume Outline</h1>
+            <button
+              className={
+                showOutline ? styles.hideOutlineButton : styles.showOutlineButton
+              }
+              onClick={() => setShowOutline(!showOutline)}
+            >
+              {showOutline ? "⟨⟨⟨" : "⟩⟩⟩"}
+            </button>
+          </>
+        )}
       <DragDropProvider
         onDragOver={({ operation }) => {
           const { source, target } = operation;
@@ -93,21 +123,9 @@ const Outline = () => {
           );
         }}
       >
+
+
         <div className={styles.outlineWrapper}>
-          <div className={styles.outlineHeaderRow}>
-
-          <div className={styles.outlineTitle}>Resume Outline</div>
-
-          <button
-            className={
-              showOutline ? styles.hideOutlineButton : styles.showOutlineButton
-            }
-            onClick={() => setShowOutline(!showOutline)}
-            >
-            {showOutline ? "⟨⟨⟨" : "⟩⟩⟩"}
-          </button>
-            </div>
-
           {!sections.allIds.length ? (
             <h2>No Sections to Display</h2>
           ) : (

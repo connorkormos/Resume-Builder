@@ -184,13 +184,13 @@ const OutlineSection = ({
   };
 
   return (
-    <>
+    <div className={styles.subsectionContainer}>
       {section.subsectionIds?.map((subId, subIndex) => {
         const subsection = getSubsectionById(subId);
         return (
           <div
             key={subId}
-            className={`${styles.subsectionRow}`}
+            className={`${styles.subsectionRowWrapper}`}
             draggable={true}
             onDragStart={(e) => handleOnDragStart(e, subIndex, subId)}
             onDragOver={(e) => handleOnDragOver(e, subIndex)}
@@ -244,7 +244,7 @@ const OutlineSection = ({
             </div>
 
             {!collapsedSubsections[subId] && (
-              <div className={styles.subsectionFields}>
+              <div className={styles.fieldsContainer}>
                 {subsection.fieldIds?.map((fieldId, fieldIndex) => {
                   return renderFieldRow(section.id, subId, fieldId, fieldIndex);
                 })}
@@ -255,15 +255,15 @@ const OutlineSection = ({
                 >
                   + Add Field
                 </button>
+                <button
+                  className={styles.deleteButton}
+                  onClick={() => handleDeleteSubsection(subId, subIndex)}
+                >
+                  Delete {sectionTitle} Subsection
+                </button>
               </div>
             )}
 
-            <button
-              className={styles.deleteButton}
-              onClick={() => handleDeleteSubsection(subId, subIndex)}
-            >
-              Delete {sectionTitle} Subsection
-            </button>
           </div>
         );
       })}
@@ -271,7 +271,7 @@ const OutlineSection = ({
       <button className={styles.addButton} onClick={handleAddSubsection}>
         + Add {section.label} Subsection
       </button>
-    </>
+    </div>
   );
 };
 
