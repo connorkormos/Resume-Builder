@@ -1,10 +1,11 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { setResumeId } from "@/store/resumeSlice";
 import {
+  getResumeFromApi,
   copyResumeToApi,
   deleteResumeFromApi,
 } from "@/services/resumeServices";
@@ -15,40 +16,57 @@ import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
 
 import styles from "./UserResumes.module.css";
 
-const UserResumeRow = ({ resume, fetchUserResumes }) => {
+const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [resume, setResume] = useState(null);
+
+  useEffect(() => {
+    const fetchResume = async () => {
+      const resumeData = await getResumeFromApi(resumeId);
+      if (resumeData) {
+        console.log('Fetched resume data: ', resumeData);
+        setResume(resumeData);
+      }
+      else {
+        console.error('Failed to fetch resume data for resumeId: ', resumeId);
+      }
+    };
+    fetchResume();
+  }, [resumeId]);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
   const user = useSelector((state) => state.user);
 
   const handleEditResume = () => {
-    dispatch(setResumeId(resume.id));
-    navigate(`/editor/${resume.id}`);
+    dispatch(setResumeId(resumeId));
+    navigate(`/editor/${resumeId}`);
   };
 
   const handleDeleteResume = async () => {
-    if (
-      !confirm(`Are you sure you want to delete resume titled ${resume.title}?`)
-    ) {
-      return;
-    }
+    if (!confirm(`Are you sure you want to delete resume titled ${resume.title}?`)) return;
 
     const resumeIsDeleted = await deleteResumeFromApi(resume.id);
     if (!resumeIsDeleted) {
       return;
     }
-    fetchUserResumes(user.id);
+    fetchUserResumeIds(user.id);
   };
 
   const handleCopyResume = async () => {
+    
     const copiedResume = await copyResumeToApi(resume.id);
     if (!copiedResume) {
       alert("An error occured when copying your resume.");
       return;
     }
-    fetchUserResumes(user.id);
+    fetchUserResumeIds(user.id);
   };
+
+  if (!resume) {
+    return null;
+  }
 
   return (
     <>
@@ -59,6 +77,7 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
               hoverPreview
               styling={{ height: "6rem" }}
               resumeId={resume.id}
+              resumeData={resume}
               caption={false}
             />
             <div className={styles.resumeInfoWrapper}>
@@ -104,6 +123,7 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
               hoverPreview
               styling={{ height: !isMobile ? "4rem" : "9rem" }}
               resumeId={resume.id}
+              resumeData={resume}
               caption={false}
             />
             <div className={styles.mobileResumeRowContent}>
@@ -130,7 +150,6 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
                 >
                   Delete
                 </button>
-                {/* Future implementation: Buttons for viewing, editing, and deleting the resume */}
               </div>
             </div>
           </div>

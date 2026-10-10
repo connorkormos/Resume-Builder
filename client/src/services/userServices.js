@@ -91,6 +91,31 @@ export const updateUserApi = async (userId, userData) => {
    }
 }
 
+export const getUserResumeIdsFromApi = async (userId) => {
+   try {
+      const resumeIdData = await fetchApi({
+         endpoint: `/users/${userId}/resume-ids`
+      })
+
+      // if (!response.ok) {
+         // console.error(`Error fetching resume IDs for user of ID ${userId}: `, response);
+         // throw new Error(`Failed to fetch resume IDs for user of ID ${userId}`);
+      // }
+
+      return resumeIdData;
+
+   } catch (error) {
+      console.error(`Error fetching resume IDs for user of ID ${userId}: `, error);
+      alert(
+         error?.code && error?.message
+         ? error.code + '\n' + error.message
+         : `Error fetching resume IDs for user of ID ${userId}.`
+      )
+
+      return null;
+   }
+}
+
 export const getUserResumesFromApi = async (userId) => {
    try {
       const data = await fetchApi({

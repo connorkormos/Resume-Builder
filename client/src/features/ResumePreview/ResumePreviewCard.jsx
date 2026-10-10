@@ -10,7 +10,8 @@ import { TbExternalLink } from "react-icons/tb";
 // styling.width/height size the paper; the caption adds its own height.
 // Other styling properties apply to the outer card. Width wins if both are set.
 export default function ResumePreviewCard({
-  resumeId,
+  resumeId = null,
+  resumeData = null,
   styling = {},
   caption = true,
   hoverPreview = false,
@@ -22,31 +23,30 @@ export default function ResumePreviewCard({
   const paperRef = useRef(null);
   const [paperScale, setPaperScale] = useState(0);
   const current = result?.id === resumeId ? result : null;
-  const resume = current?.resume;
+  const resume = current?.resume ?? resumeData;
   const loading = Boolean(resumeId) && !current;
 
   useEffect(() => {
-    if (resumeId == null) return;
-    const controller = new AbortController();
+    if (resumeId == null && resumeData == null) return;
+    if (resumeData) {
+      setResult({ id: resumeId, resume: resumeData });
+      return;
+    }
     // Same normalization as getResumeFromApi, but failures stay in the tile
     // rather than opening that service's blocking alert.
     async function fetchResume() {
       try {
         const data = await fetchApi({
           endpoint: `/resumes/${encodeURIComponent(resumeId)}`,
-          options: { signal: controller.signal },
         });
         const normalized = normalizeResumeFromApi(data);
-        if (!controller.signal.aborted)
-          setResult({ id: resumeId, resume: normalized });
+        setResult({ id: resumeId, resume: normalized });
       } catch {
-        if (!controller.signal.aborted)
-          setResult({ id: resumeId, resume: null });
+        setResult({ id: resumeId, resume: null });
       }
     }
     fetchResume();
-    return () => controller.abort();
-  }, [resumeId]);
+  }, [resumeId, resumeData]);
 
   useEffect(() => {
     const viewport = viewportRef.current;

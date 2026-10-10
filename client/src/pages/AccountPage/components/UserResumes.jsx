@@ -10,7 +10,7 @@ import { TbMenu2Filled } from "react-icons/tb";
 import UserResumeRow from './UserResumeRow.jsx';
 
 // import styles from './Account.module.css';
-import { getUserResumesFromApi } from '@/services/userServices.js';
+import { getUserResumesFromApi, getUserResumeIdsFromApi } from '@/services/userServices.js';
 
 import styles from './UserResumes.module.css';
 
@@ -22,6 +22,7 @@ const UserResumes = () => {
    const navigate = useNavigate();
 
    const [userResumes, setUserResumes] = useState([]);
+   const [userResumeIds, setUserResumeIds] = useState([]);
 
    const fetchUserResumes = useCallback(
       async (userId) => {
@@ -32,15 +33,28 @@ const UserResumes = () => {
          setUserResumes(userData.resumes);
       }, [])
 
+   const fetchUserResumeIds = useCallback(
+      async (userId) => {
+         const userResumeIds = await getUserResumeIdsFromApi(userId);
+         console.log(userResumeIds);
+         if (!userResumeIds) {
+            return;
+         }
+         setUserResumeIds(userResumeIds);
+      }, [])
+
+   // useEffect(() => {
+   //    if (!user.id) return;
+   //    fetchUserResumes(user.id);
+   // }, [user.id, fetchUserResumes])
    useEffect(() => {
       if (!user.id) return;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchUserResumes(user.id);
-   }, [user.id])
+      fetchUserResumeIds(user.id);
+   }, [user.id, fetchUserResumeIds])
 
 
    const renderResumes = () => {
-      if (!userResumes || userResumes.length === 0) {
+      if (!userResumeIds || userResumeIds.length === 0) {
          return (
             <>
                <p>You have not created any resumes yet.</p>
@@ -48,9 +62,12 @@ const UserResumes = () => {
          );
       }
 
-      return userResumes.map(resume => (
+      // only map the first 10 resumes for performance reasons
+      return userResumeIds.slice(0, 10).map(resumeId => (
+      // return userResumeIds.map(resumeId => (
          <>
-            <UserResumeRow key={resume.id} resume={resume} fetchUserResumes={fetchUserResumes} />
+            <UserResumeRow key={resumeId} resumeId={resumeId} fetchUserResumeIds={fetchUserResumeIds} />
+            {console.log('Rendering resume with ID: ', resumeId)}
             <div className={styles.userResumeRowDivider}></div>
          </>
       ));
@@ -71,6 +88,8 @@ const UserResumes = () => {
          <div className={styles.userResumeRowsWrapper}>
             {renderResumes()}
          </div>
+         <p>Showing {Math.min(userResumeIds.length, 10)} of {userResumeIds.length} resumes</p>
+         
          <button
             className={styles.accountSubmitButton}
             onClick={() => navigate('/editor/new')}
