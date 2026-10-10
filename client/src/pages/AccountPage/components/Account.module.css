@@ -3,7 +3,7 @@
    --border-color-bright: color-mix(var(--bootstrap-purple), black 50%);
 
    min-height: 100dvh;
-   height: fit-content;
+   height: max(fit-content, 100dvh);
    width: 100%;
 
    display: flex;
@@ -12,7 +12,8 @@
    background: color-mix(in srgb, var(--bootstrap-purple), #000000 90%);
 }
 
-.accountSideBar, .hiddenAccountSideBar {
+.accountSideBar,
+.hiddenAccountSideBar {
    position: sticky;
    height: 100dvh;
    /* width: clamp(10%, max-content, 25%); */
@@ -49,6 +50,7 @@
       font-size: 2.5rem;
       /* margin-bottom: 2.5rem; */
    }
+
    .sideBarRow:last-child {
       margin-top: auto;
    }
@@ -67,14 +69,11 @@
 }
 
 .accountContentWrapper {
-   /* flex: 1; */
-   padding: 2.5rem 5rem;
-   height: 100vh;
+   min-height: max(fit-content, 100dvh);
    width: 100%;
-   /* width: 75%; */
-   /* height: 100%; */
-
-   /* border-radius: 1rem; */
+   >div:first-child {
+      padding: 2.5rem 5rem;
+   }
 }
 
 @media(max-width: 768px) {
@@ -86,19 +85,18 @@
    }
 
    .menuIcon {
-      /* position: absolute; */
-      /* inset: 2rem; */
-      /* margin-left: calc(100% - 2rem); */
       margin-left: 100%;
       transform: translateX(-100%);
       font-size: 2.5rem;
       margin-bottom: 1rem;
-      /* top: 0; */
-      /* left: 0; */
    }
 
    .accountContentWrapper {
-      padding: 2.5rem 2rem;
       width: 100%;
+      min-height: fit-content;
+
+      >div:first-child {
+         padding: 2.5rem 2rem;
+      }
    }
 }

@@ -1,5 +1,6 @@
 .userResumesWrapper {
    height: 100%;
+   max-height: 100dvh;
    width: 80%;
    margin: auto;
 
@@ -130,7 +131,10 @@ button:hover {
 
 @media (max-width: 768px) {
    .userResumesWrapper {
+
       width: 100%;
+      max-height: 100dvh;
+      padding: 0;
 
       .mobileResumeRowWrapper {
          max-width: 100%;

@@ -136,13 +136,16 @@ const AccountSettings = () => {
                {isMobile
                   ? `Account updated: ${formatDateTime(userFormData.updatedAt)}`
                   : `Account last updated on ${formatDateTime(userFormData.updatedAt)}`
-               }            </span>
-            <button
-               className={styles.accountSubmitButton}
-               type='submit'
-            >
-               Update Account
-            </button>
+               }
+            </span>
+            <div className={styles.accountSubmitButtonWrapper}>
+               <button
+                  className={styles.accountSubmitButton}
+                  type='submit'
+               >
+                  Update Account
+               </button>
+            </div>
             {/* Future implementation: Password fields for changing password */}
          </form>
          {/* Future implementation: Form for updating account information and changing password */}
