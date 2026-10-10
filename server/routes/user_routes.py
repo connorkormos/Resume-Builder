@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from models import db, User
 
+from utils.authorization import check_resume_access
 from utils.responses import generate_error, generate_success, print_pending_request, print_successful_request
 
 user_bp = Blueprint('users', __name__, url_prefix='/users')
@@ -84,4 +85,29 @@ def edit_user_by_id(user_id):
     print_successful_request('Updated user of ID:', user_id)
     
     response = jsonify(user.to_dict()), 200
+    return response
+
+
+@user_bp.route("/<int:user_id>/resume-ids", methods=['GET'])
+def get_user_resume_ids(user_id):
+    print_pending_request('GET', f'/users/{user_id}/resume-ids')
+
+    if session.get("user_id") is None:
+        return generate_error(error_type="UNAUTHORIZED", code="LOGIN_REQUIRED",
+                              message="You must be logged in to view your resume IDs.")
+    if session.get("user_id") != user_id:
+        return generate_error(error_type="FORBIDDEN", code="RESUME_ACCESS_FORBIDDEN",
+                              message="You can only view your own resume IDs.")
+
+    user = User.query.filter(User.id == user_id).one_or_none()
+    
+    if not user:
+        return generate_error(
+            error_type='NOT_FOUND',
+            message=f'User of id {user_id} not found.'
+        )
+
+    resume_ids = [resume.id for resume in user.resumes]
+    print_successful_request('Fetched resume IDs for user of ID:', user_id)
+    response = jsonify(resume_ids), 200
     return response
