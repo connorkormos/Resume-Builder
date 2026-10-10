@@ -59,7 +59,7 @@ const UserResumes = () => {
    return (
       <div className={styles.userResumesWrapper}>
          <div className={styles.accountHeaderWrapper}>
-            <h1>Your Resumes</h1>
+            <h1>{!isMobile && "Your "}Resumes</h1>
             {isMobile && (
                <TbMenu2Filled
                   style={{ fontSize: '2.5rem' }}

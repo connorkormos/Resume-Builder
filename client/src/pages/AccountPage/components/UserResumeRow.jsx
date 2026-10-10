@@ -10,7 +10,7 @@ import {
 } from "@/services/resumeServices";
 
 // import styles from './Account.module.css';
-import { formatDateTime } from "@/utils/formatters";
+import { formatDateTime, formatCompactDateTime } from "@/utils/formatters";
 import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
 
 import styles from "./UserResumes.module.css";
@@ -51,9 +51,9 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
   };
 
   return (
-    <div className={styles.userResumeRow}>
+    <>
       {!isMobile && (
-        <>
+        <div className={styles.userResumeRow}>
           <div className="flexRow">
             <ResumePreviewCard
               hoverPreview
@@ -63,7 +63,7 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
             />
             <div className={styles.resumeInfoWrapper}>
               <h2 className={styles.resumeTitle}>{resume.title}</h2>
-              <div className={styles.resumeDetails}>
+              <div className={styles.resumeDetailsWrapper}>
                 <p>
                   Created On: {formatDateTime(resume.createdAt)}
                 </p>
@@ -94,51 +94,49 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
             </button>
             {/* Future implementation: Buttons for viewing, editing, and deleting the resume */}
           </div>
-        </>
+        </div>
       )}
       {isMobile && (
-        <div className={styles.mobileResumeRow}>
-          <ResumePreviewCard
-            hoverPreview
-            styling={{ height: !isMobile ? "4rem" : "8rem" }}
-            resumeId={resume.id}
-            caption={false}
-          />
-          <div className={styles.mobileResumeRowContent}>
-            <div className={styles.resumeInfoWrapper}>
-              <h2 className={styles.resumeTitle}>{resume.title}</h2>
-              <p className={styles.resumeDetails}>
-                Created On: {formatDateTime(resume.createdAt)}
-              </p>
-              <p className={styles.resumeDetails}>
-                Updated On: {formatDateTime(resume.updatedAt)}
-              </p>
-            </div>
-            <div className={styles.userResumeRowButtons}>
-              <button
-                className={styles.editResumeButton}
-                onClick={handleEditResume}
-              >
-                Edit
-              </button>
-              <button
-                className={styles.editResumeButton}
-                onClick={handleCopyResume}
-              >
-                Copy
-              </button>
-              <button
-                className={styles.deleteResumeButton}
-                onClick={handleDeleteResume}
-              >
-                Delete
-              </button>
-              {/* Future implementation: Buttons for viewing, editing, and deleting the resume */}
+        <div className={styles.mobileResumeRowWrapper}>
+          <h2 className={styles.resumeTitle}>{resume.title}</h2>
+          <div className={styles.mobileResumeRow}>
+            <ResumePreviewCard
+              hoverPreview
+              styling={{ height: !isMobile ? "4rem" : "9rem" }}
+              resumeId={resume.id}
+              caption={false}
+            />
+            <div className={styles.mobileResumeRowContent}>
+              {/* <div className={styles.resumeDetailsWrapper}> */}
+                <p><span>Created: </span><span>{formatCompactDateTime(resume.createdAt)}</span></p>
+                <p><span>Updated: </span><span>{formatCompactDateTime(resume.updatedAt)}</span></p>
+              {/* </div> */}
+              <div className={styles.userResumeRowButtons}>
+                <button
+                  className={styles.editResumeButton}
+                  onClick={handleEditResume}
+                >
+                  Edit
+                </button>
+                <button
+                  className={styles.editResumeButton}
+                  onClick={handleCopyResume}
+                >
+                  Copy
+                </button>
+                <button
+                  className={styles.deleteResumeButton}
+                  onClick={handleDeleteResume}
+                >
+                  Delete
+                </button>
+                {/* Future implementation: Buttons for viewing, editing, and deleting the resume */}
+              </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
