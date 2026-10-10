@@ -1,45 +1,53 @@
 .accountContainer {
    --border-color-main: color-mix(var(--bootstrap-purple), black 70%);
    --border-color-bright: color-mix(var(--bootstrap-purple), black 50%);
-   /* position: relative; */
-   min-height: 100%;
-   height: 100%;
+
+   min-height: 100dvh;
+   height: fit-content;
    width: 100%;
 
    display: flex;
-   /* flex-direction: column; */
 
    color: var(--color-main);
    background: color-mix(in srgb, var(--bootstrap-purple), #000000 90%);
 }
 
-.accountSideBar {
-   height: 100%;
-   /* width: max-content; */
-   width: 20rem;
+.accountSideBar, .hiddenAccountSideBar {
+   position: sticky;
+   height: 100dvh;
+   /* width: clamp(10%, max-content, 25%); */
+   min-width: max-content;
+   top: 0;
+   overflow: scroll;
+   scrollbar-width: none;
 
    display: flex;
    flex-direction: column;
 
    gap: 2.5rem;
-   padding: 2.5rem;
+   padding: 2.5rem 2rem;
 
    background: color-mix(in srgb, var(--bootstrap-purple), black 87.5%);
    border-right: 1px solid var(--border-color-main);
-   /* border-right: 1px solid color-mix(in srgb, var(--boostrap-purple), black 5%); */
 
    .sideBarRow {
       font-size: 1.5rem;
       width: 100%;
       margin: 0 auto;
+      display: inline-flex;
+      justify-content: space-between;
+      align-items: center;
 
       .homeButton {
-         font-size: 1.75em;
+         margin: 0;
+         /* font-size: 1.75em; */
       }
    }
 
    .sideBarRow:first-child {
-      margin-bottom: 2.5rem;
+      height: 3rem;
+      font-size: 2.5rem;
+      /* margin-bottom: 2.5rem; */
    }
    .sideBarRow:last-child {
       margin-top: auto;
@@ -52,159 +60,45 @@
    }
 }
 
+.hiddenAccountSideBar {
+   display: none;
+   /* position: absolute; */
+   /* transform: translateX(-100%); */
+}
+
 .accountContentWrapper {
-   flex: 1;
-   padding: 5rem;
-   width: fit-content;
-   height: fit-content;
-   border-radius: 1rem;
-}
-/* 
-.navLinksWrapper {
-   position: relative;
-   width: clamp(10rem, 80rem, var(--width-main));
-   margin: 1rem auto 0 auto;
-
-   font-size: 2rem;
-}
-
-.accountContent {
-   position: relative;
-   height: 50rem;
-   width: clamp(10rem, 80rem, var(--width-main));
-   margin: auto;
-}
-
-.accountHome {
-   height: 20rem;
+   /* flex: 1; */
+   padding: 2.5rem 5rem;
+   height: 100vh;
    width: 100%;
-   margin: 9rem auto auto auto;
-   text-align: center;
-   display: flex;
-   flex-direction: column;
-   gap: 5rem;
+   /* width: 75%; */
+   /* height: 100%; */
+
+   /* border-radius: 1rem; */
 }
 
-.accountOutletWrapper,
-.accountTab,
-.logoutTab {
-   background-color: rgba(25, 25, 25, 1);
-}
+@media(max-width: 768px) {
 
-.accountTabsWrapper {
-   display: flex;
-   gap: 1rem;
-   font-size: 1.25rem;
-}
-
-.accountTab,
-.logoutTab {
-   position: relative;
-   padding: 0.5em 1em;
-   top: 0.1em;
-
-
-   border-top-left-radius: 0.5em;
-   border-top-right-radius: 0.5em;
-   border: 1px solid rgba(255, 255, 255, 0.1);
-   border-bottom: none;
-}
-
-.logoutTab {
-   margin-left: auto;
-}
-
-.accountOutletWrapper {
-   height: 45rem;
-   padding: 2rem;
-   padding-bottom: 3rem;
-   min-height: 25rem;
-   border: 1px solid rgba(255, 255, 255, 0.1);
-   border-radius: 1.5rem;
-   border-top-left-radius: 0;
-   border-top-right-radius: 0;
-} */
-
-
-@media (max-width: 768px) {
-   .navLinksWrapper {
-      margin: 1rem 5%;
-      margin-left: 5%;
+   .accountSideBar {
+      width: 100%;
+      position: absolute;
+      border-right: none;
    }
 
-   .accountContainer {
-      height: 150%;
+   .menuIcon {
+      /* position: absolute; */
+      /* inset: 2rem; */
+      /* margin-left: calc(100% - 2rem); */
+      margin-left: 100%;
+      transform: translateX(-100%);
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      /* top: 0; */
+      /* left: 0; */
    }
 
-   .accountOutletWrapper {
-      height: 100%;
-      padding: 1rem;
-   }
-
-   .accountTabsWrapper {
-      font-size: 1rem;
-      justify-content: space-between;
-   }
-
-   .accountTabsWrapper * {
-      margin: 0;
-   }
-
-   .accountContent {
-      width: 90%;
-      margin: 0 auto;
+   .accountContentWrapper {
+      padding: 2.5rem 2rem;
+      width: 100%;
    }
 }
-
-/* 
-.accountSettingsH2 {
-   margin-top: 0.75em;
-}
-
-.accountSettingsForm {
-   display: flex;
-   flex-direction: column;
-   margin-top: 2.5em;
-   gap: 1em;
-   width: 50%;
-}
-
-.accountSettingsInput {
-   color: black;
-   padding: 0.5em;
-   border: 1px solid transparent;
-   border-radius: 5vh;
-}
-
-.accountSettingsInput:focus {
-   outline: none;
-}
-
-.accountSubmitButton {
-   min-width: 15rem;
-   width: 30%;
-   margin-top: 3rem;
-   padding: 1em;
-   border: 1px solid transparent;
-   border-radius: 5rem;
-   background-color: rgba(0, 120, 255, 1);
-   color: white;
-   font-weight: bold;
-   cursor: pointer;
-}
- */
-
-
-
-
-/* 
-.accountOutlineWrapper {
-   padding: 10vh 5vh 0 5vh;
-   background-color: rgba(25, 25, 25, 1);
-}
-
-.accountOutlineRow {
-   display: flex;
-   flex-direction: row;
-   margin-bottom: 3vh;
-} */

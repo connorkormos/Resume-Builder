@@ -1,6 +1,20 @@
+.accountSettingsWrapper {
+   /* width: 90%; */
+   width: max-content;
+   /* height: fit-content; */
+}
+
 .accountSettingsHeaderWrapper {
+   height: 3rem;
+   width: 100%;
+   display: inline-flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 2.5rem;
+
    h1 {
       font-size: 2.5rem;
+      margin: 0;
    }
 
    p {
@@ -9,12 +23,9 @@
 }
 
 .accountSettingsForm {
-   width: max-content;
-
    display: flex;
    flex-direction: column;
 
-   margin-top: 2.5em;
    gap: 1.5rem;
 
    .accountFormGroup {
@@ -37,14 +48,6 @@
 }
 
 .accountSubmitButton {
-   /* min-width: 15rem; */
-   /* width: 30%; */
-   /* margin-top: 3rem; */
-   /* padding: 1em; */
-   /* border: 1px solid transparent; */
-   /* border-radius: 5rem; */
-   /* background-color: rgba(0, 120, 255, 1); */
-
    margin-top: 2.5rem;
    padding: 1rem;
 
@@ -58,8 +61,24 @@
 }
 
 @media (max-width: 768px) {
-   .accountSettingsForm {
+   .accountSettingsWrapper {
       width: 100%;
+   }
+
+   .accountSettingsHeaderWrapper {
+
+      /* margin-left: auto; */
+      /* width: fit-content; */
+      /* margin-left: auto; */
+      /* margin: auto; */
+      h1 {
+         font-size: 2rem;
+         line-height: 1;
+      }
+   }
+
+   .accountSettingsForm {
+      /* width: 90%; */
    }
 
    .accountSubmitButton {

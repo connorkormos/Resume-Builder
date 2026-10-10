@@ -1,16 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useOutletContext } from 'react-router-dom';
 
 import { BASE_URL } from '@/config.js';
+import { TbMenu2Filled } from "react-icons/tb";
 
 import UserResumeRow from './UserResumeRow.jsx';
 
 // import styles from './Account.module.css';
-import styles from './UserResumes.module.css';
 import { getUserResumesFromApi } from '@/services/userServices.js';
 
+import styles from './UserResumes.module.css';
+
 const UserResumes = () => {
+   const isMobile = useMediaQuery("(max-width: 768px)");
+   const { setSideBarIsOpen } = useOutletContext();
+
    const user = useSelector(state => state.user);
    const navigate = useNavigate();
 
@@ -42,13 +49,25 @@ const UserResumes = () => {
       }
 
       return userResumes.map(resume => (
-         <UserResumeRow key={resume.id} resume={resume} fetchUserResumes={fetchUserResumes} />
+         <>
+            <UserResumeRow key={resume.id} resume={resume} fetchUserResumes={fetchUserResumes} />
+            <div className={styles.userResumeRowDivider}></div>
+         </>
       ));
    }
 
    return (
       <div className={styles.userResumesWrapper}>
-         <h1 className={styles.myResumesH1}>Your Resumes</h1>
+         <div className={styles.accountHeaderWrapper}>
+            <h1>Your Resumes</h1>
+            {isMobile && (
+               <TbMenu2Filled
+                  style={{ fontSize: '2.5rem' }}
+                  // className={styles.menuIcon}
+                  // style={{position: 'absolute', right: 0}}
+                  onClick={() => setSideBarIsOpen(true)} />
+            )}
+         </div>
          <div className={styles.userResumeRowsWrapper}>
             {renderResumes()}
          </div>

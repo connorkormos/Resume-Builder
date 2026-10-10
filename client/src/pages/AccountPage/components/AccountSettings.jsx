@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
+import { useOutletContext } from "react-router-dom";
 
 import { updateUser } from '@/store/userSlice';
 
 // import styles from './Account.module.css';
 import { updateUserApi } from '@/services/userServices';
 import { formatDateTime } from '@/utils/formatters';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { TbMenu2Filled } from 'react-icons/tb';
 
 import styles from './AccountSettings.module.css';
 
 const AccountSettings = () => {
+   const { setSideBarIsOpen } = useOutletContext();
+   const isMobile = useMediaQuery('(max-width: 768px)');
 
    const dispatch = useDispatch();
    const user = useSelector(state => state.user);
@@ -57,9 +62,16 @@ const AccountSettings = () => {
    };
 
    return (
-      <>
+      <div className={styles.accountSettingsWrapper}>
          <div className={styles.accountSettingsHeaderWrapper}>
             <h1>Account Settings</h1>
+            {isMobile && (
+               <TbMenu2Filled
+                  style={{ fontSize: '2.5rem' }}
+                  // className={styles.menuIcon}
+                  // style={{position: 'absolute', right: 0}}
+                  onClick={() => setSideBarIsOpen(true)} />
+            )}
             {/* <p>Here you can update your account information, change your password, and manage other account settings.</p> */}
          </div>
          <form
@@ -115,11 +127,16 @@ const AccountSettings = () => {
                />
             </div>
             <span className={styles.accountTimeStampsSpan}>
-               Areated on {formatDateTime(userFormData.createdAt)}
+               {isMobile
+                  ? `Account created: ${formatDateTime(userFormData.createdAt)}`
+                  : `Account created on ${formatDateTime(userFormData.createdAt)}`
+               }
             </span>
             <span className={styles.accountTimeStampsSpan}>
-               Account last updated on {formatDateTime(userFormData.updatedAt)}.
-            </span>
+               {isMobile
+                  ? `Account updated: ${formatDateTime(userFormData.updatedAt)}`
+                  : `Account last updated on ${formatDateTime(userFormData.updatedAt)}`
+               }            </span>
             <button
                className={styles.accountSubmitButton}
                type='submit'
@@ -129,7 +146,7 @@ const AccountSettings = () => {
             {/* Future implementation: Password fields for changing password */}
          </form>
          {/* Future implementation: Form for updating account information and changing password */}
-      </>
+      </div>
    );
 };
 

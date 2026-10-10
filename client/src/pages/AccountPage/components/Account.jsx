@@ -1,10 +1,12 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import AccountOutline from './AccountOutline';
+import AccountSettings from './AccountSettings';
+import { TbMenu2Filled } from "react-icons/tb";
 
 import { logUserOutOfApi } from '@/services/userServices';
 import { clearUser } from '@/store/userSlice';
@@ -33,9 +35,13 @@ const Account = () => {
       confirm('You have been logged out successfully.');
       navigate('/');
    };
+
+   const [sideBarIsOpen, setSideBarIsOpen] = useState(true);
+
    return (
       <div className={styles.accountContainer}>
-         <div className={styles.accountSideBar}>
+         <div className={`${sideBarIsOpen ? styles.accountSideBar : styles.hiddenAccountSideBar}`}>
+
             <div className={styles.sideBarRow}>
                <Link
                   to='/'
@@ -43,12 +49,22 @@ const Account = () => {
                >
                   Home
                </Link>
+               {(isMobile && sideBarIsOpen && location.pathname !== '/account/' && location.pathname !== '/account') &&
+                  <TbMenu2Filled
+                     style={{ fontSize: '2.5rem' }}
+                     // className={styles.menuIcon}
+                     // style={{position: 'absolute', right: 0}}
+                     onClick={() => setSideBarIsOpen(!sideBarIsOpen)} />
+               }
             </div>
             {/* <div className={styles.sideBarDivider}></div> */}
             <div className={styles.sideBarRow}>
                <Link
                   // className={styles.accountTabLink}
                   to='/account/my-resumes'
+                  onClick={() => {
+                     isMobile && setSideBarIsOpen(false)
+                  }}
                >
                   {!isMobile && "View "}Resumes
                </Link>
@@ -58,6 +74,9 @@ const Account = () => {
                <Link
                   // className={styles.accountTabLink}
                   to='/account/settings'
+                  onClick={() => {
+                     isMobile && setSideBarIsOpen(false)
+                  }}
                >
                   Settings
                </Link>
@@ -72,7 +91,11 @@ const Account = () => {
             </div>
          </div>
          <div className={styles.accountContentWrapper}>
-            <Outlet />
+            {/* {(isMobile && !sideBarIsOpen) && <TbMenu2Filled className={styles.menuIcon} onClick={() => setSideBarIsOpen(!sideBarIsOpen)} />} */}
+            {((isMobile && !sideBarIsOpen) || (!isMobile)) && (
+               // location.pathname === '/account/settings' && <AccountSettings setSideBarIsOpen={setSideBarIsOpen} />
+               <Outlet context={{ setSideBarIsOpen }} />
+            )}
          </div>
 
          {/* <div className={styles.navLinksWrapper}>

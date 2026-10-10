@@ -3,8 +3,8 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  /* margin: 0; */
-  /* padding: 0; */
+  margin: 0;
+  padding: 0;
 }
 
 /** ROOT DEFAULT **/
@@ -43,6 +43,12 @@
   --height-editor-page: 7.7in;
   --width-editor-page: 5.95in;
   --bootstrap-blue: #0d6efd;
+  --bootstrap-blue-soft: #2564b3;
+  --bootstrap-dark-red: #921a14;
+  /* --bootstrap-dark-red: #c42d25; */
+  /* --bootstrap-dark-red: #811b1b; */
+  --bootstrap-dark-red-hover: #bb231b;
+  /* --bootstrap-purple: #468EE5; */
   --bootstrap-purple: #4f46e5;
   --bootstrap-purple-dark: color-mix(in srgb, var(--bootstrap-purple), black 75%);
   --bootstrap-purple-darker: color-mix(in srgb, var(--bootstrap-purple), black 90%);

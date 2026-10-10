@@ -10,9 +10,10 @@ import {
 } from "@/services/resumeServices";
 
 // import styles from './Account.module.css';
-import styles from "./UserResumes.module.css";
 import { formatDateTime } from "@/utils/formatters";
 import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
+
+import styles from "./UserResumes.module.css";
 
 const UserResumeRow = ({ resume, fetchUserResumes }) => {
   const dispatch = useDispatch();
@@ -56,18 +57,20 @@ const UserResumeRow = ({ resume, fetchUserResumes }) => {
           <div className="flexRow">
             <ResumePreviewCard
               hoverPreview
-              styling={{ height: "4rem" }}
+              styling={{ height: "6rem" }}
               resumeId={resume.id}
               caption={false}
             />
             <div className={styles.resumeInfoWrapper}>
               <h2 className={styles.resumeTitle}>{resume.title}</h2>
-              <p className={styles.resumeDetails}>
-                Created On: {formatDateTime(resume.createdAt)}
-              </p>
-              <p className={styles.resumeDetails}>
-                Last Updated On: {formatDateTime(resume.updatedAt)}
-              </p>
+              <div className={styles.resumeDetails}>
+                <p>
+                  Created On: {formatDateTime(resume.createdAt)}
+                </p>
+                <p>
+                  Last Updated On: {formatDateTime(resume.updatedAt)}
+                </p>
+              </div>
             </div>
           </div>
           <div className={styles.userResumeRowButtons}>
