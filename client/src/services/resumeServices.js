@@ -239,14 +239,17 @@ export const getOfficialResumeTemplatesFromApi = async (templateCount = 10, orde
    }
 }
 
-export const getResumeFromApi = async (resumeId) => {
+export const getResumeFromApi = async (resumeId, normalized = true) => {
    try {
       const data = await fetchApi({
          endpoint: `/resumes/${resumeId}`
       })
 
-      const normalizedResume = normalizeResumeFromApi(data);
-      return normalizedResume;
+      if (normalized) {
+         const normalizedResume = normalizeResumeFromApi(data);
+         return normalizedResume;
+      }
+      return data;
 
    } catch (error) {
       console.error(`Error fetching resume of ID ${resumeId}: `, error);

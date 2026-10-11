@@ -67,6 +67,7 @@ const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
   if (!resume) {
     return null;
   }
+  console.log("RESUME", resume);
 
   return (
     <>
