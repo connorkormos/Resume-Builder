@@ -26,7 +26,6 @@ const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
     const fetchResume = async () => {
       const resumeData = await getResumeFromApi(resumeId);
       if (resumeData) {
-        console.log('Fetched resume data: ', resumeData);
         setResume(resumeData);
       }
       else {
@@ -67,7 +66,6 @@ const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
   if (!resume) {
     return null;
   }
-  console.log("RESUME", resume);
 
   return (
     <>

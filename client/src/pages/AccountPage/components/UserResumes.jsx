@@ -36,7 +36,6 @@ const UserResumes = () => {
    const fetchUserResumeIds = useCallback(
       async (userId) => {
          const userResumeIds = await getUserResumeIdsFromApi(userId);
-         console.log("TEST:", Math.ceil(userResumeIds.length / 10));
          if (!userResumeIds) {
             return;
          }
@@ -72,7 +71,6 @@ const UserResumes = () => {
          // return userResumeIds.map(resumeId => (
          <>
             <UserResumeRow key={resumeId} resumeId={resumeId} fetchUserResumeIds={fetchUserResumeIds} />
-            {console.log('Rendering resume with ID: ', resumeId)}
             <div className={styles.userResumeRowDivider}></div>
          </>
       ));

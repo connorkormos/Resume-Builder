@@ -7,7 +7,6 @@ import { normalizeSlateValue } from "./normalizeSlateValue.js";
 import { normalizeSectionLayout } from "./normalizeSectionLayout.js";
 
 const normalizeResumeFromApi = (apiResume) => {
-  console.log('Normalizing resume from API: ', apiResume);
   let normalizedResume = {
     id: apiResume.id ?? null,
     title: apiResume.title ?? '',
