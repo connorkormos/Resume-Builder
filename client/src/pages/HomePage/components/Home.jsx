@@ -20,9 +20,10 @@ const Home = () => {
 
   useEffect(() => {
     const fetchTemplates = async () => {
-      const templateData =
-        (await getOfficialResumeTemplatesFromApi(3, "copyCount")) ?? [];
+      const templateData = await getOfficialResumeTemplatesFromApi(3, "copyCount") ?? [];
       const templates = templateData.templates ?? [];
+
+      // for (let id of [0, 19, 153, 154, 156, 157, 158, 159])
 
       if (!templates.length) {
         setPreviewResumes([]);
@@ -101,7 +102,7 @@ const Home = () => {
                 resumeId={resume.id}
                 //  styling={{ width: "75%", margin: "auto" }}
                 width="15rem"
-                styling={{ marginBottom: isMobile && "1rem"}}
+                styling={{ marginBottom: isMobile && "1rem" }}
                 //  styling={{ width: "15rem"
                 // , margin: '1rem 1rem 5rem 1rem'
                 //  }}

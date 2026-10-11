@@ -17,6 +17,9 @@ MAJOR BUGS:
 
 MEDIUM BUGS:
 
+-Dragging padding is inconsistent
+   -Increasing padding top for sections can only being done via margin ruler
+
 -FontSizeOffset Appears to be restricted to round numbers (i.e. it can't be 1.5 as the offset)
 
 -Check Nav Links for bugginess on mobile when deployed.
@@ -28,6 +31,8 @@ MEDIUM BUGS:
 -Undo/Redo functionality is buggy when adding/deleting primary content (fields, subsections, sections, and columns)
    
 SMALL BUGS:
+
+-Resume editor is twitchy when hovering toolbar buttons
 
 -Sections go off the page even if there isn't enough content to justify doing so
    -Looks like a mandatory minimum margin, or potentially something to do with the flex wrap CSS to make sections fill to the bottom of the page

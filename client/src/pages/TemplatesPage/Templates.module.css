@@ -1,11 +1,15 @@
+/* Overlay */
+.templatesPageContainer::before {
+  height: 100%;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center,
+      rgba(15, 15, 15, 0.4),
+      rgba(10, 10, 15, 0.6));
+}
+
 .templatesPageContainer {
-  /* display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center; */
-  /* min-height: 100vh; */
-  /* width: 80vw; */
-  /* ! HOME PAGE STYLING BELOW */
   min-height: 100%;
   width: 100%;
   position: relative;
@@ -22,18 +26,6 @@
   z-index: var(--z-base);
 }
 
-/* Overlay */
-.templatesPageContainer::before {
-  height: 100%;
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at center,
-    rgba(15, 15, 15, 0.4),
-    rgba(10, 10, 15, 0.6)
-  );
-}
 
 .templatesPageContentWrapper {
   position: relative;
@@ -44,11 +36,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
 
-.templatesPageTitle {
-  font-size: 2.5rem;
-  margin-bottom: 2.5rem;
+  .templatesPageTitle {
+    font-size: 2.5rem;
+    margin-bottom: 2.5rem;
+  }
 }
 
 .resumeSearchWrapper,
@@ -70,108 +62,119 @@
   align-items: stretch;
   margin-bottom: 4rem;
   font-size: 1.25rem;
-}
 
-.resumeSearchForm {
-  flex: 1 1 40%;
-  /* flex: 1 1 calc(50% - 0.75rem); */
-  min-width: 0;
-}
+  .resumeSearchForm {
+    flex: 1 1 40%;
+    min-width: 0;
 
-.resumeSearchInput {
-  width: 100%;
-  height: var(--control-height);
-  padding: 0.75rem 1rem;
-  border: var(--border-main);
-  border-radius: var(--border-radius-main);
-  /* background: var(--background-main); */
-  color: black;
-  font-size: inherit;
-  box-sizing: border-box;
-  outline: none;
+    .resumeSearchInput {
+      width: 100%;
+      height: var(--control-height);
+      padding: 0.75rem 1rem;
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      color: black;
+      font-size: inherit;
+      box-sizing: border-box;
+      outline: none;
+    }
+  }
 }
 
 .searchControlsWrapper {
   /* Let controls wrap across the full search row, including below the input. */
   display: contents;
-}
 
-.dropdownWrapper {
-  position: relative;
-  flex: 1 1 8rem;
-  min-width: 0;
-}
+  .dropdownWrapper {
+    position: relative;
+    flex: 1 1 8rem;
+    min-width: 0;
 
-.dropdownToggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  height: var(--control-height);
-  padding: 0.75rem 1rem;
-  border: var(--border-main);
-  border-radius: var(--border-radius-main);
-  background: var(--background-main);
-  /* color: black; */
-  color: inherit;
-  /* font-size: inherit; */
-  font-size: 80%;
-  cursor: pointer;
-  box-sizing: border-box;
-}
+    .dropdownToggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      width: 100%;
+      height: var(--control-height);
+      padding: 0.75rem 1rem;
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      background: var(--background-main);
+      color: inherit;
+      font-size: 80%;
+      cursor: pointer;
+      box-sizing: border-box;
 
-.dropdownToggleLabel {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+      .dropdownToggleLabel {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
 
-.dropdownMenu {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  min-width: 100%;
-  width: max-content;
-  z-index: 2;
+    .dropdownMenu {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 0;
+      min-width: 100%;
+      width: max-content;
+      z-index: 2;
 
-  padding: 0.25rem;
-  border: var(--border-main);
-  border-radius: var(--border-radius-main);
-  background: var(--background-main);
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
-}
+      padding: 0.25rem;
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      background: var(--background-main);
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.35);
 
-.dropdownOption {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 0.75rem;
-  border: 0;
-  border-radius: 0.25rem;
-  background: transparent;
-  color: inherit;
-  font-size: inherit;
-  text-align: left;
-  cursor: pointer;
-}
+      .dropdownOption {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.75rem;
+        border: 0;
+        border-radius: 0.25rem;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
 
-.dropdownOption:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
+      .dropdownOption:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+    }
 
-.resumeTypeCheckboxOption {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem;
-  font-size: inherit;
-  cursor: pointer;
-}
+    .resumeTypeCheckboxOption {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: inherit;
+      cursor: pointer;
+    }
 
-.resumeTypeCheckboxOption:hover {
-  background: rgba(255, 255, 255, 0.12);
+    .resumeTypeCheckboxOption:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .applyButton {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: 0;
+    border-radius: var(--border-radius-main);
+    background: #0d6efd;
+    color: white;
+    cursor: pointer;
+  }
+
+  .applyButton:hover {
+    background: #0b5ed7;
+  }
 }
 
 .searchButton {
@@ -192,58 +195,56 @@
   background: #0b5ed7;
 }
 
-.applyButton {
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.6rem 1rem;
-  border: 0;
-  border-radius: var(--border-radius-main);
-  background: #0d6efd;
-  color: white;
-  cursor: pointer;
-}
-
-.applyButton:hover {
-  background: #0b5ed7;
-}
-
 .templatePreviewsGridWrapper {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 1.5rem;
   width: 100%;
   box-sizing: border-box;
+
+  /* Keep the paper's aspect ratio and captions within their grid track. */
+  >figure>a {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  >figure>a>div:first-child {
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    height: auto;
+    overflow-wrap: anywhere;
+  }
 }
 
-@media (max-width: 768px) {
-  .templatePreviewsGridWrapper {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-  .templatesPageTitle {
-    font-size: 1.25rem;
-  }
-}
 /* grid-template-columns: repeat(4, minmax(0, 15rem)); */
 /* justify-content: space-between; */
 /* align-items: start; */
 /* gap: 5rem 2%; */
 /* } */
 
-/* Keep the paper's aspect ratio and captions within their grid track. */
-.templatePreviewsGridWrapper > figure > a {
-  display: block;
-  width: 100%;
-  min-width: 0;
-}
 
-.templatePreviewsGridWrapper > figure > a > div:first-child {
-  width: 100%;
-  height: auto;
-}
+@media (max-width: 768px) {
+  .templatesPageContentWrapper {
+    width: 90%;
 
-.templatePreviewsGridWrapper figcaption {
-  height: auto;
-  overflow-wrap: anywhere;
+    .templatesPageTitle {
+      font-size: 2.5rem;
+    }
+
+    .resumeSearchForm {
+      flex: 1 0 auto;
+    }
+
+    .resumeSearchInput {}
+  }
+
+  .templatePreviewsGridWrapper {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }
 
 @media (max-width: 90rem) {
@@ -252,38 +253,89 @@
   }
 }
 
-.navigateTemplatePageInfoWrapper {
+.paginationContainer {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
-  width: 100%;
+  /* width: 100%; */
+  width: max-content;
   margin-top: 4rem;
+
+  .currentPageInfoText {
+    font-size: 1rem;
+    opacity: 0.85;
+  }
 }
 
-.navigateTemplatePageText {
-  font-size: 1rem;
-  opacity: 0.85;
+
+.paginationWrapper {
+  display: flex;
+  justify-content: space-between;
+  /* display: grid; */
+  /* grid-auto-flow: column; */
+  /* grid-auto-columns: minmax(0, 1fr); */
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 36rem;
+
+  .pageNumberButton,
+  .paginationEllipsis {
+    /* padding: 0.5rem 0.125rem; */
+    /* font-size: 0.875rem; */
+    text-align: center;
+  }
+
+  .pageNumberButton {
+    min-width: 0;
+    width: fit-content;
+    border: none;
+    background: none;
+    /* border: var(--border-main); */
+    /* border-radius: var(--border-radius-main); */
+    /* background: var(--background-main); */
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .pageNumberButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .pageNumberButton[aria-current="page"] {
+    /* background: #0d6efd; */
+    text-decoration: underline;
+    font-style: italic;
+    color: white;
+    font-weight: 700;
+  }
+
 }
 
-.navigateTemplatePageButtonWrapper {
+.previousNextButtonWrapper {
+  width: 100%;
   display: flex;
   gap: 1rem;
+
+  .previousNextButton {
+    padding: 0.5rem 1.25rem;
+    border: var(--border-main);
+    border-radius: var(--border-radius-main);
+    background: var(--background-main);
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .previousNextButton[name='next'] {
+    margin-left: auto;
+  }
+
+  .previousNextButton:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
-.navigateTemplatePageButtonWrapper button {
+button {
   font-size: 50%;
-}
-
-.navigateTemplatePageButton {
-  padding: 0.5rem 1.25rem;
-  border: var(--border-main);
-  border-radius: var(--border-radius-main);
-  background: var(--background-main);
-  color: inherit;
-  cursor: pointer;
-}
-
-.navigateTemplatePageButton:hover {
-  background: rgba(255, 255, 255, 0.12);
 }
