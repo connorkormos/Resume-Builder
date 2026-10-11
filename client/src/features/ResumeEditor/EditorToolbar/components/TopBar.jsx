@@ -2,20 +2,18 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useCallback } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { setResume, updateResume } from "@/store/resumeSlice.js";
 import { ActionCreators as UndoActionCreators } from "redux-undo";
-import {
-  getResumeFromApi,
-  saveResumeToApi,
-  copyResumeToApi,
-} from "@/services/resumeServices";
+import { getResumeFromApi } from "@/services/resumeServices";
 
 import { FaArrowLeft } from "react-icons/fa6";
 
 import CurrentlyEditing from "./CurrentlyEditing";
-import AddSection from "./AddSection";
+import Save from "./Save";
+import Copy from "./Copy";
+import Print from "./Print";
 
 
 
@@ -24,7 +22,6 @@ import styles from "../Toolbar.module.css";
 // const TopBar = forwardRef(function TopBar({  }, ref) {
 const TopBar = ({ handlePrint }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { resumeId } = useParams();
 
   const resume = useSelector((state) => state.resume.present);
@@ -46,28 +43,6 @@ const TopBar = ({ handlePrint }) => {
   useEffect(() => {
     if (resumeId) fetchResumeById(resumeId);
   }, [resumeId, fetchResumeById]);
-
-  const saveResume = async () => {
-    const resumeIsSaved = await saveResumeToApi(resume);
-    if (!resumeIsSaved) {
-      return;
-    }
-
-    alert("Resume saved successfully!");
-  };
-
-  const copyResume = async () => {
-    // Implement the logic to copy the resume here
-    if (user?.id == null) {
-      return alert("You must be logged in to copy the resume.");
-    }
-    const newResume = await copyResumeToApi(resume.id);
-    if (!newResume) {
-      return alert("Failed to copy the resume.");
-    }
-    alert("Resume copied successfully! Happy editing.");
-    navigate(`/editor/${newResume.id}`);
-  };
 
   const [resumeTitle, setResumeTitle] = useState(resume.title);
 
@@ -117,30 +92,16 @@ const TopBar = ({ handlePrint }) => {
       {/* <CurrentlyEditing /> */}
       {/* <AddSection /> */}
       {/* <div className={styles.saveCopyPrintButtonsWrapper}> */}
-      {user?.id === resume?.userId ? (
-        <button
-          data-toolbar-label="Save Resume"
-          className={`buttonMain ${styles.saveCopyButton}`}
-          onClick={saveResume}
-        >
-          Save {!isMobile && "Resume"}
-        </button>
-      ) : (
-        <button
-          data-toolbar-label="Copy Resume"
-          className={`buttonMain ${styles.saveCopyButton}`}
-          onClick={copyResume}
-        >
-          Copy {!isMobile && "Resume"}
-        </button>
+      {!isMobile && (
+        <>
+          {user?.id === resume?.userId ? (
+            <Save isMobile={isMobile} />
+          ) : (
+            <Copy isMobile={isMobile} />
+          )}
+          <Print handlePrint={handlePrint} />
+        </>
       )}
-      <button
-        data-toolbar-label="Print Resume"
-        className={`buttonMain ${styles.printButton}`}
-        onClick={handlePrint}
-      >
-        Print
-      </button>
       {/* </div> */}
     </div>
   );

@@ -3,11 +3,8 @@
   --height-toolbar-local: fit-content;
   height: var(--height-toolbar-local);
   --home-link-size: calc(var(--height-toolbar) * 0.5);
-  /* height: fit-content; */
   width: 100%;
-  /* margin: 0; */
   top: 0;
-  /* left: 0; */
   display: flex;
 
   color: var(--color-main);
@@ -19,30 +16,25 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* width: fit-content; */
-    /* max-width: 90%; */
     gap: 0.5rem;
     margin: auto;
-    /* margin-left: calc(var(--home-link-size) * -1 * 0.5); */
     transform: translateX(calc(var(--home-link-size) * -0.5));
 
     padding: 0.25rem 0;
-    /* padding: 0.25rem calc(var(--height-toolbar) * 0.5) 0.25rem calc(var(--height-toolbar) * 0.5); */
   }
 
 
   .homeLink {
     position: relative;
-    /* top: 0; */
     left: 0;
-    /* width: 10%; */
     margin: auto 2.5%;
-    /* aspect-ratio: 1 / 1; */
     height: var(--home-link-size);
     font-size: var(--home-link-size);
   }
+}
 
   .tooltip {
+    /* display: none; */
     position: fixed;
     transform: translateX(-50%);
     z-index: 10000;
@@ -57,13 +49,10 @@
     white-space: nowrap;
     pointer-events: none;
   }
-}
 
 
 
 .richTextToolbarContainer {
-  /* height: calc(var(--height-toolbar-local) / 10); */
-  /* height: fit-content; */
   width: 100%;
   margin: auto;
 
@@ -79,10 +68,7 @@
 }
 
 .topBarContainer {
-  /* height: calc(var(--height-toolbar) / 2); */
-  /* height: fit-content; */
   width: 100%;
-
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -91,7 +77,6 @@
 
   .resumeTitle {
     flex: 5;
-    /* justify-content: flex-start; */
   }
 
   .currentlyEditingButton {
@@ -114,7 +99,6 @@
     gap: 0.5rem;
     flex: 1;
   }
-
 }
 
 .dropdownContainer {
@@ -148,13 +132,13 @@
 }
 
 
-@media (min-width: 2560px) {
+@media (min-width: 1800px) {
   .toolbarContainer {
     .toolbarContent {
-      .richTextToolbarContainer {
-        .richTextToolbarWrapper {
-          /* scale: 1.25; */
-        }
+      button, input {
+
+        font-size: 1.25rem;
+        padding: 0.5em;
       }
     }
 
@@ -166,33 +150,27 @@
 @media (max-width: 768px) {
   .toolbarContainer {
     height: fit-content;
-    /* position: relative; */
-    /* padding-top: 0.25rem; */
-    /* padding-bottom: 0.25rem; */
     margin-bottom: 5%;
 
     .homeLink {
       margin-left: 0;
-      /* position: relative; */
       height: calc(var(--height-toolbar) * 0.4);
       font-size: calc(var(--height-toolbar) * 0.35);
 
       display: inline-block;
       transform: none;
-      /* font-size: 1.5rem; */
     }
 
     .toolbarContent {
       gap: 0.25rem;
-      padding: 0 0.5rem;
+      padding: 0.5rem;
       transform: translateX(0);
 
       .topBarContainer {
         width: 100%;
-        gap: 0.5rem;
+        gap: 0;
 
         .resumeTitle {
-          /* max-width: 50%; */
           max-width: max-content;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -225,22 +203,10 @@
           align-items: center;
           justify-content: space-between;
           flex-wrap: wrap;
-          /* gap: 0.5rem; */
         }
       }
     }
-
   }
-
-
-
-
-
-
-
-  /* .resumeTitle { */
-  /* margin: auto 5% auto 5%; */
-  /* } */
 }
 
 .mobileToolbarRow {

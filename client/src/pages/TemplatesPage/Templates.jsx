@@ -194,6 +194,7 @@ export default function Templates() {
               key={template.id}
               styling={{
                 width: "100%",
+                fontSize: isMobile ? '1rem' : 'auto'
               }}
               resumeId={template.id}
             />

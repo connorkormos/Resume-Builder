@@ -18,7 +18,7 @@ const Outline = () => {
   const sections = resume.sections;
   // const sections = useSelector((state) => state.resume.present.sections);
 
-  const [showOutline, setShowOutline] = useState(true);
+  const [showOutline, setShowOutline] = useState(!isMobile);
 
   // Collapse state for SECTIONS
   const [collapsedSections, setCollapsedSections] = useState({});

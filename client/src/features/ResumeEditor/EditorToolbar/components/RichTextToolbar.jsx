@@ -23,11 +23,17 @@ import AddSection from "./AddSection.jsx";
 import ResetStyling from "./ResetStyling.jsx";
 import Indentation from "../../TextFormatting/Indentation.jsx";
 import UndoRedo from "./UndoRedo.jsx";
+import Copy from './Copy.jsx';
+import Save from './Save.jsx';
+import Print from './Print.jsx';
 
 import styles from "../Toolbar.module.css";
 
-const RichTextToolbar = ({ editor }) => {
+const RichTextToolbar = ({ editor, handlePrint }) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
+    const user = useSelector((state) => state.user);
+    const resume = useSelector((state) => state.resume.present);
+  
   const resumeStyling = useSelector((state) => state.resume.present.styling);
   const sections = useSelector((state) => state.resume.present.sections);
   const columns = useSelector((state) => state.resume.present.columns);
@@ -94,7 +100,7 @@ const RichTextToolbar = ({ editor }) => {
   const fontFamilyComponent = <FontFamily />;
   const marksComponent = <Marks editor={editor} />;
   const linksComponent = <Links editor={editor} selection={selection} />;
-  const iconsComponent = <Icons editor={editor} />;   
+  const iconsComponent = <Icons editor={editor} />;
   const columnsComponent = <Columns label="Columns:" />;
   const textAlignComponent = (
     <TextAlign
@@ -118,37 +124,45 @@ const RichTextToolbar = ({ editor }) => {
   const addSectionComponent = <AddSection />;
 
   if (isMobile) {
-   return (
+    return (
       <div className={styles.richTextToolbarContainer}>
         <div className={styles.richTextToolbarWrapper}>
-         <div className={styles.mobileToolbarRow}>
+          <div className={styles.mobileToolbarRow}>
 
-          {lineHeightComponent}
-          {fontSizeComponent}
-          {fontFamilyComponent}
-          {fontColorComponent}
-          {marksComponent}
-         </div>
-         <div className={styles.mobileToolbarRow}>
-          {textAlignComponent}
-          {listsComponent}
-          {indentationComponent}
-          {backgroundColorComponent}
-          {highlightColorComponent}
-          {linksComponent}
-          {iconsComponent}
-         </div>
-         <div className={styles.mobileToolbarRow}>
-          {columnsComponent}
-          {gapComponent}
-          {bordersComponent}
-          {addSectionComponent}
-          {resetStylingComponent}
-          {undoRedoComponent}
-         </div>
+            {lineHeightComponent}
+            {fontSizeComponent}
+            {fontFamilyComponent}
+            {fontColorComponent}
+            {marksComponent}
+          </div>
+          <div className={styles.mobileToolbarRow}>
+            {textAlignComponent}
+            {listsComponent}
+            {indentationComponent}
+            {backgroundColorComponent}
+            {highlightColorComponent}
+            {linksComponent}
+            {iconsComponent}
+          </div>
+          <div className={styles.mobileToolbarRow}>
+            {columnsComponent}
+            {gapComponent}
+            {bordersComponent}
+            {addSectionComponent}
+            {resetStylingComponent}
+            {undoRedoComponent}
+            <div>
+              {user?.id === resume?.userId ? (
+                <Save isMobile={isMobile} />
+              ) : (
+                <Copy isMobile={isMobile} />
+              )}
+              <Print handlePrint={handlePrint} />
+            </div>
+          </div>
         </div>
       </div>
-   )
+    )
   }
 
   return (

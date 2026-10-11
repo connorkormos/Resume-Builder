@@ -70,7 +70,7 @@ const Toolbar = ({ handlePrint }) => {
         )}
       <div className={styles.toolbarContent}>
         <TopBar handlePrint={handlePrint} />
-        <RichTextToolbar editor={editor} />
+        <RichTextToolbar editor={editor} handlePrint={handlePrint} />
       </div>
     </div>
         </>

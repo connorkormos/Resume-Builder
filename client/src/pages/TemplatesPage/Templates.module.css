@@ -24,6 +24,10 @@
   font-size: var(--font-size-main);
 
   z-index: var(--z-base);
+
+  button {
+    font-size: 50%;
+  }
 }
 
 
@@ -227,32 +231,6 @@
 /* } */
 
 
-@media (max-width: 768px) {
-  .templatesPageContentWrapper {
-    width: 90%;
-
-    .templatesPageTitle {
-      font-size: 2.5rem;
-    }
-
-    .resumeSearchForm {
-      flex: 1 0 auto;
-    }
-
-    .resumeSearchInput {}
-  }
-
-  .templatePreviewsGridWrapper {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-}
-
-@media (max-width: 90rem) {
-  .resumeSearchForm {
-    flex-basis: 100%;
-  }
-}
-
 .paginationContainer {
   display: flex;
   flex-direction: column;
@@ -260,10 +238,13 @@
   gap: 1rem;
   /* width: 100%; */
   width: max-content;
+  max-width: 100%;
   margin-top: 4rem;
 
+  font-size: 2rem;
+
   .currentPageInfoText {
-    font-size: 1rem;
+    font-size: 1.25rem;
     opacity: 0.85;
   }
 }
@@ -272,9 +253,6 @@
 .paginationWrapper {
   display: flex;
   justify-content: space-between;
-  /* display: grid; */
-  /* grid-auto-flow: column; */
-  /* grid-auto-columns: minmax(0, 1fr); */
   align-items: center;
   gap: 0.25rem;
   width: 100%;
@@ -282,8 +260,6 @@
 
   .pageNumberButton,
   .paginationEllipsis {
-    /* padding: 0.5rem 0.125rem; */
-    /* font-size: 0.875rem; */
     text-align: center;
   }
 
@@ -292,15 +268,12 @@
     width: fit-content;
     border: none;
     background: none;
-    /* border: var(--border-main); */
-    /* border-radius: var(--border-radius-main); */
-    /* background: var(--background-main); */
     color: inherit;
     cursor: pointer;
   }
 
   .pageNumberButton:hover {
-    background: rgba(255, 255, 255, 0.12);
+    font-weight: 600;
   }
 
   .pageNumberButton[aria-current="page"] {
@@ -336,6 +309,31 @@
   }
 }
 
-button {
-  font-size: 50%;
+
+
+
+@media (max-width: 768px) {
+  .templatesPageContentWrapper {
+    width: 90%;
+
+    .templatesPageTitle {
+      font-size: 2rem;
+    }
+
+    .resumeSearchForm {
+      flex: 1 0 auto;
+    }
+
+    .resumeSearchInput {}
+  }
+
+  .templatePreviewsGridWrapper {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 90rem) {
+  .resumeSearchForm {
+    flex-basis: 100%;
+  }
 }
