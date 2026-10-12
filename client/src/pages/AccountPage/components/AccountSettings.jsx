@@ -48,12 +48,16 @@ const AccountSettings = () => {
       setUserFormData({ ...userFormData, [field]: value });
    };
 
-   const submitUserAccountSettings = async (e) => {
-      e.preventDefault();
+   const updateUserAccountSettings = async () => {
       if (userFormData.firstName === user.firstName && userFormData.lastName === user.lastName && userFormData.email === user.email) {
          alert('All information is current.');
          return;
       }
+      setShowConfirmPasswordModal(true)
+   }
+
+   const submitUserAccountSettings = async (e) => {
+      e.preventDefault();
       if (!confirm('Are you sure you want to save all changes?')) {
          return;
       };
@@ -75,20 +79,15 @@ const AccountSettings = () => {
                {isMobile && (
                   <TbMenu2Filled
                      style={{ fontSize: '2.5rem' }}
-                     // className={styles.menuIcon}
-                     // style={{position: 'absolute', right: 0}}
                      onClick={() => setSideBarIsOpen(true)} />
                )}
-               {/* <p>Here you can update your account information, change your password, and manage other account settings.</p> */}
             </div>
             <form
                className={styles.accountSettingsForm}
-               // onSubmit={(e) => submitUserAccountSettings(e)}
                onSubmit={(e) => {
                   e.preventDefault();
-                  setShowConfirmPasswordModal(true)
-               }
-               }
+                  updateUserAccountSettings();
+               }}
             >
                <div className={styles.accountFormGroup}>
                   <label htmlFor="firstName">
@@ -154,10 +153,10 @@ const AccountSettings = () => {
                <span className={styles.accountTimeStampWrapper}>
                   <span>Account Updated:</span>
                   <span>
-                  {isMobile
-                     ? `${formatCompactDateTime(userFormData.updatedAt)}`
-                     : `${formatDateTime(userFormData.updatedAt)}`
-                  }
+                     {isMobile
+                        ? `${formatCompactDateTime(userFormData.updatedAt)}`
+                        : `${formatDateTime(userFormData.updatedAt)}`
+                     }
                   </span>
                </span>
                <div className={styles.accountSubmitButtonWrapper}>
@@ -168,15 +167,11 @@ const AccountSettings = () => {
                      Update Account
                   </button>
                </div>
-               {/* Future implementation: Password fields for changing password */}
             </form>
-            {/* Future implementation: Form for updating account information and changing password */}
             {isMobile && showConfirmPasswordModal && (
                <div className={styles.confirmPasswordModalContainer}>
                   <form className={`${styles.confirmPasswordModal}`} onSubmit={(e) => submitUserAccountSettings(e)}>
-                     {/* <div className={styles.accountFormGroup}> */}
                      <div className={styles.confirmPasswordFormGroup}>
-                        {/* Future implementation: Form for confirming password before making sensitive changes */}
                         <label htmlFor='currentPassword'>Confirm current password:</label>
                         <input
                            id='currentPassword'

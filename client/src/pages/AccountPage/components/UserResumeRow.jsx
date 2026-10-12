@@ -1,11 +1,10 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { setResumeId } from "@/store/resumeSlice";
 import {
-  getResumeFromApi,
   copyResumeToApi,
   deleteResumeFromApi,
 } from "@/services/resumeServices";
@@ -16,27 +15,15 @@ import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
 
 import styles from "./UserResumes.module.css";
 
-const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
+const UserResumeRow = ({ resumeId, resume, fetchResume, fetchUserResumeIds }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [resume, setResume] = useState(null);
-
   useEffect(() => {
-    const fetchResume = async () => {
-      const resumeData = await getResumeFromApi(resumeId);
-      if (resumeData) {
-        setResume(resumeData);
-      }
-      else {
-        console.error('Failed to fetch resume data for resumeId: ', resumeId);
-      }
-    };
-    fetchResume();
-  }, [resumeId]);
+    if (!resume) void fetchResume(resumeId);
+  }, [resumeId, resume, fetchResume]);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const user = useSelector((state) => state.user);
 
   const handleEditResume = () => {
     dispatch(setResumeId(resumeId));
@@ -50,7 +37,7 @@ const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
     if (!resumeIsDeleted) {
       return;
     }
-    fetchUserResumeIds(user.id);
+    await fetchUserResumeIds(true);
   };
 
   const handleCopyResume = async () => {
@@ -60,7 +47,7 @@ const UserResumeRow = ({ resumeId, fetchUserResumeIds }) => {
       alert("An error occured when copying your resume.");
       return;
     }
-    fetchUserResumeIds(user.id);
+    await fetchUserResumeIds(true);
   };
 
   if (!resume) {

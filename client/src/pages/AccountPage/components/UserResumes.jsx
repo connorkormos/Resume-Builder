@@ -1,64 +1,35 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useOutletContext } from 'react-router-dom';
 
-import { BASE_URL } from '@/config.js';
 import { TbMenu2Filled } from "react-icons/tb";
 
 import UserResumeRow from './UserResumeRow.jsx';
 
-// import styles from './Account.module.css';
-import { getUserResumesFromApi, getUserResumeIdsFromApi } from '@/services/userServices.js';
 
 import styles from './UserResumes.module.css';
 
 const UserResumes = () => {
    const isMobile = useMediaQuery("(max-width: 768px)");
-   const { setSideBarIsOpen } = useOutletContext();
-
-   const user = useSelector(state => state.user);
+   const { setSideBarIsOpen, resumeData, setResumeData, fetchUserResumeIds, fetchResume } = useOutletContext();
    const navigate = useNavigate();
+   const { ids, resumes, startIndex, error } = resumeData;
+   const userResumeIds = ids ?? [];
+   const setStartIndex = startIndex => setResumeData(previous => ({ ...previous, startIndex }));
 
-   const [userResumes, setUserResumes] = useState([]);
-   const [userResumeIds, setUserResumeIds] = useState([]);
-
-   const fetchUserResumes = useCallback(
-      async (userId) => {
-         const userData = await getUserResumesFromApi(userId);
-         if (!userData) {
-            return;
-         }
-         setUserResumes(userData.resumes);
-      }, [])
-
-   const fetchUserResumeIds = useCallback(
-      async (userId) => {
-         const userResumeIds = await getUserResumeIdsFromApi(userId);
-         if (!userResumeIds) {
-            return;
-         }
-         setUserResumeIds(userResumeIds);
-      }, [])
-
-   // useEffect(() => {
-   //    if (!user.id) return;
-   //    fetchUserResumes(user.id);
-   // }, [user.id, fetchUserResumes])
    useEffect(() => {
-      if (!user.id) return;
-      fetchUserResumeIds(user.id);
-   }, [user.id, fetchUserResumeIds])
+      if (ids === null) void fetchUserResumeIds();
+   }, [ids, fetchUserResumeIds]);
 
-
-
-   const [startIndex, setStartIndex] = useState(0);
    const currentPage = Math.floor(startIndex / 10);
    const endIndex = startIndex + 10;
    const pageCount = Math.ceil(userResumeIds.length / 10);
    const renderResumes = () => {
-      if (!userResumeIds || userResumeIds.length === 0) {
+      if (ids === null) {
+         return <p>{error ? 'Unable to load resumes.' : 'Loading resumes...'}</p>;
+      }
+      if (userResumeIds.length === 0) {
          return (
             <>
                <p>You have not created any resumes yet.</p>
@@ -69,10 +40,10 @@ const UserResumes = () => {
       // only map the first 10 resumes for performance reasons
       return userResumeIds.slice(startIndex, endIndex).map(resumeId => (
          // return userResumeIds.map(resumeId => (
-         <>
-            <UserResumeRow key={resumeId} resumeId={resumeId} fetchUserResumeIds={fetchUserResumeIds} />
+         <React.Fragment key={resumeId}>
+            <UserResumeRow resumeId={resumeId} resume={resumes[resumeId]} fetchResume={fetchResume} fetchUserResumeIds={fetchUserResumeIds} />
             <div className={styles.userResumeRowDivider}></div>
-         </>
+         </React.Fragment>
       ));
    }
 
@@ -127,7 +98,7 @@ const UserResumes = () => {
          </div>
          <div className={styles.footer}>
             <div className={styles.paginationWrapper}>
-               <p>Showing {startIndex + 1} - {Math.min(endIndex, userResumeIds.length)} of {userResumeIds.length} resumes</p>
+               <p>Showing {userResumeIds.length ? startIndex + 1 : 0} - {Math.min(endIndex, userResumeIds.length)} of {userResumeIds.length} resumes</p>
                <div className={styles.paginationButtonsWrapper}>
                   {pageNumbers}
 
