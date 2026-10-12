@@ -17,9 +17,6 @@ MAJOR BUGS:
 
 MEDIUM BUGS:
 
--Dragging padding is inconsistent
-   -Increasing padding top for sections can only being done via margin ruler
-
 -FontSizeOffset Appears to be restricted to round numbers (i.e. it can't be 1.5 as the offset)
 
 -Dragging Fields is Clunky/Buggy

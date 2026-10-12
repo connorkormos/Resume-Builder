@@ -17,7 +17,7 @@ export default function MarginRulerTop({
 }) {
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
-  const section = resume.sections.byId[resume.activeSectionIds[0]];
+  const section = resume.sections.byId[preview?.target === 'section' ? preview.id : resume.activeSectionIds[0]];
   const column = resume.columns.byId[section?.columnId];
   const padding = previewLayout(resume.layout, preview, "resume", null).padding;
   const columnPadding = previewLayout(

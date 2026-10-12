@@ -26,7 +26,7 @@
   z-index: var(--z-base);
 
   button {
-    font-size: 50%;
+    /* font-size: 50%; */
   }
 }
 
@@ -189,7 +189,6 @@
   border-radius: var(--border-radius-main);
   background: #0d6efd;
   color: white;
-  font-size: inherit;
   cursor: pointer;
   white-space: nowrap;
   box-sizing: border-box;

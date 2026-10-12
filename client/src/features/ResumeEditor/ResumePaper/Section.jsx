@@ -45,7 +45,7 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
   const paddingPreview = useContext(PaddingPreviewContext)?.preview;
   const sectionLayout = useMemo(() => previewLayout(section.layout, paddingPreview, 'section', section.id), [section.layout, section.id, paddingPreview]);
   const columnLayout = useMemo(() => previewLayout(column.layout, paddingPreview, 'column', column.id), [column.layout, column.id, paddingPreview]);
-  const { previewBottom, handleProps } = useSectionPaddingResize(section);
+  const { handleProps } = useSectionPaddingResize(section, column);
   useEffect(() => {
     if (!section) {
       console.error("Section component rendered without a valid section prop.");
@@ -148,9 +148,6 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
       style={{
         ...section.styling,
         ...sectionPadding,
-        ...(previewBottom !== null && {
-          paddingBottom: `${Math.max(0, previewBottom + parseRemValue(resumeLayout?.gap?.vertical))}rem`,
-        }),
         outlineColor: section.styling?.color,
         cursor: "all-scroll",
       }}

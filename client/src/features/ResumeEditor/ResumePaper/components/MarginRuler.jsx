@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import styles from './MarginRuler.module.css';
 import MarginRulerTop from './MarginRulerTop';
 import MarginRulerSide from './MarginRulerSide';
+import { PaddingPreviewContext } from '../PaddingPreviewContext';
 import { useDispatch, useSelector } from 'react-redux';
 import useMarginGeometry from '@/hooks/useMarginGeometry';
 import { clearActiveSectionIds, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
@@ -10,7 +11,9 @@ import { clearActiveSectionIds, setActiveEditorId, setActiveEditorSelection } fr
 const MarginRuler = ({ pageRef }) => {
 
    const dispatch = useDispatch();
-   const sectionId = useSelector(state => state.resume.present.activeSectionIds[0] ?? null);
+   const { preview } = useContext(PaddingPreviewContext);
+   const activeSectionId = useSelector(state => state.resume.present.activeSectionIds[0] ?? null);
+   const sectionId = preview?.target === 'section' ? preview.id : activeSectionId;
    const columnId = useSelector(state => state.resume.present.sections.byId[sectionId]?.columnId);
    // Share one measurement and observer set between both rulers.
    const geometry = useMarginGeometry(pageRef, columnId, sectionId);
@@ -18,17 +21,17 @@ const MarginRuler = ({ pageRef }) => {
    const [visibleMarginLabels, setVisibleMarginLabels] = useState(() => new Set());
    const marginLabelDisplayTimers = useRef(new Map());
 
-   const cancelHideMarginLabel = (id) => {
+   const cancelHideMarginLabel = useCallback((id) => {
       clearTimeout(marginLabelDisplayTimers.current.get(id));
       marginLabelDisplayTimers.current.delete(id);
-   };
+   }, []);
 
-   const showMarginLabel = (id) => {
+   const showMarginLabel = useCallback((id) => {
       cancelHideMarginLabel(id);
       setVisibleMarginLabels(previous => previous.has(id) ? previous : new Set(previous).add(id));
-   };
+   }, [cancelHideMarginLabel]);
 
-   const delayHideMarginLabel = (id) => {
+   const delayHideMarginLabel = useCallback((id) => {
       cancelHideMarginLabel(id);
       marginLabelDisplayTimers.current.set(id, setTimeout(() => {
          marginLabelDisplayTimers.current.delete(id);
@@ -38,12 +41,24 @@ const MarginRuler = ({ pageRef }) => {
             return next;
          });
       }, 1500));
-   };
+   }, [cancelHideMarginLabel]);
 
-   const flashLabel = (id) => {
+   const flashLabel = useCallback((id) => {
       showMarginLabel(id);
       delayHideMarginLabel(id);
-   };
+   }, [showMarginLabel, delayHideMarginLabel]);
+
+   // Keep the preview label visible even when the pointer pauses; linger on release.
+   const previewLabel = preview
+      ? `${preview.target === 'resume' ? 'resume' : preview.id}-${preview.side}`
+      : null;
+   const displayedMarginLabels = new Set(visibleMarginLabels);
+   if (previewLabel) displayedMarginLabels.add(previewLabel);
+   useEffect(() => {
+      return () => {
+         if (previewLabel) flashLabel(previewLabel);
+      };
+   }, [previewLabel, flashLabel]);
 
    useEffect(() => {
       const timers = marginLabelDisplayTimers.current;
@@ -102,7 +117,7 @@ const MarginRuler = ({ pageRef }) => {
          onClick={(e) => handleEditorBlur(e)}
       >
          <MarginRulerTop
-            visibleMarginLabels={visibleMarginLabels}
+            visibleMarginLabels={displayedMarginLabels}
             showMarginLabel={showMarginLabel}
             delayHideMarginLabel={delayHideMarginLabel}
             flashLabel={flashLabel}
@@ -111,7 +126,7 @@ const MarginRuler = ({ pageRef }) => {
             renderMarginRuler={renderMarginRuler}
          />
          <MarginRulerSide
-            visibleMarginLabels={visibleMarginLabels}
+            visibleMarginLabels={displayedMarginLabels}
             showMarginLabel={showMarginLabel}
             delayHideMarginLabel={delayHideMarginLabel}
             flashLabel={flashLabel}

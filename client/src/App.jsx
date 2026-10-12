@@ -15,7 +15,7 @@ import AccountPage from "./pages/AccountPage/AccountPage";
 import ResumeEditorPage from "./pages/ResumeEditorPage/ResumeEditorPage";
 import UserResumes from "./pages/AccountPage/components/UserResumes.jsx";
 import AccountSettings from "./pages/AccountPage/components/AccountSettings.jsx";
-import Templates from "./pages/TemplatesPage/Templates";
+import Templates from "./pages/SearchPage/Search";
 
 const App = () => {
   const dispatch = useDispatch();

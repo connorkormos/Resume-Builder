@@ -1,46 +1,63 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
+import { PaddingPreviewContext } from "./PaddingPreviewContext";
 
-export default function useSectionPaddingResize(section) {
+export default function useSectionPaddingResize(section, column) {
   const dispatch = useDispatch();
   const verticalGap = useSelector((state) => state.resume.present.layout.gap?.vertical);
-  const minimumBottom = -parseRemValue(verticalGap);
+  const activeIds = useSelector((state) => state.resume.present.activeSectionIds);
+  const nextId = column.sectionIds[column.sectionIds.indexOf(section.id) + 1];
+  const nextSection = useSelector((state) => state.resume.present.sections.byId[nextId]);
+  const lowerIsSelected = !!nextSection && activeIds.length === 1 && activeIds[0] === nextId;
+  const minimumPadding = -parseRemValue(verticalGap);
+  const { setPreview } = useContext(PaddingPreviewContext);
   const dragRef = useRef(null);
-  const [previewBottom, setPreviewBottom] = useState(null);
 
   useEffect(() => () => {
+    if (dragRef.current) setPreview(null);
     dragRef.current = null;
-  }, []);
+  }, [setPreview]);
 
-  const commit = (bottom) => dispatch(updateSection({
-    id: section.id,
-    changes: { layout: { padding: { bottom: `${bottom}rem` } } },
-  }));
-
-  const valueAtPointer = (event, drag) => Math.max(
-    minimumBottom,
-    drag.startBottom + (event.clientY - drag.startY) / drag.pixelsPerRem,
+  // Capture selection and effective padding once, before the drag starts.
+  const startValues = () => ({
+    id: lowerIsSelected ? nextId : section.id,
+    side: lowerIsSelected ? 'top' : 'bottom',
+    direction: lowerIsSelected ? -1 : 1,
+    startValue: Math.max(minimumPadding, parseRemValue(lowerIsSelected
+      ? nextSection.layout?.padding?.top
+      : section.layout?.padding?.bottom)),
+    minimumPadding,
+  });
+  const valueAtDelta = (delta, drag) => Math.max(
+    drag.minimumPadding, drag.startValue + drag.direction * delta,
   );
-
+  const valueAtPointer = (event, drag) => valueAtDelta(
+    (event.clientY - drag.startY) / drag.pixelsPerRem, drag,
+  );
+  const commit = (value, drag) => {
+    if (value === drag.startValue) return;
+    dispatch(updateSection({
+      id: drag.id,
+      changes: { layout: { padding: { [drag.side]: `${value}rem` } } },
+    }));
+  };
   const finish = (event, canceled = false) => {
     const drag = dragRef.current;
     if (!drag || event.pointerId !== drag.pointerId) return;
     dragRef.current = null;
-    if (!canceled) {
-      const bottom = valueAtPointer(event, drag);
-      if (bottom !== drag.startBottom) commit(bottom);
-    }
-    setPreviewBottom(null);
+    if (!canceled) commit(valueAtPointer(event, drag), drag);
+    setPreview(null);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
   };
 
   return {
-    previewBottom,
     handleProps: {
+      "aria-label": lowerIsSelected ? "Adjust lower section top padding" : "Adjust section bottom padding",
+      title: lowerIsSelected ? "Drag to adjust top padding, or use arrow keys" : "Drag to adjust bottom padding, or use arrow keys",
       onClick: (event) => event.stopPropagation(),
       onPointerDown: (event) => {
         event.stopPropagation();
@@ -52,9 +69,9 @@ export default function useSectionPaddingResize(section) {
         const remSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
         if (!(scale > 0) || !(remSize > 0)) return;
         dragRef.current = {
+          ...startValues(),
           pointerId: event.pointerId,
           startY: event.clientY,
-          startBottom: parseRemValue(section.layout?.padding?.bottom),
           pixelsPerRem: scale * remSize,
         };
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -62,7 +79,9 @@ export default function useSectionPaddingResize(section) {
       onPointerMove: (event) => {
         const drag = dragRef.current;
         if (!drag || event.pointerId !== drag.pointerId) return;
-        setPreviewBottom(valueAtPointer(event, drag));
+        setPreview({
+          target: 'section', id: drag.id, side: drag.side, value: valueAtPointer(event, drag),
+        });
       },
       onPointerUp: (event) => finish(event),
       onPointerCancel: (event) => finish(event, true),
@@ -72,9 +91,9 @@ export default function useSectionPaddingResize(section) {
         if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
         event.preventDefault();
         if (dragRef.current) return;
-        const current = parseRemValue(section.layout?.padding?.bottom);
-        const bottom = Math.max(minimumBottom, Math.round((current + (event.key === "ArrowDown" ? 0.1 : -0.1)) * 1000) / 1000);
-        if (bottom !== current) commit(bottom);
+        const drag = startValues();
+        const delta = event.key === "ArrowDown" ? 0.1 : -0.1;
+        commit(Math.max(drag.minimumPadding, Math.round(valueAtDelta(delta, drag) * 1000) / 1000), drag);
       },
     },
   };
