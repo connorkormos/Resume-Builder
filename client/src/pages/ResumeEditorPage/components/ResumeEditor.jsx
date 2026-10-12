@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
 
-import { toggleAllSectionIds, setResume } from '@/store/resumeSlice.js';
+import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
 import Toolbar from '@/features/ResumeEditor/EditorToolbar/Toolbar.jsx';
 import Outline from '@/features/ResumeEditor/EditorOutline/Outline.jsx';
@@ -122,9 +122,17 @@ const ResumeEditor = () => {
       }, 500);
    };
 
+   const handleBackgroundClick = (event) => {
+      // Only clicks directly on the page background, never its child controls.
+      if (event.target !== event.currentTarget) return;
+
+      dispatch(setActiveEditorId(null));
+      dispatch(setActiveSectionId(null));
+   };
+
    return (
       // <div className={styles.resumeEditorContainer}>
-      <div className={styles.resumeEditorContainer}>
+      <div className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          <Toolbar handlePrint={handlePrint} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>

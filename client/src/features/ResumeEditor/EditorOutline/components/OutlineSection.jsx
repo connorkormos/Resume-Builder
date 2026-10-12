@@ -269,7 +269,7 @@ const OutlineSection = ({
                   className={styles.deleteButton}
                   onClick={() => handleDeleteSubsection(subId, subIndex)}
                 >
-                  Delete {sectionTitle} Subsection
+                  Delete Subsection
                 </button>
               </div>
             )}
@@ -278,9 +278,12 @@ const OutlineSection = ({
         );
       })}
 
-      <button className={styles.addButton} onClick={handleAddSubsection}>
-        + Add {section.label} Subsection
+      <div style={{width: '100%', display: 'flex', justifyContent: 'center', marginLeft: '-2.5%'}}>
+
+      <button className={styles.addButton} style={{margin: 'auto'}} onClick={handleAddSubsection}>
+        + Add Subsection
       </button>
+      </div>
     </div>
   );
 };
