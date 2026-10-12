@@ -17,8 +17,7 @@ const PaperPadding = () => {
       const paddingValueAdjustment = Number(value);
 
       dispatch(updateResume({
-         key: 'layout',
-         changes: {
+         layout: {
             padding: {
                ...padding,
                [name]: `${(currentPaddingValue + paddingValueAdjustment).toFixed(1)}rem`

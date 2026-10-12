@@ -53,7 +53,6 @@ const Outline = () => {
           dragItem={dragItem}
           setDragItem={setDragItem}
         />
-        {/* <StartNewRow fieldId={fieldId} /> */}
       </React.Fragment>
     );
   };

@@ -172,7 +172,7 @@ const OutlineSection = ({
     // Swap positions
     dispatch(
       updateSubsection({
-        subsectionId: currentSubsection.id,
+        id: currentSubsection.id,
         changes: {
           position: subsectionToSwapWith.position,
         },
@@ -181,7 +181,7 @@ const OutlineSection = ({
 
     dispatch(
       updateSubsection({
-        subsectionId: subsectionToSwapWith.id,
+        id: subsectionToSwapWith.id,
         changes: {
           position: currentSubsection.position,
         },

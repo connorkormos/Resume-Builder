@@ -78,8 +78,7 @@ export default function ResetStyling() {
       if (resetOption === "resumeMargins") {
         dispatchReset(
           updateResume({
-            key: "layout",
-            changes: {
+            layout: {
               padding: { ...initialState.layout.padding },
             },
           }),
@@ -88,8 +87,7 @@ export default function ResetStyling() {
       if (resetOption === "columnSpacing") {
         dispatchReset(
           updateResume({
-            key: "layout",
-            changes: {
+            layout: {
               gap: {
                 horizontal: initialState.layout.gap.horizontal,
               },
@@ -132,8 +130,7 @@ export default function ResetStyling() {
       if (resetOption === "sectionSpacing") {
         dispatchReset(
           updateResume({
-            key: "layout",
-            changes: {
+            layout: {
               gap: {
                 vertical: initialState.layout.gap.vertical,
               },
@@ -188,8 +185,7 @@ export default function ResetStyling() {
         if (resetOption !== "highlightColor") {
           dispatchReset(
             updateResume({
-              key: "styling",
-              changes: {
+              styling: {
                 [resetOption]: initialResumeStyling[resetOption],
               },
             }),
@@ -225,7 +221,7 @@ export default function ResetStyling() {
           reduxResume.subsections.allIds.forEach((subsectionId) => {
             dispatchReset(
               updateSubsection({
-                subsectionId: subsectionId,
+                id: subsectionId,
                 changes: {
                   styling: stylingChanges,
                 },

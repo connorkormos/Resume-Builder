@@ -57,8 +57,7 @@ const TopBar = ({ handlePrint }) => {
     setResumeTitle(value);
     dispatch(
       updateResume({
-        key: "title",
-        changes: value,
+        title: value,
       }),
     );
   };

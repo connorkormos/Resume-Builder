@@ -40,8 +40,7 @@ export default function MarginIndicator({
     dispatch(
       target === "resume"
         ? updateResume({
-          key: "layout",
-          changes: { padding: { ...resumePadding, ...padding } },
+          layout: { padding: { ...resumePadding, ...padding } },
         })
         : (target === "column" ? updateColumn : updateSection)({
           id,

@@ -52,8 +52,7 @@ const FontFamily = () => {
     );
     dispatch(
       updateResume({
-        key: "styling",
-        changes: {
+        styling: {
           fontFamily,
         },
       }),

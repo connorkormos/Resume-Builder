@@ -25,12 +25,8 @@ const Gap = () => {
     }
     dispatch(
       updateResume({
-        key: "layout",
-        changes: {
+        layout: {
           gap: {
-            // horizontal: '1rem',
-            // vertical: '0.5rem'
-            ...resumeGap,
             [gapType]: updatedGap,
           },
         },

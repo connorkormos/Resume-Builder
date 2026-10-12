@@ -37,8 +37,7 @@ const FontColor = ({ editor, selection, context, activeSectionIds }) => {
          }
       } else {
          dispatch(updateResume({
-            key: 'styling',
-            changes: {
+            styling: {
                color: newFontColor
             }
          }))

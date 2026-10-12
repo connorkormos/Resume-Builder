@@ -45,8 +45,7 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
     } else {
       dispatch(
         updateResume({
-          key: "styling",
-          changes: {
+          styling: {
             textAlign: alignment,
           },
         }),

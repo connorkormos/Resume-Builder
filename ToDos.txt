@@ -2,14 +2,7 @@
    BUGS
 !--------!
 
-QUICK BUGS:
-
--Nav Buttons on Mobile move around when clicked in not perfect spot.
-   -Should be fixed, need to verify after deploy
-
 MAJOR BUGS:
-
--Links don't work on PDF, even when saved on desktop
 
 -Printing/Downloading on Mobile is totally Non Functional
    -Scale on Desktop also messes with it, but need to investigate if that's really an issue on my end or the user's end

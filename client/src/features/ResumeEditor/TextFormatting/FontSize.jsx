@@ -150,8 +150,7 @@ const FontSize = ({
       // Case 3: Resume level (no editor, no section)
       if (!editor && !sectionIdToUse) {
          dispatch(updateResume({
-            key: 'styling',
-            changes: {
+            styling: {
                fontSize: `${targetFontSize}px`
             }
          }));

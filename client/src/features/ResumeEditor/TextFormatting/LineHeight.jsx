@@ -184,8 +184,7 @@ const LineHeight = ({
     if (!editor && !sectionIdToUse) {
       dispatch(
         updateResume({
-          key: "styling",
-          changes: {
+          styling: {
             lineHeight: targetLineHeight,
           },
         }),

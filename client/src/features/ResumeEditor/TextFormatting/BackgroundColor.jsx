@@ -23,8 +23,7 @@ const BackgroundColor = ({activeSectionId, activeSectionIds}) => {
          }
       } else {
          dispatch(updateResume({
-            key: 'styling',
-            changes: {
+            styling: {
                backgroundColor: color
             }
          }))

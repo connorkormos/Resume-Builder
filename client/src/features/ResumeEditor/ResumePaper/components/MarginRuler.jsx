@@ -6,7 +6,7 @@ import MarginRulerSide from './MarginRulerSide';
 import { PaddingPreviewContext } from '../PaddingPreviewContext';
 import { useDispatch, useSelector } from 'react-redux';
 import useMarginGeometry from '@/hooks/useMarginGeometry';
-import { clearActiveSectionIds, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
+import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
 
 const MarginRuler = ({ pageRef }) => {
 
@@ -108,7 +108,7 @@ const MarginRuler = ({ pageRef }) => {
       if (preventBlur) return;
       dispatch(setActiveEditorId(null));
       dispatch(setActiveEditorSelection(null))
-      dispatch(clearActiveSectionIds())
+      dispatch(setActiveSectionId(null))
    }
 
    return (

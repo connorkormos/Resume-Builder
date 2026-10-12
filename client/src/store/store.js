@@ -16,7 +16,6 @@ export const store = configureStore({
             "resume/setActiveSectionId",
             "resume/setActiveSectionIds",
             "resume/toggleAllSectionIds",
-            "resume/clearActiveSectionIds",
             "resume/setActiveEditorId",
             "resume/setActiveEditorSelection",
             "resume/setResumePrintRef",

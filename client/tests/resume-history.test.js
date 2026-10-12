@@ -30,7 +30,7 @@ const fixture = () => ({
 });
 const start = () => reducer(undefined, actions.loadResume(fixture()));
 const document = state => actions.selectResumeDocument({ resume: state });
-const title = text => actions.updateResume({ key: 'title', changes: text });
+const title = text => actions.updateResume({ title: text });
 const color = backgroundColor => actions.updateSection({ id: 's1', changes: { styling: { backgroundColor } } });
 const text = newText => actions.updateFieldValue({ fieldId: 'f1', newValue: value(newText) });
 const undo = state => reducer(state, actions.undoResume());
@@ -193,7 +193,7 @@ test('array growth, shrinking, reorder, object-key removal, and type changes rou
    let state = start();
    for (const sample of values) {
       const before = state;
-      state = reducer(state, actions.updateResume({ key: 'styling', changes: { testData: sample } }));
+      state = reducer(state, actions.updateResume({ styling: { testData: sample } }));
       assert.deepEqual(document(undo(state)), document(before));
       assert.deepEqual(document(redo(undo(state))), document(state));
    }
@@ -292,7 +292,7 @@ test('selectors, legacy undo action, and history clearing work with a real Redux
 test('generic updates cannot overwrite the history bookkeeping', () => {
    const state = start();
    for (const key of ['history', 'actionStack', 'id', 'activeEditorId']) {
-      assert.throws(() => reducer(state, actions.updateResume({ key, changes: {} })), TypeError);
+      assert.throws(() => reducer(state, actions.updateResume({ [key]: {} })), TypeError);
    }
 });
 
@@ -342,8 +342,8 @@ test('deterministic nested JSON edits survive serialized patch replay and repeat
    for (let index = 0; index < 100; index += 1) {
       const before = document(state);
       const group = `sample-${index}`;
-      state = reducer(state, grouped(actions.updateResume({ key: 'styling', changes: { generated: sample(3) } }), group));
-      state = reducer(state, grouped(actions.updateResume({ key: 'styling', changes: { generated: sample(3) } }), group));
+      state = reducer(state, grouped(actions.updateResume({ styling: { generated: sample(3) } }), group));
+      state = reducer(state, grouped(actions.updateResume({ styling: { generated: sample(3) } }), group));
       // Equivalent values can produce a net-zero group: nothing to round-trip.
       if (state.history.group !== group) continue;
       const after = document(state);

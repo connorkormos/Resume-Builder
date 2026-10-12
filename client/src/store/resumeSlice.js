@@ -2,7 +2,8 @@ import { normalizeSlateValue } from "../utils/normalizeSlateValue.js";
 import { normalizeSectionLayout } from "../utils/normalizeSectionLayout.js";
 import { createSlice } from '@reduxjs/toolkit';
 
-// Insert only the new subsection and its fields; keep existing local edits.
+import { mergeDeep } from "./helpers/mergeDeep.js";
+
 const insertSubsection = (state, subsectionData) => {
    const { fields = [], ...subsection } = subsectionData;
    const sortedFields = [...fields].sort(
@@ -186,7 +187,6 @@ export const initialState = {
    activeEditorId: null,
    activeEditorSelection: null,
    resumeRef: null,
-   // actionStack: [],
 };
 
 const resumeSlice = createSlice({
@@ -219,23 +219,9 @@ const resumeSlice = createSlice({
          state.resumeRef = action.payload;
       },
 
-      // revertToPreviousState(state) {
-      //    console.log("Attempting to revert to previous state");
-      //    if (state.actionStack.length > 0) {
-      //       const previousState = state.actionStack.pop();
-      //       console.log("Previous state retrieved from action stack: ", previousState);
-      //       Object.assign(state, previousState);
-      //       // state = previousState;
-      //    }
-      // },
-
       // * ------------ V
       // * ADD TO STATE V
       // * ------------ V
-
-      // addColumn(state) {
-      //   createDefaultColumn(state);
-      // },
 
       addSection(state, action) {
          const { sectionData } = action.payload;
@@ -258,27 +244,10 @@ const resumeSlice = createSlice({
          }
       },
 
-      // addSubsection(state, action) {
-      //   const { sectionId } = action.payload;
-      //   const section = state.sections.byId[sectionId];
-      //   if (!section) {
-      //     console.error(`Cannot add subsection.  No section with ID of ${sectionId} found.`);
-      //     return;
-      //   }
-      //   const subsection = createDefaultSubsection(state, section.type, sectionId);
-      //   createDefaultField(state, section.type, subsection.id);
-      // },
       addSubsection(state, action) {
          const { subsectionData } = action.payload;
          insertSubsection(state, subsectionData);
       },
-      // addSubsection(state, action) {
-      //    const { subsectionData } = action.payload;
-      //    console.log("Adding subsection with data: ", subsectionData);
-      //    state.subsections.byId[subsectionData.id] = subsectionData;
-      //    state.subsections.allIds.push(subsectionData.id);
-      //    state.sections.byId[subsectionData.sectionId].subsectionIds.push(subsectionData.id);
-      // },
 
       addField(state, action) {
          const { fieldData } = action.payload;
@@ -287,15 +256,6 @@ const resumeSlice = createSlice({
          state.fields.allIds.push(fieldData.id);
          state.subsections.byId[fieldData.subsectionId].fieldIds.push(fieldData.id);
       },
-      // addField(state, action) {
-      //   const { subsectionId } = action.payload;
-      //   const subsection = state.subsections.byId[subsectionId];
-      //   if (!subsection) {
-      //     console.error(`Cannot add field.  No subsection with ID of ${subsectionId} found.`);
-      //     return;
-      //   }
-      //   createDefaultField(state, subsection.type, subsection.id);
-      // },
 
       // * ----------------- V
       // * DELETE FROM STATE V
@@ -326,34 +286,39 @@ const resumeSlice = createSlice({
       // * UPDATE STATE V
       // * ------------ V
 
+      // updateResume(state, action) {
+      //    const { key, changes } = action.payload;
+
+      //    if (key === "title") {
+      //       state.title = changes;
+      //       return;
+      //    }
+      //    if (key === "layout") {
+      //       state.layout = {
+      //          ...state.layout,
+      //          ...changes,
+      //          gap: { ...state.layout.gap, ...changes.gap },
+      //       };
+      //       return;
+      //    }
+      //    if (key === "styling") {
+      //       state.styling = {
+      //          ...state.styling,
+      //          ...changes,
+      //       };
+      //       return;
+      //    }
+
+      //    else state[key] = {
+      //       ...state[key],
+      //       ...changes,
+      //    };
+      // },
+
       updateResume(state, action) {
-         const { key, changes } = action.payload;
-
-         if (key === "title") {
-            state.title = changes;
-            return;
-         }
-         if (key === "layout") {
-            state.layout = {
-               ...state.layout,
-               ...changes,
-               gap: { ...state.layout.gap, ...changes.gap },
-            };
-            return;
-         }
-         if (key === "styling") {
-            state.styling = {
-               ...state.styling,
-               ...changes,
-            };
-            return;
-         }
-
-         else state[key] = {
-            ...state[key],
-            ...changes,
-         };
+         mergeDeep(state, action.payload);
       },
+
       updateColumn(state, action) {
          const { id, changes } = action.payload;
 
@@ -397,6 +362,7 @@ const resumeSlice = createSlice({
             layout: column.layout,
          });
       },
+
       resizeColumnPair(state, action) {
          const { leftColumnId, rightColumnId, leftWidth, rightWidth } = action.payload;
          const leftColumn = state.columns.byId[leftColumnId];
@@ -438,7 +404,6 @@ const resumeSlice = createSlice({
 
             if (oldColumn) {
                oldColumn.sectionIds = oldColumn.sectionIds.filter(
-                  // (id) => id !== id
                   (columnSectionId) => columnSectionId !== id
 
                );
@@ -480,10 +445,10 @@ const resumeSlice = createSlice({
       },
 
       updateSubsection(state, action) {
-         const { subsectionId, changes } = action.payload;
-         const subsection = state.subsections.byId[subsectionId];
+         const { id, changes } = action.payload;
+         const subsection = state.subsections.byId[id];
          if (!subsection) {
-            console.error(`Cannot update subsection. ID of ${subsectionId} not found.`);
+            console.error(`Cannot update subsection. ID of ${id} not found.`);
             return;
          }
          const section = state.sections.byId[subsection.sectionId];
@@ -509,26 +474,6 @@ const resumeSlice = createSlice({
                subsection[key] = changes[key];
             }
          }
-
-         // for (const key in changes) {
-         //   if (key === "styling") {
-         //     subsection.styling = { ...subsection.styling, ...changes.styling };
-         //     normalizedSubsection.styling = { ...normalizedSubsection.styling, ...changes.styling };
-         //   } else {
-         //     subsection[key] = changes[key];
-         //     normalizedSubsection[key] = changes[key];
-         //   }
-         // }
-      },
-
-      updateSubsectionFlexDirection(state, action) {
-         const { id, flexDirection } = action.payload;
-         const subsection = state.subsections.byId[id];
-         if (!subsection) {
-            console.error(`Cannot update subsection. ID of ${id} not found.`);
-            return;
-         }
-         subsection.layout.flexDirection = flexDirection;
       },
 
       updateField(state, action) {
@@ -546,13 +491,13 @@ const resumeSlice = createSlice({
             } else if (key === "layout") {
                field.layout = { ...field.layout, ...changes.layout };
             }
-             else {
+            else {
                alert('This reducer only handles styling changes for now.');
                return;
-               // field[key] = changes[key];
             }
          }
       },
+
       updateFieldValue(state, action) {
          const { fieldId, newValue } = action.payload;
          const field = state.fields.byId[fieldId];
@@ -625,6 +570,12 @@ const resumeSlice = createSlice({
          }
       },
 
+      // Exclusive select: replaces the whole active-section selection with a single id
+      setActiveSectionId(state, action) {
+         const id = action.payload;
+         state.activeSectionIds = id ? [id] : [];
+      },
+
       setActiveSectionIds(state, action) {
          const id = action.payload;
          const currentActiveSectionIds = state.activeSectionIds;
@@ -636,16 +587,6 @@ const resumeSlice = createSlice({
          } else {
             state.activeSectionIds.push(id);
          }
-      },
-
-      clearActiveSectionIds(state, action) {
-         state.activeSectionIds = [];
-      },
-
-      // Exclusive select: replaces the whole active-section selection with a single id
-      setActiveSectionId(state, action) {
-         const id = action.payload;
-         state.activeSectionIds = id ? [id] : [];
       },
 
       setActiveEditorId(state, action) {
@@ -663,8 +604,7 @@ const resumeSlice = createSlice({
 
       dndReorderSections(state, action) {
          const { dndKitDict } = action.payload;
-         // const beforeState = JSON.parse(JSON.stringify(state));
-         // console.log('BEFORE STATE', beforeState)
+
          const columnIds = Object.keys(dndKitDict);
          columnIds.forEach(columnId => {
             const column = state.columns.byId[columnId];
@@ -679,11 +619,6 @@ const resumeSlice = createSlice({
                });
             }
          });
-         // const afterState = JSON.parse(JSON.stringify(state));
-         // console.log('AFTER STATE', afterState);
-
-         // state.actionStack.push(beforeState)
-         
       },
 
       dndReorderSubsections(state, action) {
@@ -766,95 +701,6 @@ const resumeSlice = createSlice({
                field.layout.grid.fillRow = layoutByPosition[index].fillRow;
             }
          });
-      },
-
-      newReorderSections(state, action) {
-         const { sectionId, dragTarget } = action.payload;
-         const sectionBeingDragged = state.sections.byId[sectionId];
-         if (!sectionBeingDragged || !dragTarget?.type || !dragTarget?.id) {
-            return;
-         }
-         console.log(sectionId, dragTarget);
-         const affectedColumns = []
-         if (dragTarget.type === 'column') {
-            const fromColumn = state.columns.byId[sectionBeingDragged.columnId];
-            fromColumn.sectionIds = fromColumn.sectionIds.filter((id) => id !== sectionId);
-            affectedColumns.push(fromColumn);
-
-            const targetColumn = state.columns.byId[dragTarget.id];
-            targetColumn.sectionIds.push(sectionId);
-            affectedColumns.push(targetColumn);
-
-            affectedColumns.forEach(column => {
-               column.sectionIds.map((sectionId, index) => {
-                  const section = state.sections.byId[sectionId];
-                  if (section) {
-                     section.position = index;
-                     section.columnId = column.id;
-                  }
-               });
-            });
-
-            sectionBeingDragged.columnId = targetColumn.id;
-         }
-         else if (dragTarget.type === 'section') {
-            const targetSection = state.sections.byId[dragTarget.id];
-            if (!targetSection) {
-               return;
-            }
-            if (targetSection.columnId === sectionBeingDragged.columnId) {
-               const column = state.columns.byId[sectionBeingDragged.columnId];
-               const fromIndex = column.sectionIds.indexOf(sectionId);
-               const toIndex = column.sectionIds.indexOf(targetSection.id);
-               if (fromIndex === -1 || toIndex === -1) {
-                  return;
-               }
-               column.sectionIds.splice(fromIndex, 1);
-               column.sectionIds.splice(toIndex, 0, sectionId);
-               column.sectionIds.forEach((id, index) => {
-                  const section = state.sections.byId[id];
-                  if (section) {
-                     section.position = index;
-                  }
-               });
-            } else if (targetSection.columnId !== sectionBeingDragged.columnId) {
-               const fromColumn = state.columns.byId[sectionBeingDragged.columnId];
-               const toColumn = state.columns.byId[targetSection.columnId];
-               if (!fromColumn || !toColumn) {
-                  return;
-               }
-               const targetIndex = toColumn.sectionIds.indexOf(targetSection.id);
-               if (targetIndex === -1) {
-                  return;
-               }
-               fromColumn.sectionIds = fromColumn.sectionIds.filter(id => id !== sectionId);
-               toColumn.sectionIds = toColumn.sectionIds.filter(id => id !== sectionId);
-               toColumn.sectionIds.splice(targetIndex, 0, sectionId);
-               affectedColumns.push(fromColumn);
-               affectedColumns.push(toColumn);
-               affectedColumns.forEach(column => {
-                  column.sectionIds.forEach((sectionId, index) => {
-                     const section = state.sections.byId[sectionId];
-                     if (section) {
-                        section.position = index;
-                        section.columnId = column.id;
-                     }
-                  });
-               });
-            }
-         }
-         console.log(state.sections.allIds)
-
-         const updatedSectionIdsArr = [];
-         state.columns.allIds.forEach(columnId => {
-            const column = state.columns.byId[columnId];
-            column.sectionIds.forEach(sectionId => {
-               updatedSectionIdsArr.push(sectionId);
-            });
-         })
-         state.sections.allIds = updatedSectionIdsArr;
-         console.log('still running')
-         console.log(state.sections.allIds)
       },
 
       reorderSections(state, action) {
@@ -996,7 +842,6 @@ export const {
    setActiveSectionId,
    setActiveSectionIds,
    toggleAllSectionIds,
-   clearActiveSectionIds,
    setActiveEditorId,
    setActiveEditorSelection,
 
@@ -1005,7 +850,6 @@ export const {
    updateResume,
    setResumePrintRef,
 
-   // addColumn,
    deleteColumn,
    updateColumn,
    resizeColumnPair,
@@ -1014,7 +858,6 @@ export const {
    updateSection,
    deleteSection,
    reorderSections,
-   newReorderSections,
    dndReorderSections,
    dndReorderSubsections,
    dndReorderFields,
@@ -1032,8 +875,6 @@ export const {
    updateFieldLayout,
    swapFieldPositions,
    reorderFields,
-
-   // revertToPreviousState
 
 } = resumeSlice.actions;
 
