@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { Node } from "slate";
 import { getTrimmedNodeString } from "@/helpers/getNodeString";
+import { HiOutlineArrowUp, HiOutlineArrowDown } from "react-icons/hi";
 
 import {
   deleteField,
@@ -131,7 +132,8 @@ const FieldRow = ({
             className={styles.upOrDownArrow}
             onClick={() => moveFieldUpOrDown("up")}
           >
-            ▲
+            <HiOutlineArrowUp />
+            {/* ▲ */}
           </span>
         )}
         {fieldIndex !== subsection.fieldIds.length - 1 && (
@@ -139,7 +141,8 @@ const FieldRow = ({
             className={styles.upOrDownArrow}
             onClick={() => moveFieldUpOrDown("down")}
           >
-            ▼
+            <HiOutlineArrowDown />
+            {/* ▼ */}
           </span>
         )}
       </div>

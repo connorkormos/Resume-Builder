@@ -12,7 +12,9 @@ export default function Print({ handlePrint }) {
       className={`buttonMain ${styles.printButton}`}
       onClick={handlePrint}
     >
-      {isMobile ? <PiPrinterBold style={{scale: 1.2}} /> : 'Print'}
+      {/* {isMobile ?  */}
+      <PiPrinterBold style={{scale: 1.2}} />
+       {/* : 'Print'} */}
     </button>
   );
 }

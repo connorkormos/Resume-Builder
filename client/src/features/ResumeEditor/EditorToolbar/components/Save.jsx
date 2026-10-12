@@ -21,7 +21,9 @@ export default function Save({ isMobile }) {
       className={`buttonMain ${styles.saveCopyButton}`}
       onClick={saveResume}
     >
-      {isMobile ? <PiFloppyDiskFill style={{scale: 1.2}} /> : 'Save'}
+      {/* {isMobile ?  */}
+      <PiFloppyDiskFill style={{scale: 1.2}} />
+      {/* : 'Save'} */}
     </button>
   );
 }

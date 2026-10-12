@@ -3,6 +3,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 import { useSelector } from "react-redux";
 import { addField, addSubsection } from "@/store/resumeSlice";
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
+import { HiOutlineArrowUp, HiOutlineArrowDown } from "react-icons/hi";
 
 import {
   updateSubsection,
@@ -217,7 +219,8 @@ const OutlineSection = ({
                       moveSubsectionUpOrDown("up", subId, subIndex)
                     }
                   >
-                    ▲
+                    {/* ▲ */}
+                    <HiOutlineArrowUp style={{scale: 0.75}} />
                   </span>
                 )}
                 {subIndex !== subsections.allIds.length - 1 && (
@@ -227,7 +230,8 @@ const OutlineSection = ({
                       moveSubsectionUpOrDown("down", subId, subIndex)
                     }
                   >
-                    ▼
+                    {/* ▼ */}
+                    <HiOutlineArrowDown style={{scale: 0.75}} />
                   </span>
                 )}
               </div>
@@ -243,7 +247,9 @@ const OutlineSection = ({
                   toggleSubsection(subId);
                 }}
               >
-                {/* {collapsedSubsections[subId] ? "▼" : "▲"} */}▼
+                {/* {collapsedSubsections[subId] ? "▼" : "▲"} */}
+                {/* ▼ */}
+                <MdExpandMore style={{scale: 1.25}} />
               </button>
             </div>
 

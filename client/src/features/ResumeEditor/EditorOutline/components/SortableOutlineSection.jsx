@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import { deleteSectionFromApi } from "@/services/resumeServices";
 import { deleteSection } from "@/store/resumeSlice.js";
 
+import { MdExpandMore, MdExpandLess } from "react-icons/md";
+
 import styles from "../Outline.module.css";
 
 const SortableOutlineSection = ({
@@ -64,7 +66,10 @@ const SortableOutlineSection = ({
           className={styles.collapseButton}
           onClick={() => toggleSection(sectionId)}
         >
-          ▼
+          {collapsedSections[sectionId] ?? true 
+          ? <MdExpandMore />
+          : <MdExpandLess />
+        }
         </button>
       </div>
       {!(collapsedSections[sectionId] ?? true) && (

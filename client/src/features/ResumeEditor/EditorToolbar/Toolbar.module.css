@@ -83,12 +83,8 @@
     flex: 4;
   }
 
-  .saveCopyButton {
-    flex: 1;
-  }
-
-  .printButton {
-    flex: 1;
+  .saveCopyButton, .printButton {
+    flex: 0.25;
   }
 
   .saveCopyPrintButtonsWrapper {

@@ -37,7 +37,7 @@ const CurrentlyEditing = () => {
          setCurrentlyEditingText(`${activeSectionText} > ${activeEditorLabel}`);
       } else if (activeEditorText) {
          // setCurrentlyEditingText(activeEditorText);
-         setCurrentlyEditingText(activeEditorLabel);         
+         setCurrentlyEditingText(activeEditorLabel);
       } else if (activeSectionText) {
          setCurrentlyEditingText(activeSectionText);
       } else {
@@ -45,13 +45,39 @@ const CurrentlyEditing = () => {
       }
    }, [activeSectionText, activeEditorText, activeEditorLabel])
 
+   // Keep the section and editor label on mobile, using the shorter section label.
+   const mobileSectionLabel = activeSection?.label || activeSectionText || 'Section';
+   const escapedSectionLabel = mobileSectionLabel.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+   const mobileEditorLabel = activeEditorLabel
+      .replace(new RegExp(`(?<![\\p{L}\\p{N}_])${escapedSectionLabel}(?![\\p{L}\\p{N}_])`, 'giu'), '')
+      .replace(/\s+/g, ' ')
+      .trim();
+   const mobileEditingText = (
+      activeSectionText && activeEditorText && activeSectionText !== activeEditorText
+         ? [mobileSectionLabel, mobileEditorLabel].filter(Boolean).join(' > ')
+         : activeEditorText
+         ? activeEditorLabel
+         : activeSection
+            ? mobileSectionLabel
+            : 'Resume'
+   ).toLowerCase().replace(/\b[a-z]/g, letter => letter.toUpperCase());
 
    const clearToolbarSelection = () => {
       dispatch(setActiveEditorId(null));
       dispatch(setActiveSectionId(null));
    }
    return (
-      <button data-toolbar-label="Edit Full Resume" className={`buttonMain ${styles.currentlyEditingButton}`} onClick={() => clearToolbarSelection()}>{`${!isMobile ? `Currently Editing: ${currentlyEditingText || "Unknown Error"}` : currentlyEditingText || "Unknown Error"}`}</button>
+      <button
+         data-toolbar-label="Edit Full Resume"
+         className={`buttonMain ${styles.currentlyEditingButton}`}
+         onClick={() => clearToolbarSelection()}
+      >
+         {`${
+            !isMobile 
+               ? `Currently Editing: ${currentlyEditingText || "Unknown Error"}`
+               : "Editing: " + mobileEditingText
+         }`}
+      </button>
    )
 }
 
