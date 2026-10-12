@@ -7,7 +7,7 @@ import { updateUser } from '@/store/userSlice';
 
 // import styles from './Account.module.css';
 import { updateUserApi } from '@/services/userServices';
-import { formatDateTime } from '@/utils/formatters';
+import { formatDateTime, formatCompactDateTime } from '@/utils/formatters';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { TbMenu2Filled } from 'react-icons/tb';
 
@@ -128,13 +128,13 @@ const AccountSettings = () => {
             </div>
             <span className={styles.accountTimeStampsSpan}>
                {isMobile
-                  ? `Account created: ${formatDateTime(userFormData.createdAt)}`
+                  ? `Account created: ${formatCompactDateTime(userFormData.createdAt)}`
                   : `Account created on ${formatDateTime(userFormData.createdAt)}`
                }
             </span>
             <span className={styles.accountTimeStampsSpan}>
                {isMobile
-                  ? `Account updated: ${formatDateTime(userFormData.updatedAt)}`
+                  ? `Account updated: ${formatCompactDateTime(userFormData.updatedAt)}`
                   : `Account last updated on ${formatDateTime(userFormData.updatedAt)}`
                }
             </span>
