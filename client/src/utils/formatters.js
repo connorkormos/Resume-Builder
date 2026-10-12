@@ -1,3 +1,22 @@
+export const formatExtendedDateTime = (dateTimeValue) => {
+  if (!dateTimeValue) return '';
+
+  const date = new Date(dateTimeValue);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'long',
+    weekday: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  }).format(date);
+};
+
 export const formatDateTime = (dateTimeValue) => {
   if (!dateTimeValue) return '';
 
@@ -11,7 +30,6 @@ export const formatDateTime = (dateTimeValue) => {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    second: '2-digit',
     hour12: true,
   }).format(date);
 };
@@ -27,9 +45,6 @@ export const formatCompactDateTime = (dateTimeValue) => {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
   }).format(date);
 };
 
