@@ -87,6 +87,31 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.id}>"
 
+# class Profile(db.Model):
+#     __tablename__ = "profiles"
+
+#     id = id_column()
+#     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+#     phone_number = db.Column(db.String(20), nullable=True)
+#     location = db.Column(db.String(255), nullable=True)
+#     summary = db.Column(db.Text, nullable=True)
+#     created_at = created_at_column()
+#     updated_at = updated_at_column()
+
+#     def to_dict(self):
+#         return {
+#             "id": self.id,
+#             "userId": self.user_id,
+#             "phoneNumber": self.phone_number,
+#             "location": self.location,
+#             "summary": self.summary,
+#             "createdAt": serialize_datetime(self.created_at),
+#             "updatedAt": serialize_datetime(self.updated_at),
+#         }
+
+#     def __repr__(self):
+#         return f"<Profile {self.id}>"
+
 class Resume(db.Model):
     __tablename__ = "resumes"
 

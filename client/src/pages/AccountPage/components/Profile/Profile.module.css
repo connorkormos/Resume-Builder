@@ -1,0 +1,46 @@
+.profilePageContainer {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    color: white;
+
+    .profilePageTitle {
+        margin-bottom: 2.5rem;
+    }
+}
+
+.profileInfoForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: max-content;
+    width: 30rem;
+    
+    .profileInfoFormGroup {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+
+        .profileInfoFormLabel {
+            flex: 1;
+            min-width: max-content;
+            /* width: 20%; */
+            /* width: max-content; */
+        }
+        
+        .profileInfoFormInput {
+            /* width: 80%; */
+            flex: 2;
+            padding: 0.25rem 1rem;
+            border: none;
+            outline: none;
+            border-radius: 0.25rem;
+            /* width: 100%; */
+            /* min-width: max-content; */
+            color: black;
+        }
+    }
+}

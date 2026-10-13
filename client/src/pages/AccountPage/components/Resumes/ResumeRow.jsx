@@ -12,6 +12,7 @@ import {
 // import styles from './Account.module.css';
 import { formatDateTime, formatCompactDateTime } from "@/utils/formatters";
 import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
+import { getNodeString } from "@/helpers/getNodeString";
 
 import styles from "./Resumes.module.css";
 
@@ -19,11 +20,13 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+
+
   useEffect(() => {
     if (!resume) void fetchResume(resumeId);
   }, [resumeId, resume, fetchResume]);
-
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const handleEditResume = () => {
     dispatch(setResumeId(resumeId));
@@ -41,13 +44,26 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
   };
 
   const handleCopyResume = async () => {
-    
+
     const copiedResume = await copyResumeToApi(resume.id);
     if (!copiedResume) {
       alert("An error occured when copying your resume.");
       return;
     }
     await fetchUserResumeIds(true);
+  };
+
+  const handleViewResumeDetails = () => {
+    // const fieldsById = resume.fields.byId;
+    // const profileInfo = [];
+    // for (const id in fieldsById) {
+    //   profileInfo.push({
+    //     label: fieldsById[id].label,
+    //     value: getNodeString(fieldsById[id]),
+    //   });
+    // }
+    // console.log("Field Data", profileInfo);
+    navigate(`/account/profile`, { state: { resume } });
   };
 
   if (!resume) {
@@ -79,6 +95,13 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
             </div>
           </div>
           <div className={styles.userResumeRowButtons}>
+            <button
+              className={styles.editResumeButton}
+              onClick={handleViewResumeDetails}
+
+            >
+              View Details
+            </button>
             <button
               className={styles.editResumeButton}
               onClick={handleEditResume}
@@ -114,8 +137,8 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
             />
             <div className={styles.mobileResumeRowContent}>
               {/* <div className={styles.resumeDetailsWrapper}> */}
-                <p><span>Created: </span><span>{formatCompactDateTime(resume.createdAt)}</span></p>
-                <p><span>Updated: </span><span>{formatCompactDateTime(resume.updatedAt)}</span></p>
+              <p><span>Created: </span><span>{formatCompactDateTime(resume.createdAt)}</span></p>
+              <p><span>Updated: </span><span>{formatCompactDateTime(resume.updatedAt)}</span></p>
               {/* </div> */}
               <div className={styles.userResumeRowButtons}>
                 <button
@@ -124,6 +147,7 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
                 >
                   Edit
                 </button>
+
                 <button
                   className={styles.editResumeButton}
                   onClick={handleCopyResume}
