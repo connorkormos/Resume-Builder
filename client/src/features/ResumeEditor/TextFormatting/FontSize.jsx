@@ -38,7 +38,7 @@ const FontSize = ({
    const effectiveSectionId = activeSectionId;
    const { editorId: activeEditorId } = context;
    const hasEditorAncestry = Boolean(context.section && (!context.field || context.subsection));
-   
+
    const getSectionTotalFontSize = useCallback((sectionData) => {
       if (!sectionData) return getResumeFontSize();
 
@@ -139,7 +139,9 @@ const FontSize = ({
 
             dispatch(updateSection({
                id: sectionId,
-               changes: { styling: { fontSizeOffset: newSectionFontSizeOffset } }
+               styling: {
+                  fontSizeOffset: newSectionFontSizeOffset
+               }
             }));
          });
 
@@ -169,8 +171,8 @@ const FontSize = ({
             value={fontSizeInputValue}
             onChange={(e) => setFontSizeInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && setNewFontSize(fontSizeInputValue)}
-            style={!isMobile ? {width: '3rem'} : undefined}
-            />
+            style={!isMobile ? { width: '3rem' } : undefined}
+         />
          <button data-toolbar-label="Increase Font Size" className='buttonMain' onClick={() => setNewFontSize('increment')}>+</button>
       </div>
    )

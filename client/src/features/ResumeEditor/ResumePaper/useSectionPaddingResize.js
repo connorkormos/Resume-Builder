@@ -40,7 +40,11 @@ export default function useSectionPaddingResize(section, column) {
     if (value === drag.startValue) return;
     dispatch(updateSection({
       id: drag.id,
-      changes: { layout: { padding: { [drag.side]: `${value}rem` } } },
+      layout: {
+        padding: {
+          [drag.side]: `${value}rem`
+        }
+      },
     }));
   };
   const finish = (event, canceled = false) => {

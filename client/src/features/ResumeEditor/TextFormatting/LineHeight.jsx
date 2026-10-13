@@ -169,8 +169,8 @@ const LineHeight = ({
         dispatch(
           updateSection({
             id: sectionId,
-            changes: {
-              styling: { lineHeightOffset: newSectionLineHeightOffset },
+            styling: {
+              lineHeightOffset: newSectionLineHeightOffset
             },
           }),
         );

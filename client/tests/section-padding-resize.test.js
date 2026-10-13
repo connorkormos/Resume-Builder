@@ -49,9 +49,9 @@ test('lower-only drags adjust only top padding in either direction and clamp at 
   p.onPointerMove(event(-8));
   assert.deepEqual(h.preview, { target: 'section', id: 'l', side: 'top', value: 1.5 });
   p.onPointerUp(event(-8));
-  assert.deepEqual(h.actions.pop(), updateSection({ id: 'l', changes: { layout: { padding: { top: '1.5rem' } } } }));
+  assert.deepEqual(h.actions.pop(), updateSection({ id: 'l', layout: { padding: { top: '1.5rem' } } } ));
   p.onPointerDown(event(0)); p.onPointerUp(event(80));
-  assert.deepEqual(h.actions.pop().payload, { id: 'l', changes: { layout: { padding: { top: '-0.25rem' } } } });
+  assert.deepEqual(h.actions.pop().payload, { id: 'l', layout: { padding: { top: '-0.25rem' } } });
 });
 
 test('selection is fixed at drag start; cancel discards previews; keyboard uses top padding', t => {
@@ -66,19 +66,19 @@ test('selection is fixed at drag start; cancel discards previews; keyboard uses 
   h.state.resume.present.activeSectionIds = ['l'];
   p = useResize(upper, column).handleProps;
   p.onKeyDown({ ...event(0), key: 'ArrowDown' });
-  assert.equal(h.actions.pop().payload.changes.layout.padding.top, '0.4rem');
+  assert.equal(h.actions.pop().payload.layout.padding.top, '0.4rem');
 });
 
 test('default and multi-selection keep changing only the upper bottom padding', t => {
   const p = setup(t, ['u', 'l']);
   p.onPointerDown(event(0)); p.onPointerUp(event(4));
-  assert.deepEqual(h.actions.pop().payload, { id: 'u', changes: { layout: { padding: { bottom: '1.5rem' } } } });
+  assert.deepEqual(h.actions.pop().payload, { id: 'u', layout: { padding: { bottom: '1.5rem' } } });
 });
 
 test('one undo/redo restores the lower padding while the upper section stays unchanged', () => {
   const original = { ...reducer(undefined, { type: 'init' }), sections: { allIds: ['u', 'l'], byId: { u: upper, l: lower } } };
   const history = undoable(reducer);
-  const after = history({ past: [], present: original, future: [] }, updateSection({ id: 'l', changes: { layout: { padding: { top: '1.5rem' } } } }));
+  const after = history({ past: [], present: original, future: [] }, updateSection({ id: 'l', layout: { padding: { top: '1.5rem' } } } ));
   assert.equal(after.past.length, 1);
   assert.deepEqual(after.present.sections.byId.u, upper);
   const undone = history(after, ActionCreators.undo());

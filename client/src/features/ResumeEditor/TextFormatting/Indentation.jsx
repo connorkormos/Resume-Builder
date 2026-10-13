@@ -39,10 +39,8 @@ export default function Indentation() {
       dispatch(
         updateSection({
           id: activeTarget.id,
-          changes: {
-            layout: {
-              marginLeft: `${currentMarginLeft}rem`,
-            },
+          layout: {
+            marginLeft: `${currentMarginLeft}rem`,
           },
         }),
       );
@@ -50,10 +48,8 @@ export default function Indentation() {
       dispatch(
         updateField({
           id: activeTarget.id,
-          changes: {
-            layout: {
-              marginLeft: `${currentMarginLeft}rem`,
-            },
+          layout: {
+            marginLeft: `${currentMarginLeft}rem`,
           },
         }),
       );

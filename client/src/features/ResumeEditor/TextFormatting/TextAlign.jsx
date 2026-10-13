@@ -22,7 +22,7 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
   const resumeAlignment = useSelector((state) => state.resume.present?.styling?.textAlign);
   const activeEditorSelection = useSelector((state) => state.resume.present?.activeEditorSelection)
   const activeEditorAlignment = editor ? getActiveAlignment(editor) : null;
-//   const activeEditorAlignment = activeEditorSelection?.[0]?.textAlign;
+  //   const activeEditorAlignment = activeEditorSelection?.[0]?.textAlign;
   const activeEditorChildren = activeEditorSelection?.[0]?.children;
   const activeSectionAlignment = useSelector((state) => state.resume.present?.sections?.byId[activeSectionId]?.styling?.textAlign)
 
@@ -34,10 +34,8 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
         dispatch(
           updateSection({
             id: sectionId,
-            changes: {
-              styling: {
-                textAlign: alignment,
-              },
+            styling: {
+              textAlign: alignment,
             },
           }),
         );
@@ -54,17 +52,17 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
   };
 
   const [showTextAlignDropdown, setShowTextAlignDropdown] = useState(false);
-  const [alignmentIcon, setAlignmentIcon] = useState(<MdFormatAlignLeft style={{position: 'relative', top: '0.1em'}} />)
+  const [alignmentIcon, setAlignmentIcon] = useState(<MdFormatAlignLeft style={{ position: 'relative', top: '0.1em' }} />)
 
   const handleDropdownClick = () => {
     setShowTextAlignDropdown(!showTextAlignDropdown)
   }
 
   const handleSetAlignmentIcon = (alignment) => {
-        if (alignment === 'center') setAlignmentIcon(<MdFormatAlignCenter style={{position: 'relative', top: '0.1em'}} />)
-    else if (alignment === 'right') setAlignmentIcon(<MdFormatAlignRight style={{position: 'relative', top: '0.1em'}} />)
-    else if (alignment === 'justify') setAlignmentIcon(<MdFormatAlignJustify style={{position: 'relative', top: '0.1em'}} />)
-    else setAlignmentIcon(<MdFormatAlignLeft style={{position: 'relative', top: '0.1em'}} />)
+    if (alignment === 'center') setAlignmentIcon(<MdFormatAlignCenter style={{ position: 'relative', top: '0.1em' }} />)
+    else if (alignment === 'right') setAlignmentIcon(<MdFormatAlignRight style={{ position: 'relative', top: '0.1em' }} />)
+    else if (alignment === 'justify') setAlignmentIcon(<MdFormatAlignJustify style={{ position: 'relative', top: '0.1em' }} />)
+    else setAlignmentIcon(<MdFormatAlignLeft style={{ position: 'relative', top: '0.1em' }} />)
   }
 
   const handleDropdownSelection = (alignment) => {
@@ -109,9 +107,9 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
       <button
         className='buttonMain'
         onClick={() => handleDropdownClick()}
-        >
-          {alignmentIcon}
-        <MdArrowDropDown style={{marginRight: '-0.5em'}} />
+      >
+        {alignmentIcon}
+        <MdArrowDropDown style={{ marginRight: '-0.5em' }} />
       </button>
       {showTextAlignDropdown && <TextFormatDropdown isOpen={showTextAlignDropdown} setIsOpen={setShowTextAlignDropdown} dropdownOptions={dropdownOptions} />}
     </div>

@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { Slate, Editable } from "slate-react";
 import { useSelector } from "react-redux";
-import { updateFieldValue } from "../../store/resumeSlice.js";
+import { updateField } from "../../store/resumeSlice.js";
 import { useResumeSlateEditor } from "./useResumeSlateEditor.js";
 
 import Leaf from "./renderLeaf.jsx";
@@ -51,7 +51,7 @@ const SlateField = ({ field }) => {
   const { editor, onChange, activate, editableProps } = useResumeSlateEditor({
     editorId: field.id,
     value: field.value,
-    createValueAction: (newValue) => updateFieldValue({ fieldId: field.id, newValue }),
+    createValueAction: (newValue) => updateField({ id: field.id, value: newValue }),
   });
 
   const renderLeaf = useCallback(

@@ -33,12 +33,10 @@ const ColumnSettings = () => {
     dispatch(
       updateColumn({
         id: column?.id,
-        changes: {
-          layout: {
-            width: {
-              value: columnWidthInputValue + "%",
-              auto: false,
-            },
+        layout: {
+          width: {
+            value: columnWidthInputValue + "%",
+            auto: false,
           },
         },
       }),
@@ -51,11 +49,9 @@ const ColumnSettings = () => {
     dispatch(
       updateColumn({
         id: column?.id,
-        changes: {
-          layout: {
-            width: {
-              auto: autoWidthInputValue,
-            },
+        layout: {
+          width: {
+            auto: autoWidthInputValue,
           },
         },
       }),

@@ -37,7 +37,7 @@ const SlateHeading = ({ section }) => {
     value: section.value,
     createValueAction: (value) => updateSection({
       id: section.id,
-      changes: { value },
+      value,
     }),
   });
 

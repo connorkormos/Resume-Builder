@@ -173,18 +173,14 @@ const OutlineSection = ({
     dispatch(
       updateSubsection({
         id: currentSubsection.id,
-        changes: {
-          position: subsectionToSwapWith.position,
-        },
+        position: subsectionToSwapWith.position,
       }),
     );
 
     dispatch(
       updateSubsection({
         id: subsectionToSwapWith.id,
-        changes: {
-          position: currentSubsection.position,
-        },
+        position: currentSubsection.position,
       }),
     );
   };

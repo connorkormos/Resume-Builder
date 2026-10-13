@@ -3,7 +3,7 @@ import test from 'node:test';
 import { configureStore } from '@reduxjs/toolkit';
 import undoable, { ActionCreators, excludeAction } from 'redux-undo';
 import { createEditor, Editor, Node, Transforms } from 'slate';
-import reducer, { updateFieldValue, updateSection, setActiveEditorSelection } from '../src/store/resumeSlice.js';
+import reducer, { updateField, updateSection, setActiveEditorSelection } from '../src/store/resumeSlice.js';
 import { createSlateHistoryGrouping, observeHistoryOperations } from '../src/helpers/slateHelpers/historyGrouping.js';
 import { withInlineVoidIcons } from '../src/helpers/slateHelpers/editorSchemaRules.js';
 import { addListItem } from '../src/helpers/listBehavior.js';
@@ -38,8 +38,8 @@ async function setup(initial = '', { heading = false, nodes = value(initial) } =
     const historyGroup = grouping.getHistoryGroup(editor.operations, editor.selection, store.getState().resume.group, editor.marks);
     if (editor.operations.some(op => op.type !== 'set_selection')) {
       const action = heading
-        ? updateSection({ id: 's1', changes: { value: editor.children } })
-        : updateFieldValue({ fieldId: 'f1', newValue: editor.children });
+        ? updateSection({ id: 's1', value: editor.children })
+        : updateField({ id: 'f1', value: editor.children });
       store.dispatch({ ...action, meta: { historyGroup } });
     }
     // The application's filtered toolbar update follows every content callback.
@@ -249,7 +249,7 @@ test('formatting and typing after it stay separate, including collapsed mark cha
 test('an intervening document edit splits typing even when this editor remains focused', async () => {
   const h = await setup();
   await h.type('ab');
-  h.store.dispatch(updateSection({ id: 's1', changes: { styling: { backgroundColor: 'red' } } }));
+  h.store.dispatch(updateSection({ id: 's1', styling: { backgroundColor: 'red' } }));
   await h.type('cd');
   assert.equal(h.history().past.length, 3);
   h.undo();
@@ -349,7 +349,7 @@ test('switching between a field and a heading preserves global chronological ord
     const historyGroup = grouping.getHistoryGroup(heading.operations, heading.selection, h.history().group);
     if (heading.operations.some(op => op.type !== 'set_selection')) {
       h.store.dispatch({
-        ...updateSection({ id: 's1', changes: { value: heading.children } }),
+        ...updateSection({ id: 's1', value: heading.children }),
         meta: { historyGroup },
       });
     }

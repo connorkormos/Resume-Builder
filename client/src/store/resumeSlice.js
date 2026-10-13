@@ -286,42 +286,12 @@ const resumeSlice = createSlice({
       // * UPDATE STATE V
       // * ------------ V
 
-      // updateResume(state, action) {
-      //    const { key, changes } = action.payload;
-
-      //    if (key === "title") {
-      //       state.title = changes;
-      //       return;
-      //    }
-      //    if (key === "layout") {
-      //       state.layout = {
-      //          ...state.layout,
-      //          ...changes,
-      //          gap: { ...state.layout.gap, ...changes.gap },
-      //       };
-      //       return;
-      //    }
-      //    if (key === "styling") {
-      //       state.styling = {
-      //          ...state.styling,
-      //          ...changes,
-      //       };
-      //       return;
-      //    }
-
-      //    else state[key] = {
-      //       ...state[key],
-      //       ...changes,
-      //    };
-      // },
-
       updateResume(state, action) {
          mergeDeep(state, action.payload);
       },
 
       updateColumn(state, action) {
-         const { id, changes } = action.payload;
-
+         const { id, ...changes } = action.payload;
          const column = state.columns.byId[id];
 
          if (!column) {
@@ -329,38 +299,11 @@ const resumeSlice = createSlice({
             return;
          }
 
-         if (changes.layout) {
-            column.layout ??= {};
+         mergeDeep(column, changes);
 
-            if (changes.layout.width) {
-               column.layout.width = {
-                  ...column.layout.width,
-                  ...changes.layout.width,
-               };
-
-               updateAutoColumnWidths(state);
-            }
-
-            if (changes.layout.padding) {
-               column.layout.padding = {
-                  ...column.layout.padding,
-                  ...changes.layout.padding,
-               };
-            }
+         if (changes.layout?.width) {
+            updateAutoColumnWidths(state);
          }
-
-         if (changes.styling) {
-            column.styling = {
-               ...column.styling,
-               ...changes.styling,
-            };
-         }
-
-         Object.assign(column, {
-            ...changes,
-            styling: column.styling,
-            layout: column.layout,
-         });
       },
 
       resizeColumnPair(state, action) {
@@ -386,8 +329,7 @@ const resumeSlice = createSlice({
       },
 
       updateSection(state, action) {
-         const { id, changes } = action.payload;
-
+         const { id, columnId, ...changes } = action.payload;
          const section = state.sections.byId[id];
 
          if (!section) {
@@ -395,17 +337,13 @@ const resumeSlice = createSlice({
             return;
          }
 
-         if (changes.columnId && changes.columnId !== section.columnId) {
-            const oldColumnId = section.columnId;
-            const newColumnId = changes.columnId;
-
-            const oldColumn = state.columns.byId[oldColumnId];
-            const newColumn = state.columns.byId[newColumnId];
+         if (columnId && columnId !== section.columnId) {
+            const oldColumn = state.columns.byId[section.columnId];
+            const newColumn = state.columns.byId[columnId];
 
             if (oldColumn) {
                oldColumn.sectionIds = oldColumn.sectionIds.filter(
-                  (columnSectionId) => columnSectionId !== id
-
+                  (sectionId) => sectionId !== id
                );
             }
 
@@ -413,39 +351,14 @@ const resumeSlice = createSlice({
                newColumn.sectionIds.push(id);
             }
 
-            section.columnId = newColumnId;
+            section.columnId = columnId;
          }
 
-         if (changes.styling) {
-            section.styling = {
-               ...section.styling,
-               ...changes.styling,
-            };
-         }
-
-         if (changes.layout) {
-            section.layout ??= {};
-
-            section.layout = {
-               ...section.layout,
-               ...changes.layout,
-               padding: {
-                  ...section.layout.padding,
-                  ...changes.layout.padding,
-               },
-            };
-         }
-
-         Object.assign(section, {
-            ...changes,
-            columnId: section.columnId,
-            styling: section.styling,
-            layout: section.layout,
-         });
+         mergeDeep(section, changes);
       },
 
       updateSubsection(state, action) {
-         const { id, changes } = action.payload;
+         const { id, ...changes } = action.payload;
          const subsection = state.subsections.byId[id];
          if (!subsection) {
             console.error(`Cannot update subsection. ID of ${id} not found.`);
@@ -457,76 +370,30 @@ const resumeSlice = createSlice({
             return;
          }
 
-         for (const key in changes) {
-            if (key === "position") {
-               subsection.position = changes.position;
+         mergeDeep(subsection, changes);
 
-               section.subsectionIds = section.subsectionIds
-                  .map(id => state.subsections.byId[id])
-                  .filter(Boolean)
-                  .sort((a, b) => a.position - b.position)
-                  .map(subsection => subsection.id);
-            } else if (key === "styling") {
-               subsection.styling = { ...subsection.styling, ...changes.styling };
-            } else if (key === "layout") {
-               subsection.layout = { ...subsection.layout, ...changes.layout };
-            } else {
-               subsection[key] = changes[key];
-            }
+         if (Object.hasOwn(changes, "position")) {
+            section.subsectionIds = section.subsectionIds
+               .map(id => state.subsections.byId[id])
+               .filter(Boolean)
+               .sort((a, b) => a.position - b.position)
+               .map(subsection => subsection.id);
          }
       },
 
       updateField(state, action) {
-         const { id, changes } = action.payload;
+         const { id, ...changes } = action.payload;
          const field = state.fields.byId[id];
          if (!field) {
             console.error(`Cannot update field. ID of ${id} not found.`);
             return;
          }
-         for (const key in changes) {
-            if (key === "styling") {
-               field.styling = { ...field.styling, ...changes.styling };
-            } else if (key === "value") {
-               field.value = changes.value;
-            } else if (key === "layout") {
-               field.layout = { ...field.layout, ...changes.layout };
-            }
-            else {
-               alert('This reducer only handles styling changes for now.');
-               return;
-            }
-         }
-      },
-
-      updateFieldValue(state, action) {
-         const { fieldId, newValue } = action.payload;
-         const field = state.fields.byId[fieldId];
-         if (!field) {
-            console.error(`Cannot update field. ID of ${fieldId} not found.`);
-            return;
-         }
-         const subsection = state.subsections.byId[field.subsectionId];
-         if (!subsection) {
+         if (Object.hasOwn(changes, "value") && !state.subsections.byId[field.subsectionId]) {
             console.error(`Cannot update field. Subsection with ID ${field.subsectionId} not found.`);
             return;
          }
-         field.value = newValue;
-      },
 
-      updateFieldLayout(state, action) {
-         const { id, changes } = action.payload;
-         const field = state.fields.byId[id];
-         console.log('FIELD BEFORE CHANGES: ', field)
-         console.log('FIELD LAYOUT CHANGES:', changes)
-         if (!field) {
-            console.error(`Cannot update field.  ID of ${id} not found.`);
-            return;
-         }
-         if (!field.layout) {
-            field.layout = {};
-         }
-         Object.assign(field.layout, changes);
-         console.log('FIELD AFTER CHANGES: ', field.layout)
+         mergeDeep(field, changes);
       },
 
       swapFieldPositions(state, action) {
@@ -703,6 +570,28 @@ const resumeSlice = createSlice({
          });
       },
 
+      
+      reorderFields(state, action) {
+         const { subsectionId, fromIndex, toIndex } = action.payload;
+
+         const subsection = state.subsections.byId[subsectionId];
+         if (!subsection) {
+            console.error(`Cannot reorder fields. Subsection with ID of ${subsectionId} not found.`);
+            return;
+         }
+
+         const fieldIdsArr = subsection.fieldIds;
+         const [moved] = fieldIdsArr.splice(fromIndex, 1);
+         fieldIdsArr.splice(toIndex, 0, moved);
+
+         fieldIdsArr.forEach((fieldId, index) => {
+            const field = state.fields.byId[fieldId];
+            if (field) {
+               field.position = index;
+            }
+         });
+      },
+
       reorderSections(state, action) {
          const { fromId, toId } = action.payload;
 
@@ -814,27 +703,6 @@ const resumeSlice = createSlice({
          subsectionIdsArr.splice(toIndex, 0, moved);
       },
 
-      //  Reorder fields in a subsection
-      reorderFields(state, action) {
-         const { subsectionId, fromIndex, toIndex } = action.payload;
-
-         const subsection = state.subsections.byId[subsectionId];
-         if (!subsection) {
-            console.error(`Cannot reorder fields. Subsection with ID of ${subsectionId} not found.`);
-            return;
-         }
-
-         const fieldIdsArr = subsection.fieldIds;
-         const [moved] = fieldIdsArr.splice(fromIndex, 1);
-         fieldIdsArr.splice(toIndex, 0, moved);
-
-         fieldIdsArr.forEach((fieldId, index) => {
-            const field = state.fields.byId[fieldId];
-            if (field) {
-               field.position = index;
-            }
-         });
-      },
    },
 });
 
@@ -871,8 +739,6 @@ export const {
    addField,
    deleteField,
    updateField,
-   updateFieldValue,
-   updateFieldLayout,
    swapFieldPositions,
    reorderFields,
 

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import reducer, { addSection, addSubsection, updateFieldValue } from '../src/store/resumeSlice.js';
+import reducer, { addSection, addSubsection, updateField } from '../src/store/resumeSlice.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
 const field = (id, subsectionId, position = 0) => ({
@@ -31,7 +31,7 @@ test('new sections register ordered descendants and preserve existing edits acro
   assert.deepEqual(state.fields.byId[7], field(7, 6));
   assert.equal(state.sections.byId[5].subsections, undefined);
   assert.equal(state.subsections.byId[6].fields, undefined);
-  state = reducer(state, updateFieldValue({ fieldId: 7, newValue: value('New project text') }));
+  state = reducer(state, updateField({ id: 7, value: value('New project text') }));
   state = reducer(state, addSection({ sectionData: { id: 10, columnId: 1, subsections: [] } }));
   const saved = JSON.parse(JSON.stringify(state));
   assert.deepEqual(saved.fields.byId[7].value, value('New project text'));

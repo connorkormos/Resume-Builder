@@ -44,7 +44,7 @@ export default function MarginIndicator({
         })
         : (target === "column" ? updateColumn : updateSection)({
           id,
-          changes: { layout: { padding } },
+          layout: { padding }
         }),
     );
   };

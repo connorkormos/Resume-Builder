@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updateFieldLayout, updateSection } from "@/store/resumeSlice.js";
+import { updateField, updateSection } from "@/store/resumeSlice.js";
 import { getTrimmedNodeString } from "@/helpers/getNodeString";
 
 
@@ -10,21 +10,19 @@ const SectionGrid = ({ section }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-  if (section.layout?.display !== "grid") {
-    dispatch(
-      updateSection({
-        id: section.id,
-        changes: {
+    if (section.layout?.display !== "grid") {
+      dispatch(
+        updateSection({
+          id: section.id,
           layout: {
             display: "grid",
             grid: {
               columns: 1,
             },
           },
-        },
-      }),
-    );
-  }
+        }),
+      );
+    }
   }, [dispatch, section.id, section.layout?.display]);
   const gridColumnsInput = section.layout?.display === "grid"
     ? section.layout?.grid?.columns ?? 1
@@ -34,15 +32,13 @@ const SectionGrid = ({ section }) => {
   const reduxFieldsById = useSelector((state) => state.resume.present.fields.byId);
 
   const updateColumnCount = (newColumnCount) => {
-   if (newColumnCount < 1) return;
+    if (newColumnCount < 1) return;
     dispatch(
       updateSection({
         id: section.id,
-        changes: {
-          layout: {
-            grid: {
-              columns: newColumnCount,
-            },
+        layout: {
+          grid: {
+            columns: newColumnCount,
           },
         },
       }),
@@ -67,7 +63,7 @@ const SectionGrid = ({ section }) => {
             }}
             style={{ width: "3rem" }}
           />
-                    <button className="buttonMain" onClick={() => updateColumnCount(gridColumnsInput + 1)}>
+          <button className="buttonMain" onClick={() => updateColumnCount(gridColumnsInput + 1)}>
             +
           </button>
 
@@ -169,9 +165,9 @@ const SectionGrid = ({ section }) => {
                               onChange={(event) => {
                                 // setStartNewRow(event.target.checked)
                                 dispatch(
-                                  updateFieldLayout({
+                                  updateField({
                                     id: fieldId,
-                                    changes: {
+                                    layout: {
                                       startNewRow: event.target.checked,
                                     },
                                   }),
@@ -189,9 +185,9 @@ const SectionGrid = ({ section }) => {
                               onChange={(event) => {
                                 // setStartNewRow(event.target.checked)
                                 dispatch(
-                                  updateFieldLayout({
+                                  updateField({
                                     id: fieldId,
-                                    changes: {
+                                    layout: {
                                       grid: {
                                         fillRow: event.target.checked,
                                       },

@@ -28,7 +28,7 @@ import { updateSection } from "@/store/resumeSlice";
 import styles from "../../TextFormatting/TextFormatting.module.css";
 
 const Borders = ({ activeSectionId, activeSectionIds }) => {
-  const isMobile = useMediaQuery("(max-width: 768px)"); 
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const sectionsById = useSelector(
     (state) => state.resume.present.sections.byId,
@@ -52,14 +52,12 @@ const Borders = ({ activeSectionId, activeSectionIds }) => {
       dispatch(
         updateSection({
           id: sectionId,
-          changes: {
-            styling: {
-              border: {
-                ...currentSectionBorder,
-                [type]: {
-                  ...currentSide,
-                  ...borderChanges,
-                },
+          styling: {
+            border: {
+              ...currentSectionBorder,
+              [type]: {
+                ...currentSide,
+                ...borderChanges,
               },
             },
           },
@@ -420,9 +418,9 @@ const Borders = ({ activeSectionId, activeSectionIds }) => {
             gap: "0.5rem",
           }}
           // containerStyling={{ display: "flex", flexDirection: "column",
-          containerStyling={ 
-            isMobile ? {} 
-            : { transform: "translateX(-80%)" }}
+          containerStyling={
+            isMobile ? {}
+              : { transform: "translateX(-80%)" }}
         />
       )}
     </div>

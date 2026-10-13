@@ -32,7 +32,9 @@ const FontColor = ({ editor, selection, context, activeSectionIds }) => {
          for (let sectionId of activeSectionIds) {
             dispatch(updateSection({
                id: sectionId,
-               changes: { styling: { color: newFontColor } }
+               styling: {
+                  color: newFontColor
+               }
             }));
          }
       } else {

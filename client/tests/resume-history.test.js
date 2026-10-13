@@ -31,8 +31,8 @@ const fixture = () => ({
 const start = () => reducer(undefined, actions.loadResume(fixture()));
 const document = state => actions.selectResumeDocument({ resume: state });
 const title = text => actions.updateResume({ title: text });
-const color = backgroundColor => actions.updateSection({ id: 's1', changes: { styling: { backgroundColor } } });
-const text = newText => actions.updateFieldValue({ fieldId: 'f1', newValue: value(newText) });
+const color = backgroundColor => actions.updateSection({ id: 's1', styling: { backgroundColor } } );
+const text = newText => actions.updateField({ id: 'f1', value: value(newText) });
 const undo = state => reducer(state, actions.undoResume());
 const redo = state => reducer(state, actions.redoResume());
 const grouped = (action, group = 'gesture-1', extra = {}) => actions.withResumeHistory(action, { group, ...extra });
@@ -132,7 +132,7 @@ test('multiple reducers can form one atomic transaction, including newly created
    const before = start();
    const after = reducer(before, actions.resumeTransaction([
       actions.addField({ fieldData: { id: 'f3', subsectionId: 'sub1', value: value(''), position: 2 } }),
-      actions.updateFieldValue({ fieldId: 'f3', newValue: value('New entry') }),
+      actions.updateField({ id: 'f3', value: value('New entry') }),
       color('blue'),
    ], { label: 'Add and format an entry' }));
    assert.equal(after.history.past.length, 1);

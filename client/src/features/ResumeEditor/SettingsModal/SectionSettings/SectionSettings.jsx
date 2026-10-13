@@ -24,9 +24,7 @@ const SectionSettings = () => {
     dispatch(
       updateSection({
         id: section.id,
-        changes: {
-          showHeading: newShowHeadingValue,
-        },
+        showHeading: newShowHeadingValue,
       }),
     );
   };

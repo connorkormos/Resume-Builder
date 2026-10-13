@@ -14,7 +14,7 @@ import TextFormatDropdown from "../../TextFormatting/shared/TextFormatDropdown";
 import { initialState } from "@/store/resumeSlice";
 
 export default function ResetStyling() {
-   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const initialResumeStyling = initialState.styling;
   const reduxResume = useSelector((state) => state.resume.present);
@@ -61,19 +61,17 @@ export default function ResetStyling() {
     checkedResetOptions.forEach((resetOption) => {
       console.log(`Resetting styling for: ${resetOption}`);
       if (resetOption === "borders") {
-         const reduxSections = reduxResume.sections.allIds;
-         reduxSections.forEach((sectionId) => {
-           dispatchReset(
-             updateSection({
-               id: sectionId,
-               changes: {
-                 styling: {
-                   border: {},
-                 },
-               },
-             }),
-           );
-         });
+        const reduxSections = reduxResume.sections.allIds;
+        reduxSections.forEach((sectionId) => {
+          dispatchReset(
+            updateSection({
+              id: sectionId,
+              styling: {
+                border: null,
+              },
+            }),
+          );
+        });
       }
       if (resetOption === "resumeMargins") {
         dispatchReset(
@@ -99,12 +97,10 @@ export default function ResetStyling() {
           dispatchReset(
             updateColumn({
               id: columnId,
-              changes: {
-                layout: {
-                  padding: {
-                    left: "0rem",
-                    right: "0rem",
-                  },
+              layout: {
+                padding: {
+                  left: "0rem",
+                  right: "0rem",
                 },
               },
             }),
@@ -115,12 +111,10 @@ export default function ResetStyling() {
           dispatchReset(
             updateSection({
               id: sectionId,
-              changes: {
-                layout: {
-                  padding: {
-                    left: "0rem",
-                    right: "0rem",
-                  },
+              layout: {
+                padding: {
+                  left: "0rem",
+                  right: "0rem",
                 },
               },
             }),
@@ -141,12 +135,10 @@ export default function ResetStyling() {
           dispatchReset(
             updateColumn({
               id: columnId,
-              changes: {
-                layout: {
-                  padding: {
-                    top: "0rem",
-                    bottom: "0rem",
-                  },
+              layout: {
+                padding: {
+                  top: "0rem",
+                  bottom: "0rem",
                 },
               },
             }),
@@ -157,12 +149,10 @@ export default function ResetStyling() {
           dispatchReset(
             updateSection({
               id: sectionId,
-              changes: {
-                layout: {
-                  padding: {
-                    top: "0rem",
-                    bottom: "0rem",
-                  },
+              layout: {
+                padding: {
+                  top: "0rem",
+                  bottom: "0rem",
                 },
               },
             }),
@@ -194,9 +184,7 @@ export default function ResetStyling() {
             dispatchReset(
               updateColumn({
                 id: columnId,
-                changes: {
-                  styling: stylingChanges,
-                },
+                styling: stylingChanges,
               }),
             );
           });
@@ -210,10 +198,8 @@ export default function ResetStyling() {
           dispatchReset(
             updateSection({
               id: sectionId,
-              changes: {
-                styling: stylingChanges,
-                value: fieldValueCopy,
-              },
+              styling: stylingChanges,
+              value: fieldValueCopy,
             }),
           );
         });
@@ -222,9 +208,7 @@ export default function ResetStyling() {
             dispatchReset(
               updateSubsection({
                 id: subsectionId,
-                changes: {
-                  styling: stylingChanges,
-                },
+                styling: stylingChanges,
               }),
             );
           });
@@ -239,10 +223,8 @@ export default function ResetStyling() {
           dispatchReset(
             updateField({
               id: fieldId,
-              changes: {
-                styling: stylingChanges,
-                value: fieldValueCopy,
-              },
+              styling: stylingChanges,
+              value: fieldValueCopy,
             }),
           );
         });
