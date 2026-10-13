@@ -11,9 +11,9 @@ import { formatDateTime, formatCompactDateTime } from '@/utils/formatters';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { TbMenu2Filled } from 'react-icons/tb';
 
-import styles from './AccountSettings.module.css';
+import styles from './Settings.module.css';
 
-const AccountSettings = () => {
+export default function Settings() {
    const { setSideBarIsOpen } = useOutletContext();
    const isMobile = useMediaQuery('(max-width: 768px)');
 
@@ -194,5 +194,3 @@ const AccountSettings = () => {
       </>
    );
 };
-
-export default AccountSettings;

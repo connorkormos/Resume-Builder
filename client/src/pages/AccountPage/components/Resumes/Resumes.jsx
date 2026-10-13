@@ -5,12 +5,12 @@ import { useOutletContext } from 'react-router-dom';
 
 import { TbMenu2Filled } from "react-icons/tb";
 
-import UserResumeRow from './UserResumeRow.jsx';
+import ResumeRow from './ResumeRow.jsx';
 
 
-import styles from './UserResumes.module.css';
+import styles from './Resumes.module.css';
 
-const UserResumes = () => {
+export default function Resumes() {
    const isMobile = useMediaQuery("(max-width: 768px)");
    const { setSideBarIsOpen, resumeData, setResumeData, fetchUserResumeIds, fetchResume } = useOutletContext();
    const navigate = useNavigate();
@@ -41,7 +41,7 @@ const UserResumes = () => {
       return userResumeIds.slice(startIndex, endIndex).map(resumeId => (
          // return userResumeIds.map(resumeId => (
          <React.Fragment key={resumeId}>
-            <UserResumeRow resumeId={resumeId} resume={resumes[resumeId]} fetchResume={fetchResume} fetchUserResumeIds={fetchUserResumeIds} />
+            <ResumeRow resumeId={resumeId} resume={resumes[resumeId]} fetchResume={fetchResume} fetchUserResumeIds={fetchUserResumeIds} />
             <div className={styles.userResumeRowDivider}></div>
          </React.Fragment>
       ));
@@ -148,5 +148,3 @@ const UserResumes = () => {
       </div>
    );
 };
-
-export default UserResumes;

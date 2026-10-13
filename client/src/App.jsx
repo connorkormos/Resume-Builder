@@ -11,11 +11,14 @@ import { getResumeFromApi } from "./services/resumeServices";
 import NavbarLayout from "./components/Layout/NavbarLayout";
 import HomePage from "./pages/HomePage/HomePage";
 import AuthPage from "./pages/AuthPage/AuthPage";
-import AccountPage from "./pages/AccountPage/AccountPage";
 import ResumeEditorPage from "./pages/ResumeEditorPage/ResumeEditorPage";
-import UserResumes from "./pages/AccountPage/components/UserResumes.jsx";
-import AccountSettings from "./pages/AccountPage/components/AccountSettings.jsx";
-import Templates from "./pages/SearchPage/Search";
+
+import AccountPage from "./pages/AccountPage/AccountPage";
+import Resumes from "./pages/AccountPage/components/Resumes/Resumes.jsx";
+import Settings from "./pages/AccountPage/components/Settings/Settings.jsx";
+import Profile from "./pages/AccountPage/components/Profile/Profile.jsx";
+
+import Search from "./pages/SearchPage/Search";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -44,13 +47,14 @@ const App = () => {
           <Route path="/home" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage />} />
-          <Route path="/browse" element={<Templates />} />
+          <Route path="/browse" element={<Search />} />
         </Route>
 
         <Route path="/account" element={<AccountPage />}>
           {/* <Route index element={<Navigate to="my-resumes" replace />} /> */}
-          <Route path="my-resumes" element={<UserResumes />} />
-          <Route path="settings" element={<AccountSettings />} />
+          <Route path="my-resumes" element={<Resumes />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         <Route path="/editor" element={<ResumeEditorPage />} />

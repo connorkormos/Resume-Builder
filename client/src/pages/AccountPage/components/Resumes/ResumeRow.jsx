@@ -13,9 +13,9 @@ import {
 import { formatDateTime, formatCompactDateTime } from "@/utils/formatters";
 import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
 
-import styles from "./UserResumes.module.css";
+import styles from "./Resumes.module.css";
 
-const UserResumeRow = ({ resumeId, resume, fetchResume, fetchUserResumeIds }) => {
+export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResumeIds }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -144,5 +144,3 @@ const UserResumeRow = ({ resumeId, resume, fetchResume, fetchUserResumeIds }) =>
     </>
   );
 };
-
-export default UserResumeRow;
