@@ -64,7 +64,7 @@ export default function Profile() {
 
     return (
         <div className={styles.profilePageContainer}>
-            <h1 className={styles.profilePageTitle}>Profile Page</h1>
+            <h1 className={styles.profilePageTitle}>Profile Page Test</h1>
             <form className={styles.profileInfoForm}>
                 {fieldGroups}
             </form>
