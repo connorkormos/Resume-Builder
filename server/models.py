@@ -51,6 +51,14 @@ class User(db.Model):
         order_by="Resume.updated_at.desc()",
     )
     
+    profiles = db.relationship(
+        "Profile",
+        backref="user",
+        cascade="all, delete-orphan",
+        lazy=True,
+        order_by="(Profile.updated_at.desc(), Profile.id)",
+    )
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
         
@@ -69,13 +77,25 @@ class User(db.Model):
             "updatedAt": serialize_datetime(self.updated_at),
         }
         
-        if only:
-            user_dict = {key: value for key, value in user_dict.items() if key in only}
-            
         if condense_relationship_data:
-            user_dict["resumes"] = [{"id": resume.id, "title": resume.title, "createdAt": resume.created_at, "updatedAt": resume.updated_at} for resume in self.resumes]
+            user_dict["resumes"] = [
+                {
+                    "id": resume.id,
+                    "title": resume.title,
+                    "createdAt": serialize_datetime(resume.created_at),
+                    "updatedAt": serialize_datetime(resume.updated_at),
+                }
+                for resume in self.resumes
+            ]
+            user_dict["profiles"] = [profile.to_dict() for profile in self.profiles]
         else:
             user_dict["resumes"] = [resume.to_dict() for resume in self.resumes]
+            user_dict["profiles"] = [
+                profile.to_dict(include_sections=True) for profile in self.profiles
+            ]
+
+        if only:
+            user_dict = {key: value for key, value in user_dict.items() if key in only}
         
         if exclude:
             for key in exclude:
@@ -87,30 +107,136 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.id}>"
 
-# class Profile(db.Model):
-#     __tablename__ = "profiles"
+class Profile(db.Model):
+    __tablename__ = "profiles"
 
-#     id = id_column()
-#     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-#     phone_number = db.Column(db.String(20), nullable=True)
-#     location = db.Column(db.String(255), nullable=True)
-#     summary = db.Column(db.Text, nullable=True)
-#     created_at = created_at_column()
-#     updated_at = updated_at_column()
+    id = id_column()
+    title = db.Column(db.String, nullable=False, default="Untitled Profile")
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    created_at = created_at_column()
+    updated_at = updated_at_column()
 
-#     def to_dict(self):
-#         return {
-#             "id": self.id,
-#             "userId": self.user_id,
-#             "phoneNumber": self.phone_number,
-#             "location": self.location,
-#             "summary": self.summary,
-#             "createdAt": serialize_datetime(self.created_at),
-#             "updatedAt": serialize_datetime(self.updated_at),
-#         }
+    sections = db.relationship(
+        "Profile_Section",
+        backref="profile",
+        cascade="all, delete-orphan",
+        lazy=True,
+        order_by="(Profile_Section.position, Profile_Section.id)",
+    )
 
-#     def __repr__(self):
-#         return f"<Profile {self.id}>"
+    def to_dict(self, include_sections=False):
+        profile_dict = {
+            "id": self.id,
+            "title": self.title,
+            "userId": self.user_id,
+            "createdAt": serialize_datetime(self.created_at),
+            "updatedAt": serialize_datetime(self.updated_at),
+        }
+        if include_sections:
+            profile_dict["sections"] = [
+                section.to_dict(include_subsections=True) for section in self.sections
+            ]
+        return profile_dict
+
+    def __repr__(self):
+        return f"<Profile {self.id}: {self.title}>"
+
+class Profile_Section(db.Model):
+    __tablename__ = "profile_sections"
+
+    id = id_column()
+    profile_id = db.Column(db.Integer, db.ForeignKey("profiles.id"), nullable=False)
+    type = db.Column(db.String, nullable=False, default="general")
+    label = db.Column(db.String, nullable=False, default="Untitled Section")
+    position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    created_at = created_at_column()
+    updated_at = updated_at_column()
+
+    subsections = db.relationship(
+        "Profile_Subsection",
+        backref="profile_section",
+        cascade="all, delete-orphan",
+        lazy=True,
+        order_by="(Profile_Subsection.position, Profile_Subsection.id)",
+    )
+
+    def to_dict(self, include_subsections=False):
+        section_dict = {
+            "id": self.id,
+            "profileId": self.profile_id,
+            "type": self.type,
+            "label": self.label,
+            "position": self.position,
+            "createdAt": serialize_datetime(self.created_at),
+            "updatedAt": serialize_datetime(self.updated_at),
+        }
+        if include_subsections:
+            section_dict["subsections"] = [
+                subsection.to_dict(include_fields=True) for subsection in self.subsections
+            ]
+        return section_dict
+
+    def __repr__(self):
+        return f"<Profile_Section {self.id}: {self.label}>"
+
+class Profile_Subsection(db.Model):
+    __tablename__ = "profile_subsections"
+
+    id = id_column()
+    profile_section_id = db.Column(db.Integer, db.ForeignKey("profile_sections.id"), nullable=False)
+    # label = db.Column(db.String, nullable=False, default="Untitled Subsection")
+    position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    created_at = created_at_column()
+    updated_at = updated_at_column()
+
+    fields = db.relationship(
+        "Profile_Field",
+        backref="profile_subsection",
+        cascade="all, delete-orphan",
+        lazy=True,
+        order_by="(Profile_Field.position, Profile_Field.id)",
+    )
+
+    def to_dict(self, include_fields=False):
+        subsection_dict = {
+            "id": self.id,
+            "profileSectionId": self.profile_section_id,
+            # "label": self.label,
+            "position": self.position,
+            "createdAt": serialize_datetime(self.created_at),
+            "updatedAt": serialize_datetime(self.updated_at),
+        }
+        if include_fields:
+            subsection_dict["fields"] = [field.to_dict() for field in self.fields]
+        return subsection_dict
+
+    def __repr__(self):
+        return f"<Profile_Subsection {self.id}>"
+
+class Profile_Field(db.Model):
+    __tablename__ = "profile_fields"
+
+    id = id_column()
+    profile_subsection_id = db.Column(db.Integer, db.ForeignKey("profile_subsections.id"), nullable=False)
+    label = db.Column(db.String, nullable=False, default="Untitled Field")
+    value = db.Column(db.Text, nullable=False, default="", server_default="")
+    position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
+    created_at = created_at_column()
+    updated_at = updated_at_column()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "profileSubsectionId": self.profile_subsection_id,
+            "label": self.label,
+            "value": self.value,
+            "position": self.position,
+            "createdAt": serialize_datetime(self.created_at),
+            "updatedAt": serialize_datetime(self.updated_at),
+        }
+
+    def __repr__(self):
+        return f"<Profile_Field {self.id}: {self.label}>"
 
 class Resume(db.Model):
     __tablename__ = "resumes"

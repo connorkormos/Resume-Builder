@@ -10,6 +10,13 @@ user_bp = Blueprint('users', __name__, url_prefix='/users')
 def get_user_by_id(user_id):
     print_pending_request('GET', f'/users/{user_id}')
 
+    if session.get("user_id") is None:
+        return generate_error(error_type="UNAUTHORIZED", code="LOGIN_REQUIRED",
+                              message="You must be logged in to view user information.")
+    if session.get("user_id") != user_id:
+        return generate_error(error_type="FORBIDDEN", code="USER_ACCESS_FORBIDDEN",
+                              message="You can only view your own user information.")
+        
     user = User.query.filter(User.id == user_id).one_or_none()
     
     if not user:
