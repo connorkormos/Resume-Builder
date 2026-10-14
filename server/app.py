@@ -2,7 +2,7 @@ from flask import jsonify, request, make_response, session
 
 from config import app, db
 
-from models import User, Resume, Column, Section, Subsection, Field
+from models import User, Resume, Column, Section, Subsection, Field, Profile, Profile_Section, Profile_Subsection, Profile_Field
 
 from routes.user_routes import user_bp
 from routes.auth_routes import auth_bp
@@ -11,6 +11,7 @@ from routes.section_routes import section_bp
 from routes.subsection_routes import subsection_bp
 from routes.field_routes import field_bp
 from routes.column_routes import column_bp
+from routes.profile_routes import profile_bp
 
 app.register_blueprint(user_bp)
 app.register_blueprint(auth_bp)
@@ -19,6 +20,7 @@ app.register_blueprint(section_bp)
 app.register_blueprint(subsection_bp)
 app.register_blueprint(field_bp)
 app.register_blueprint(column_bp)
+app.register_blueprint(profile_bp)
 
 @app.route("/")
 def home():
