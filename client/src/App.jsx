@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 // import { revertToPreviousState } from "./store/resumeSlice";
 import { setUser } from "./store/userSlice";
 import { checkApi, checkSession } from "./services/sessionServices";
-import { getResumeFromApi } from "./services/resumeServices";
 
 import NavbarLayout from "./components/Layout/NavbarLayout";
 import HomePage from "./pages/HomePage/HomePage";
@@ -17,6 +16,9 @@ import AccountPage from "./pages/AccountPage/AccountPage";
 import Resumes from "./pages/AccountPage/components/Resumes/Resumes.jsx";
 import Settings from "./pages/AccountPage/components/Settings/Settings.jsx";
 import Profile from "./pages/AccountPage/components/Profile/Profile.jsx";
+import Profiles from "./pages/AccountPage/components/Profile/components/Profiles.jsx";
+import CreateProfileForm from "./pages/AccountPage/components/Profile/components/CreateProfileForm.jsx";
+import EditProfile from "./pages/AccountPage/components/Profile/components/EditProfile.jsx";
 
 import Search from "./pages/SearchPage/Search";
 
@@ -34,7 +36,7 @@ const App = () => {
       }
     };
     runSiteLaunch();
-  }, []);
+  }, [dispatch]);
 
   return (
     <BrowserRouter>
@@ -54,7 +56,11 @@ const App = () => {
           {/* <Route index element={<Navigate to="my-resumes" replace />} /> */}
           <Route path="my-resumes" element={<Resumes />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
+          <Route path="profile" element={<Profile />}>
+            <Route index element={<Profiles />} />
+            <Route path="create" element={<CreateProfileForm />} />
+            <Route path="edit" element={<EditProfile />} />
+          </Route>
         </Route>
 
         <Route path="/editor" element={<ResumeEditorPage />} />

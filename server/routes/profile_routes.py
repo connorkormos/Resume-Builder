@@ -44,13 +44,15 @@ def create_user_profile():
     if not form_data:
         return generate_error(error_type="BAD_REQUEST", code="NO_FORM_DATA",
                               message="No form data provided.")
+        
     profile_title = form_data.get("title")
     if not profile_title:
         return generate_error(error_type="BAD_REQUEST", code="NO_PROFILE_TITLE",
                               message="Profile title is required.")
+        
     user_id = session.get("user_id")
-    
     new_profile = Profile(title=profile_title, user_id=user_id)
+    
     db.session.add(new_profile)
     db.session.commit()
     

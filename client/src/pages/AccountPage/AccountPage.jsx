@@ -1,5 +1,5 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -94,6 +94,7 @@ export default function AccountPage() {
    };
 
    const [sideBarIsOpen, setSideBarIsOpen] = useState(true);
+
 
    return (
       <div className={styles.accountContainer}>

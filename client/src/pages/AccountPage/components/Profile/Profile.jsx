@@ -1,73 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Outlet, useOutletContext, useSearchParams } from 'react-router-dom';
+
+import { getUserProfiles } from '@/services/profileServices';
+import { updateUser } from '@/store/userSlice';
 
 import styles from './Profile.module.css';
 
 export default function Profile() {
-
+    const accountContext = useOutletContext();
     const user = useSelector((state) => state.user);
-
-    const [profileData, setProfileData] = useState({
-        name: '',
-        jobTitle: '',
-        email: '',
-        phoneNumber: '',
-        location: '',
-        summary: '',
-    });
+    const dispatch = useDispatch();
+    const [searchParams] = useSearchParams();
+    const [loadState, setLoadState] = useState({ userId: null, error: false });
+    const profiles = user.profiles ?? [];
+    const selectedProfileId = searchParams.get('profileId');
+    const selectedProfile = profiles.find((profile) => String(profile.id) === selectedProfileId);
+    const isLoading = Boolean(user.id) && loadState.userId !== user.id;
 
     useEffect(() => {
-        if (!user) return;
-        console.log('user', user);
-        setProfileData({
-            name: `${user.firstName} ${user.lastName}` || '',
-            jobTitle: user.jobTitle || '',
-            email: user.email || '',
-            phoneNumber: user.phoneNumber || '',
-            location: user.location || '',
-            summary: user.summary || ''
-        });
-    }, [user]);
+        if (!user.id) return;
+        let active = true;
 
-    const fieldGroups = Object.entries(profileData).map(([key, value]) => {
-        const fieldGroupLabel = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-        
-        if (key === 'summary' || key === 'description') {
-            return (
-                <div className={styles.profileInfoFormGroup} key={key}>
-                    <label className={styles.profileInfoFormLabel} style={{marginBottom: 'auto'}} htmlFor={key}>{fieldGroupLabel}:</label>
-                    <textarea
-                        className={styles.profileInfoFormInput}
-                        id={key}
-                        name={key}
-                        value={value || ''}
-                        onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
-                        style={{ padding: '1rem' }}
-                    />
-                </div>
-            );
-        }
-        return (
-            <div className={styles.profileInfoFormGroup} key={key}>
-                <label className={styles.profileInfoFormLabel} htmlFor={key}>{fieldGroupLabel}:</label>
-                <input
-                    className={styles.profileInfoFormInput}
-                    type={key === 'email' ? 'email' : key === 'phoneNumber' ? 'tel' : 'text'}
-                    id={key}
-                    name={key}
-                    value={value || ''}
-                    onChange={(e) => setProfileData({ ...profileData, [key]: e.target.value })}
-                />
-            </div>
-        )
-    });
+        const loadProfiles = async () => {
+            const data = await getUserProfiles();
+            if (!active) return;
+            if (data !== null) {
+                dispatch(updateUser({ profiles: data }));
+            }
+            setLoadState({ userId: user.id, error: data === null });
+        };
+
+        void loadProfiles();
+        return () => {
+            active = false;
+        };
+    }, [user.id, dispatch]);
 
     return (
         <div className={styles.profilePageContainer}>
-            <h1 className={styles.profilePageTitle}>Profile Page Test</h1>
-            <form className={styles.profileInfoForm}>
-                {fieldGroups}
-            </form>
+            <h1 className={styles.profilePageTitle}>Profile Page</h1>
+            <Outlet context={{
+                ...accountContext,
+                profiles,
+                selectedProfile,
+                isLoading,
+                error: loadState.userId === user.id && loadState.error,
+            }} />
         </div>
     );
 }

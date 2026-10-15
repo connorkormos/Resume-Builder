@@ -5,9 +5,75 @@
     flex-direction: column;
     color: white;
 
-    .profilePageTitle {
+    .profilePageTitle,
+    .profileHeading {
         margin-bottom: 2.5rem;
     }
+
+    .profileFormLabel {
+        font-weight: bold;
+    }
+}
+
+.createProfileFormContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+
+    .createProfileForm {
+
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 2.5rem;
+
+        .createProfileFormGroup {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            width: 100%;
+            /* align-items: center; */
+            gap: 0.5rem;
+
+            /* label { */
+            /* width: 100%; */
+            /* } */
+
+            /* input { */
+            /* width: 100%; */
+            /* } */
+
+            .profileFormInput {
+                width: 100%;
+            }
+
+        }
+
+        .profileFormSubmitButton {
+            padding: 0.5rem 1rem;
+            background-color: var(--bootstrap-purple);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+
+            &:hover {
+                filter: brightness(1.1);
+            }
+        }
+    }
+}
+
+
+
+.profileFormInput {
+    /* width: 100%; */
+    padding: 0.25rem 1rem;
+    border: none;
+    outline: none;
+    border-radius: 0.25rem;
+    color: black;
 }
 
 .profileInfoForm {
@@ -16,7 +82,7 @@
     gap: 1rem;
     min-width: max-content;
     width: 30rem;
-    
+
     .profileInfoFormGroup {
         width: 100%;
         display: flex;
@@ -24,23 +90,83 @@
         align-items: center;
         gap: 0.5rem;
 
-        .profileInfoFormLabel {
+        .profileFormLabel {
             flex: 1;
             min-width: max-content;
-            /* width: 20%; */
-            /* width: max-content; */
         }
-        
-        .profileInfoFormInput {
-            /* width: 80%; */
+
+        .profileFormInput {
             flex: 2;
-            padding: 0.25rem 1rem;
-            border: none;
-            outline: none;
-            border-radius: 0.25rem;
-            /* width: 100%; */
-            /* min-width: max-content; */
-            color: black;
+            /* width: auto; */
+            /* max-width: max-content; */
+
         }
     }
+}
+
+.profileRowsContainer {
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .profileRowWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: max-content;
+        gap: 2.5rem;
+
+        .profileRowTitle {
+            /* font-weight: bold; */
+            font-size: 1.5rem;
+        }
+
+        .profileRowTimeStampsWrapper {
+            display: flex;
+            /* flex-direction: column; */
+            gap: 1rem;
+        }
+
+        .editProfileButton {
+            padding: 0.5rem 1rem;
+            background-color: var(--bootstrap-purple);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+
+            &:hover {
+                filter: brightness(1.1);
+            }
+        }
+    }
+}
+
+.editProfileContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: max-content;
+    
+    .editProfileForm {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .addSectionButton {
+            padding: 0.5rem 1rem;
+            background-color: var(--bootstrap-blue);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+
+            &:hover {
+                filter: brightness(1.1);
+            }
+        }
+    }
+    /* max-width: 60rem; */
+    /* margin: 0 auto; */
 }
