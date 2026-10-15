@@ -128,7 +128,7 @@
             gap: 1rem;
         }
 
-        .editProfileButton {
+        .editProfileButton, .deleteProfileButton {
             padding: 0.5rem 1rem;
             background-color: var(--bootstrap-purple);
             color: white;
@@ -139,6 +139,10 @@
             &:hover {
                 filter: brightness(1.1);
             }
+        }
+
+        .deleteProfileButton {
+            background-color: var(--bootstrap-dark-red);
         }
     }
 }

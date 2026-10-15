@@ -6,12 +6,12 @@ from models import User, Resume, Column, Section, Subsection, Field, Profile, Pr
 
 from routes.user_routes import user_bp
 from routes.auth_routes import auth_bp
-from routes.resume_routes import resume_bp
-from routes.section_routes import section_bp
-from routes.subsection_routes import subsection_bp
-from routes.field_routes import field_bp
-from routes.column_routes import column_bp
-from routes.profile_routes import profile_bp
+from server.routes.Resume_Routes.resume_routes import resume_bp
+from server.routes.Resume_Routes.section_routes import section_bp
+from server.routes.Resume_Routes.subsection_routes import subsection_bp
+from server.routes.Resume_Routes.field_routes import field_bp
+from server.routes.Resume_Routes.column_routes import column_bp
+from server.routes.Profile_Routes.profile_routes import profile_bp
 
 app.register_blueprint(user_bp)
 app.register_blueprint(auth_bp)

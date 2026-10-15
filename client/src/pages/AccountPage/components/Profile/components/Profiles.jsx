@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useOutletContext } from 'react-router-dom';
+import { deleteUserProfile } from '@/services/profileServices';
 
 import { formatCompactDateTime } from "@/utils/formatters";
 
@@ -7,6 +8,14 @@ import styles from '../Profile.module.css';
 
 export default function Profiles() {
     const { profiles, isLoading, error } = useOutletContext();
+
+    const deleteProfile = async (profileId) => {
+        if (!window.confirm('Are you sure you want to delete this profile?')) return;
+        const remainingProfiles = await deleteUserProfile(profileId);
+        if (remainingProfiles) {
+            dispatch(updateUser({ profiles: remainingProfiles }))
+        }
+    }
 
     const profileRows = profiles.map((profile) => (
         <div className={styles.profileRowWrapper} key={profile.id}>
@@ -21,6 +30,7 @@ export default function Profiles() {
             >
                 Edit
             </Link>
+            <button className={styles.deleteProfileButton} onClick={() => deleteProfile(profile.id)}>Delete</button>
         </div>
     ));
 
