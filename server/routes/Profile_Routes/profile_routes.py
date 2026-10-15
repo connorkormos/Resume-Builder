@@ -12,9 +12,11 @@ from utils.responses import (
 )
 
 from routes.Profile_Routes.profile_section_routes import profile_section_bp
+from routes.Profile_Routes.profile_field_routes import profile_field_bp
 
 profile_bp = Blueprint("profiles", __name__, url_prefix="/profiles")
 profile_bp.register_blueprint(profile_section_bp)
+profile_bp.register_blueprint(profile_field_bp)
 
 
 @profile_bp.errorhandler(NotFound)

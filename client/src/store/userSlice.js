@@ -20,6 +20,10 @@ const userSlice = createSlice({
    reducers: {
       setUser: (state, action) => ({ ...initialState, ...action.payload }),
       clearUser: () => initialState,
+      updateProfile: (state, action) => {
+         const index = state.profiles.findIndex((profile) => profile.id === action.payload.id);
+         if (index !== -1) state.profiles[index] = action.payload;
+      },
       updateUser: (state, action) => {
          const { ...changes } = action.payload;
          mergeDeep(state, changes);
@@ -27,6 +31,6 @@ const userSlice = createSlice({
    },
 });
 
-export const { setUser, clearUser, updateUser } = userSlice.actions;
+export const { setUser, clearUser, updateUser, updateProfile } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -1,5 +1,20 @@
 import { fetchApi } from "@/lib/fetch";
 
+export const updateProfileFieldsInApi = async (profileId, fields) => {
+   try {
+      return await fetchApi({
+         endpoint: `/profiles/${profileId}/fields`,
+         options: {
+            method: 'PATCH',
+            body: JSON.stringify({ fields }),
+         },
+      });
+   } catch (error) {
+      console.error('Error updating profile fields: ', error);
+      return null;
+   }
+};
+
 export const getUserProfiles = async () => {
    try {
       const responseData = await fetchApi({
