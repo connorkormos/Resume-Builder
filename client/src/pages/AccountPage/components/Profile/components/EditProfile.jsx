@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useOutletContext } from 'react-router-dom';
 
-import { getAvailableProfileSectionsFromApi, addProfileSectionToApi, updateProfileFieldsInApi } from '@/services/profileServices';
+import { getAvailableProfileSectionsFromApi, addProfileSectionToApi, addProfileSubsectionToApi, updateProfileFieldsInApi } from '@/services/profileServices';
 import { updateProfile } from '@/store/userSlice';
 
 import ProfileSection from './ProfileSection';
@@ -26,9 +26,11 @@ function ProfileEditor({ initialProfile }) {
     const [availableSections, setAvailableSections] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isAddingSection, setIsAddingSection] = useState(false);
+    const [addingSubsectionId, setAddingSubsectionId] = useState(null);
+    const [subsectionError, setSubsectionError] = useState(null);
     const [saveMessage, setSaveMessage] = useState('');
     const [saveError, setSaveError] = useState('');
-    const isBusy = isSaving || isAddingSection;
+    const isBusy = isSaving || isAddingSection || addingSubsectionId !== null;
     const titleChanged = title !== (profile.title ?? '');
     const hasChanges = titleChanged || Object.keys(fieldChanges).length > 0;
 
@@ -110,6 +112,31 @@ function ProfileEditor({ initialProfile }) {
         }
     };
 
+    const addProfileSubsection = async (sectionId) => {
+        if (isBusy) return;
+        setAddingSubsectionId(sectionId);
+        setSubsectionError(null);
+        try {
+            const subsection = await addProfileSubsectionToApi(sectionId);
+            if (!subsection) {
+                setSubsectionError({ sectionId, message: 'Unable to add subsection. Please try again.' });
+                return;
+            }
+            const updatedProfile = {
+                ...profile,
+                sections: profile.sections.map((section) => section.id === sectionId ? {
+                    ...section,
+                    subsections: [...(section.subsections ?? []), subsection]
+                        .sort((a, b) => a.position - b.position || a.id - b.id),
+                } : section),
+            };
+            setProfile(updatedProfile);
+            dispatch(updateProfile(updatedProfile));
+        } finally {
+            setAddingSubsectionId(null);
+        }
+    };
+
     return (
         <div className={styles.editProfileContainer}>
             <h2 className={styles.profileHeading}>Edit Profile</h2>
@@ -141,6 +168,9 @@ function ProfileEditor({ initialProfile }) {
                             fieldChanges={fieldChanges}
                             onFieldChange={changeField}
                             disabled={isBusy}
+                            onAddSubsection={addProfileSubsection}
+                            isAddingSubsection={addingSubsectionId === section.id}
+                            subsectionError={subsectionError?.sectionId === section.id ? subsectionError.message : ''}
                         />
                     ))}
                 </div>

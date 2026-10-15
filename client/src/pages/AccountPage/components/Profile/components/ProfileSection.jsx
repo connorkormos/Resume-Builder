@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from '../Profile.module.css';
 
-export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, disabled = false }) {
+export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, disabled = false, onAddSubsection, isAddingSubsection = false, subsectionError = '' }) {
 
     if (!section) {
         return null;
@@ -11,9 +11,10 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
     return (
         <div className={styles.profileSectionWrapper}>
             <h2>{section.label}</h2>
-            {(section.subsections ?? []).map((subsection) => {
+            {(section.subsections ?? []).map((subsection, index) => {
                 return (
                     <div key={subsection.id} className={styles.profileSubsectionWrapper}>
+                        <h2>Subsection {index + 1}</h2>
                         {(subsection.fields ?? []).map((field) => {
                             const isMultiline = ['summary', 'description'].includes((field.label ?? '').trim().toLowerCase());
                             const FieldInput = isMultiline ? 'textarea' : 'input';
@@ -37,6 +38,17 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                     </div>
                 );
             })}
+            {onAddSubsection && (
+                <button
+                    className={styles.addSubsectionButton}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onAddSubsection(section.id)}
+                >
+                    {isAddingSubsection ? 'Adding…' : '+ Add Subsection'}
+                </button>
+            )}
+            {subsectionError && <p role="alert">{subsectionError}</p>}
 
         </div>
     );

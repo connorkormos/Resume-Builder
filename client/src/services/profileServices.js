@@ -1,5 +1,17 @@
 import { fetchApi } from "@/lib/fetch";
 
+export const addProfileSubsectionToApi = async (sectionId) => {
+   try {
+      return await fetchApi({
+         endpoint: `/profiles/sections/${sectionId}/subsections`,
+         options: { method: 'POST' },
+      });
+   } catch (error) {
+      console.error('Error adding profile subsection: ', error);
+      return null;
+   }
+};
+
 export const updateProfileFieldsInApi = async (profileId, fields, title) => {
    try {
       return await fetchApi({

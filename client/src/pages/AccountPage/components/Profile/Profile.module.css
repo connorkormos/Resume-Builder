@@ -70,6 +70,21 @@
     color: black;
 }
 
+.addSubsectionButton {
+    align-self: flex-start;
+    padding: 0.5rem 1rem;
+    background-color: var(--bootstrap-blue-soft);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.addSubsectionButton:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 textarea.profileFormInput {
     resize: vertical;
 }

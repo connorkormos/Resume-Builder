@@ -101,6 +101,59 @@ class ProfileBuildersTest(unittest.TestCase):
                 counts,
             )
 
+    def test_subsection_route_appends_empty_definition_fields_and_preserves_existing_values(self):
+        section = add_profile_section(self.profile, "workHistory")
+        section.subsections[0].position = 3
+        section.subsections[0].fields[0].value = "Existing job"
+        db.session.commit()
+        for expected_position in [4, 5]:
+            response = self.client.post(f"/profiles/sections/{section.id}/subsections")
+            self.assertEqual(response.status_code, 201)
+            data = response.json
+            self.assertEqual(data["profileSectionId"], section.id)
+            self.assertEqual(data["position"], expected_position)
+            self.assertEqual([field["label"] for field in data["fields"]], SECTION_DEFINITIONS["workHistory"]["fields"])
+            self.assertEqual([field["position"] for field in data["fields"]], list(range(len(data["fields"]))))
+            self.assertTrue(all(field["value"] == "" for field in data["fields"]))
+            self.assertTrue(all(field["profileSubsectionId"] == data["id"] for field in data["fields"]))
+            db.session.expire_all()
+            self.assertEqual(db.session.get(Profile_Subsection, data["id"]).to_dict(include_fields=True), data)
+            self.assertEqual(section.subsections[0].fields[0].value, "Existing job")
+
+    def test_subsection_route_requires_owner_and_existing_section(self):
+        section = add_profile_section(self.profile, "header")
+        other = User(first_name="Other", email="other@example.test", password_hash="unused")
+        db.session.add(other)
+        db.session.commit()
+        endpoint = f"/profiles/sections/{section.id}/subsections"
+        with self.client.session_transaction() as session:
+            session["user_id"] = other.id
+        for url in [endpoint, "/profiles/sections/99999/subsections"]:
+            response = self.client.post(url)
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.json["error"]["code"], "PROFILE_SECTION_NOT_FOUND")
+        with self.client.session_transaction() as session:
+            session.clear()
+        self.assertEqual(self.client.post(endpoint).status_code, 401)
+        self.assertEqual(Profile_Subsection.query.count(), 1)
+        self.assertEqual(Profile_Field.query.count(), 2)
+
+    def test_subsection_route_failure_does_not_leave_partial_children(self):
+        section = add_profile_section(self.profile, "header")
+        db.session.commit()
+        real_flush = db.session.flush
+
+        def fail_after_flush():
+            real_flush()
+            raise SQLAlchemyError("Simulated failure")
+
+        with patch.object(db.session, "commit", side_effect=fail_after_flush):
+            response = self.client.post(f"/profiles/sections/{section.id}/subsections")
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.json["error"]["code"], "ERROR_ADDING_PROFILE_SUBSECTION")
+        self.assertEqual(Profile_Subsection.query.count(), 1)
+        self.assertEqual(Profile_Field.query.count(), 2)
+
     def test_failed_commit_rolls_back_entire_tree(self):
         real_flush = db.session.flush
 
