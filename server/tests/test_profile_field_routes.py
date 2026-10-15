@@ -123,20 +123,57 @@ class ProfileFieldRoutesTest(unittest.TestCase):
         self.assertEqual(response.json, {"fields": []})
         self.assert_unchanged()
 
+    def test_title_only_and_combined_saves(self):
+        response = self.client.patch(
+            f"/profiles/{self.profile_id}/fields", json={"title": "Renamed"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {"fields": [], "title": "Renamed"})
+        self.assert_unchanged()
+        response = self.client.patch(f"/profiles/{self.profile_id}/fields", json={
+            "title": "Combined",
+            "fields": [{"id": self.fields[0].id, "value": "Updated"}],
+        })
+        self.assertEqual(response.status_code, 200)
+        db.session.expire_all()
+        self.assertEqual(db.session.get(Profile, self.profile_id).title, "Combined")
+        self.assertEqual(self.fields[0].value, "Updated")
+
+    def test_invalid_title_or_field_prevents_entire_save(self):
+        original_title = db.session.get(Profile, self.profile_id).title
+        for title in [None, "", "  ", 7, [], {}]:
+            response = self.client.patch(f"/profiles/{self.profile_id}/fields", json={
+                "title": title,
+                "fields": [{"id": self.fields[0].id, "value": "Must not save"}],
+            })
+            self.assertEqual(response.status_code, 400)
+            self.assert_unchanged()
+            self.assertEqual(db.session.get(Profile, self.profile_id).title, original_title)
+        response = self.client.patch(f"/profiles/{self.profile_id}/fields", json={
+            "title": "Must not save",
+            "fields": [{"id": self.fields[2].id, "value": "Wrong profile"}],
+        })
+        self.assertEqual(response.status_code, 404)
+        self.assert_unchanged()
+        self.assertEqual(db.session.get(Profile, self.profile_id).title, original_title)
+
     def test_database_failure_rolls_back_all_values(self):
         real_flush = db.session.flush
+        original_title = db.session.get(Profile, self.profile_id).title
 
         def fail_after_flush():
             real_flush()
             raise SQLAlchemyError("Simulated failure")
 
         with patch.object(db.session, "commit", side_effect=fail_after_flush):
-            response = self.save([
-                {"id": field.id, "value": "Should roll back"} for field in self.fields[:2]
-            ])
+            response = self.client.patch(f"/profiles/{self.profile_id}/fields", json={
+                "title": "Should roll back",
+                "fields": [{"id": field.id, "value": "Should roll back"} for field in self.fields[:2]],
+            })
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json["error"]["code"], "ERROR_UPDATING_PROFILE_FIELDS")
         self.assert_unchanged()
+        self.assertEqual(db.session.get(Profile, self.profile_id).title, original_title)
 
 
 if __name__ == "__main__":

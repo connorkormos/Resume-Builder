@@ -40,11 +40,17 @@ def update_profile_fields(profile, form_data):
     if profile.user_id != user_id:
         raise Forbidden(description="Only the owner can modify this profile.")
 
-    if not isinstance(form_data, dict) or not isinstance(form_data.get("fields"), list):
+    if not isinstance(form_data, dict):
+        raise BadRequest(description="Request body must be a JSON object.")
+    field_updates = form_data.get("fields", [] if "title" in form_data else None)
+    if not isinstance(field_updates, list):
         raise BadRequest(description="Request body must contain a fields array.")
+    if "title" in form_data:
+        if not isinstance(form_data["title"], str) or not form_data["title"].strip():
+            raise BadRequest(description="Profile title must be a non-empty string.")
 
     changes = {}
-    for field_data in form_data["fields"]:
+    for field_data in field_updates:
         if not isinstance(field_data, dict):
             raise BadRequest(description="Each field must be an object with an id and value.")
         field_id = field_data.get("id")
@@ -56,20 +62,19 @@ def update_profile_fields(profile, form_data):
             raise BadRequest(description="Each field value must be a string.")
         changes[field_id] = field_data["value"]
 
-    if not changes:
-        return []
-
     fields = (
         Profile_Field.query
         .join(Profile_Field.profile_subsection)
         .join(Profile_Subsection.profile_section)
         .filter(Profile_Section.profile_id == profile.id, Profile_Field.id.in_(changes))
         .all()
-    )
+    ) if changes else []
     if len(fields) != len(changes):
         raise NotFound(description="One or more fields were not found in this profile.")
 
     fields_by_id = {field.id: field for field in fields}
     for field_id, value in changes.items():
         fields_by_id[field_id].value = value
+    if "title" in form_data:
+        profile.title = form_data["title"]
     return [fields_by_id[field_id] for field_id in changes]

@@ -21,6 +21,7 @@ export default function EditProfile() {
 function ProfileEditor({ initialProfile }) {
     const dispatch = useDispatch();
     const [profile, setProfile] = useState(initialProfile);
+    const [title, setTitle] = useState(initialProfile.title ?? '');
     const [fieldChanges, setFieldChanges] = useState({});
     const [availableSections, setAvailableSections] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -28,7 +29,8 @@ function ProfileEditor({ initialProfile }) {
     const [saveMessage, setSaveMessage] = useState('');
     const [saveError, setSaveError] = useState('');
     const isBusy = isSaving || isAddingSection;
-    const hasChanges = Object.keys(fieldChanges).length > 0;
+    const titleChanged = title !== (profile.title ?? '');
+    const hasChanges = titleChanged || Object.keys(fieldChanges).length > 0;
 
     useEffect(() => {
         let active = true;
@@ -57,12 +59,16 @@ function ProfileEditor({ initialProfile }) {
     const saveChanges = async (event) => {
         event.preventDefault();
         if (isBusy || !hasChanges) return;
+        if (titleChanged && !title.trim()) {
+            setSaveError('Please enter a profile title.');
+            return;
+        }
         setIsSaving(true);
         setSaveMessage('');
         setSaveError('');
         try {
             const fields = Object.entries(fieldChanges).map(([id, value]) => ({ id: Number(id), value }));
-            const response = await updateProfileFieldsInApi(profile.id, fields);
+            const response = await updateProfileFieldsInApi(profile.id, fields, titleChanged ? title : undefined);
             if (!response) {
                 setSaveError('Unable to save changes. Your edits are still here; please try again.');
                 return;
@@ -70,6 +76,7 @@ function ProfileEditor({ initialProfile }) {
             const savedFields = new Map(response.fields.map((field) => [field.id, field]));
             const updatedProfile = {
                 ...profile,
+                title: response.title ?? profile.title,
                 sections: (profile.sections ?? []).map((section) => ({
                     ...section,
                     subsections: (section.subsections ?? []).map((subsection) => ({
@@ -79,6 +86,7 @@ function ProfileEditor({ initialProfile }) {
                 })),
             };
             setProfile(updatedProfile);
+            setTitle(updatedProfile.title ?? '');
             dispatch(updateProfile(updatedProfile));
             setFieldChanges({});
             setSaveMessage('Changes saved.');
@@ -106,9 +114,24 @@ function ProfileEditor({ initialProfile }) {
         <div className={styles.editProfileContainer}>
             <h2 className={styles.profileHeading}>Edit Profile</h2>
             <form className={styles.editProfileForm} onSubmit={saveChanges} aria-busy={isBusy}>
+                <button className={styles.saveChangesButton} type="submit" disabled={isBusy || !hasChanges}>
+                    {isSaving ? 'Saving…' : 'Save Changes'}
+                </button>
                 <div className={styles.editProfileFormGroup}>
                     <label className={styles.profileFormLabel} htmlFor="profile-title">Profile Title:</label>
-                    <input className={styles.profileFormInput} type="text" id="profile-title" value={profile.title ?? ''} readOnly />
+                    <input
+                        className={styles.profileFormInput}
+                        type="text"
+                        id="profile-title"
+                        value={title}
+                        disabled={isBusy}
+                        required
+                        onChange={(event) => {
+                            setTitle(event.target.value);
+                            setSaveMessage('');
+                            setSaveError('');
+                        }}
+                    />
                 </div>
                 <div className={styles.profileSectionsWrapper}>
                     {(profile.sections ?? []).map((section) => (
@@ -121,9 +144,7 @@ function ProfileEditor({ initialProfile }) {
                         />
                     ))}
                 </div>
-                <button type="submit" disabled={isBusy || !hasChanges}>
-                    {isSaving ? 'Saving…' : 'Save Changes'}
-                </button>
+
                 {saveMessage && <p role="status">{saveMessage}</p>}
                 {saveError && <p role="alert">{saveError}</p>}
                 {availableSections.length > 0 && (

@@ -61,11 +61,17 @@
 
 .profileFormInput {
     /* width: 100%; */
-    padding: 0.25rem 1rem;
+    width: 20rem;
+    box-sizing: border-box;
+    padding: 0.25rem 0.5rem;
     border: none;
     outline: none;
     border-radius: 0.25rem;
     color: black;
+}
+
+textarea.profileFormInput {
+    resize: vertical;
 }
 
 .profileInfoForm {
@@ -156,6 +162,19 @@
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
+        }
+
+        .saveChangesButton {
+            padding: 0.5rem 1rem;
+            background-color: var(--bootstrap-purple);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+
+            &:hover {
+                filter: brightness(1.1);
+            }
         }
     }
 

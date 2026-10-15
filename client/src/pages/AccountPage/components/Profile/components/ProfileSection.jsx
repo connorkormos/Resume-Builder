@@ -14,20 +14,25 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
             {(section.subsections ?? []).map((subsection) => {
                 return (
                     <div key={subsection.id} className={styles.profileSubsectionWrapper}>
-                        {(subsection.fields ?? []).map((field) => (
+                        {(subsection.fields ?? []).map((field) => {
+                            const isMultiline = ['summary', 'description'].includes((field.label ?? '').trim().toLowerCase());
+                            const FieldInput = isMultiline ? 'textarea' : 'input';
+                            return (
                             <div key={field.id} className={styles.profileFieldWrapper}>
-                                <label className={styles.profileFormLabel} htmlFor={`profile-field-${field.id}`}>{field.label}:</label>
-                                <input
+                                <label className={styles.profileFormLabel} style={{ marginBottom: isMultiline ? 'auto' : undefined}} htmlFor={`profile-field-${field.id}`}>{field.label}:</label>
+                                <FieldInput
                                     id={`profile-field-${field.id}`}
                                     className={styles.profileFormInput}
-                                    type="text"
+                                    {...(isMultiline ? { rows: 4 } : { type: 'text' })}
                                     value={fieldChanges[field.id] ?? field.value ?? ''}
+                                    style={{ padding: isMultiline ? '0.5rem' : undefined }}
                                     onChange={(event) => onFieldChange(field, event.target.value)}
                                     readOnly={!onFieldChange}
                                     disabled={disabled}
                                 />
                             </div>
-                        ))}
+                            );
+                        })}
                         {/* Render subsection content here */}
                     </div>
                 );

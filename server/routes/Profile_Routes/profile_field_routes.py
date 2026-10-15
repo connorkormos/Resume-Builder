@@ -14,8 +14,9 @@ profile_field_bp = Blueprint("profile_fields", __name__)
 @profile_field_bp.route("/<int:profile_id>/fields", methods=["PATCH"])
 def update_fields(profile_id):
     profile = get_profile(profile_id)
+    form_data = request.get_json(silent=True)
     try:
-        fields = update_profile_fields(profile, request.get_json(silent=True))
+        fields = update_profile_fields(profile, form_data)
         db.session.commit()
     except (BadRequest, Unauthorized, Forbidden, NotFound) as error:
         db.session.rollback()
@@ -34,4 +35,7 @@ def update_fields(profile_id):
             message="Failed to update profile fields.",
         )
 
-    return jsonify({"fields": [field.to_dict() for field in fields]}), 200
+    response = {"fields": [field.to_dict() for field in fields]}
+    if "title" in form_data:
+        response["title"] = profile.title
+    return jsonify(response), 200
