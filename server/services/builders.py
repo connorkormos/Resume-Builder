@@ -1,7 +1,7 @@
 from copy import deepcopy
 from models import Column, Field, Section, Subsection, db, Resume
 
-from services.defaults import (
+from lib.defaults import (
     RESUME_DEFAULTS,
     COLUMN_DEFAULTS,
     get_section_definition,

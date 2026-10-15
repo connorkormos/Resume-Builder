@@ -23,6 +23,29 @@ export const getUserProfiles = async () => {
    }
 }
 
+export const getUserProfile = async (profileId) => {
+   try {
+      const responseData = await fetchApi({
+         endpoint: `/profiles/${profileId}`,
+         options: {
+            method: 'GET'
+         }
+      });
+
+      return responseData;
+
+   } catch (error) {
+      console.error('Error fetching user profile: ', error);
+      alert(
+         error?.code && error?.message
+         ? error.code + '\n' + error.message
+         : 'Error fetching user profile.'
+      );
+
+      return null;
+   }
+};
+
 export const createUserProfile = async (profileTitle) => {
    try {
       const responseData = await fetchApi({
@@ -67,6 +90,56 @@ export const deleteUserProfile = async (profileId) => {
          error?.code && error?.message
          ? error.code + '\n' + error.message
          : 'Error deleting user profile.'
+      );
+
+      return null;
+   }
+};
+
+export const getAvailableProfileSectionsFromApi = async (profileId) => {
+   try {
+      const availableSectionData = await fetchApi({
+         endpoint: `/profiles/sections/${profileId}/available`,
+         options: {
+            method: 'GET'
+         }
+      });
+
+      return availableSectionData;
+
+   } catch (error) {
+      console.error('Error fetching available profile sections: ', error);
+      alert(
+         error?.code && error?.message
+         ? error.code + '\n' + error.message
+         : 'Error fetching available profile sections.'
+      );
+
+      return null;
+   }
+};
+
+export const addProfileSectionToApi = async (profileId, sectionType) => {
+   try {
+      const responseData = await fetchApi({
+         endpoint: `/profiles/sections/${profileId}`,
+         options: {
+            method: 'POST',
+            body: JSON.stringify({ type: sectionType }),
+            headers: {
+               'Content-Type': 'application/json'
+            }
+         }
+      });
+
+      return responseData;
+
+   } catch (error) {
+      console.error('Error adding profile section: ', error);
+      alert(
+         error?.code && error?.message
+         ? error.code + '\n' + error.message
+         : 'Error adding profile section.'
       );
 
       return null;

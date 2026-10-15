@@ -64,46 +64,55 @@ SECTION_DEFAULTS = {
 
 SECTION_DEFINITIONS = {
     "header": {
+        "type": "header",
         "label": "Header",
         "heading": "Header",
         "fields": ["Name", "Title"],
     },
     "workHistory": {
+        "type": "workHistory",
         "label": "Work History",
         "heading": "Work History",
         "fields": ["Job Title", "Company", "Location", "Start/End Dates", "Description"],
     },
     "education": {
+        "type": "education",
         "label": "Education",
         "heading": "Education",
         "fields": ["School", "Degree", "Field of Study", "Location", "Start/End Dates", "Description"],
     },
     "skills": {
+        "type": "skills",
         "label": "Skills",
         "heading": "Skills",
         "fields": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
     },
     "contact": {
+        "type": "contact",
         "label": "Contact",
         "heading": "Contact",
         "fields": ["Email", "Phone", "Location", "Website", "LinkedIn"],
     },
     "summary": {
+        "type": "summary",
         "label": "Summary",
         "heading": "Summary",
         "fields": ["Summary"],
     },
     "projects": {
+        "type": "projects",
         "label": "Projects",
         "heading": "Projects",
         "fields": ["Project Title", "Company/School", "Link", "Dates", "Description"],
     },
     "custom": {
+        "type": "custom",
         "label": "Custom",
         "heading": "Custom Section",
         "fields": ["Custom Field"],
     },
     "default": {
+        "type": "default",
         "label": "Default",
         "heading": "New Section",
         "fields": ["Field"],

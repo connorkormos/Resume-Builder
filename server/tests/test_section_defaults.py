@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, db
 from models import Section, User
-from services.defaults import SECTION_DEFAULTS, SECTION_DEFINITIONS, get_section_definition
+from lib.defaults import SECTION_DEFAULTS, SECTION_DEFINITIONS, get_section_definition
 
 
 class SectionDefaultsTest(unittest.TestCase):
