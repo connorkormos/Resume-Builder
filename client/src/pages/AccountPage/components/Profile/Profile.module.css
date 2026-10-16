@@ -405,15 +405,11 @@ textarea.profileFormInput {
         width: 100%;
 
         .profileSectionsWrapper {
-
             .profileSectionWrapper {
-
                 .profileSectionHeader {
-
                     .deleteSectionButton {
                         margin: auto;
                         margin-right: 0;
-                        /* font-size: 0.5rem; */
                         padding: 0.25rem 0.5rem;
                     }
                 }

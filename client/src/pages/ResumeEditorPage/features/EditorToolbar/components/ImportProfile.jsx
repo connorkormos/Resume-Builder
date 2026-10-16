@@ -10,46 +10,61 @@ import { updateProfile } from "@/store/userSlice";
 
 import { getUserProfile } from '@/services/profileServices';
 
-function replaceFieldValueText(slateFieldValue, profileFieldValue) {
-    // if (slateFieldValue.type === 'unordered-list') {
-    //     console.log(slateFieldValue)
-    //     // continue;
-    //     return;
-    // }
-    const profileWords = typeof profileFieldValue === "string"
-        ? profileFieldValue.trim().split(/\s+/).filter(Boolean)
-        : [];
-    const hasMultipleItems = slateFieldValue.length > 1;
-    const newSlateFieldValue = slateFieldValue.map((item, index) => {
-        console.log(item.type);
+function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = false) {
+    if (typeof profileFieldValue !== 'string') return slateFieldValue;
+
+    const profileText = profileFieldValue.trim();
+    const parts = isList
+        ? profileText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+        : profileText.split(/\s+/).filter(Boolean);
+
+    // Keep an empty list item when importing blank text so the list stays editable.
+    if (isList && parts.length === 0) parts.push('');
+    const valueItems = isList
+        ? parts.map((line, index) => slateFieldValue[index] ?? slateFieldValue.at(-1) ?? {
+            type: 'list-item',
+            children: [{ text: line }],
+        })
+        : slateFieldValue;
+    let wordIndex = 0;
+
+    return valueItems.map((item, index) => {
         if (item.type === 'unordered-list' || item.type === 'ordered-list') {
             return {
                 ...item,
-                children: replaceFieldValueText(item.children, profileFieldValue),
+                children: replaceFieldValueText(item.children, profileFieldValue, true),
             };
         }
+
+        let replacementText = profileText;
+        if (isList) {
+            replacementText = parts[index];
+        } else if (valueItems.length > 1) {
+            const originalText = item.children.map((child) => child.text ?? '').join('');
+            const originalWordCount = originalText.trim().split(/\s+/).filter(Boolean).length;
+            const endIndex = index === valueItems.length - 1
+                ? parts.length
+                : wordIndex + originalWordCount;
+            replacementText = parts.slice(wordIndex, endIndex).join(' ');
+            wordIndex = endIndex;
+        }
+
         return {
             ...item,
             children: item.children.map((child) => {
-                // if (child.text.length === 0) return child;
                 if (!child.text || child.text.length === 0) return { ...child };
-                // console.log('CHILD BEFORE UPDATE', child);
                 const slateFieldTextIsAllCaps = child.text === child.text.toUpperCase();
                 const leadingWhitespace = child.text.match(/^\s*/)[0];
                 const trailingWhitespace = child.text.match(/\s*$/)[0];
-                const replacementText = hasMultipleItems
-                    ? (index === slateFieldValue.length - 1
-                        ? profileWords.slice(index).join(' ')
-                        : profileWords[index] ?? '')
-                    : profileFieldValue;
                 return {
                     ...child,
-                    text: leadingWhitespace + (slateFieldTextIsAllCaps ? replacementText.trim().toUpperCase() : replacementText.trim()) + trailingWhitespace,
+                    text: leadingWhitespace
+                        + (slateFieldTextIsAllCaps ? replacementText.toUpperCase() : replacementText)
+                        + trailingWhitespace,
                 };
             }),
-        }
+        };
     });
-    return newSlateFieldValue;
 }
 
 export default function ImportProfile() {

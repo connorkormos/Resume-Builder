@@ -42,16 +42,16 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                         </div>
                         {(subsection.fields ?? []).map((field) => {
                             const isMultiline = ['summary', 'description'].includes((field.label ?? '').trim().toLowerCase());
-                            const FieldInput = isMultiline ? 'textarea' : 'input';
+                            const FieldInput = isMultiline ? 'textarea' : 'textarea';
                             return (
                                 <div key={field.id} className={styles.profileFieldWrapper}>
                                     <label className={styles.profileFormLabel} style={{ marginBottom: isMultiline ? 'auto' : undefined }} htmlFor={`profile-field-${field.id}`}>{field.label}:</label>
-                                    <FieldInput
+                                    <textarea
                                         id={`profile-field-${field.id}`}
                                         className={styles.profileFormInput}
-                                        {...(isMultiline ? { rows: '10' } : { type: 'text' })}
+                                        // {...(isMultiline ? { rows: '10' } : { type: 'text' })}
                                         value={fieldChanges[field.id] ?? field.value ?? ''}
-                                        style={{ padding: isMultiline ? '0.5rem' : undefined }}
+                                        style={{ padding: isMultiline ? '0.5rem' : undefined, resize: 'none' }}
                                         onChange={(event) => onFieldChange(field, event.target.value)}
                                         readOnly={!onFieldChange}
                                     />
