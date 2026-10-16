@@ -392,7 +392,8 @@ const resumeSlice = createSlice({
             console.error(`Cannot update field. Subsection with ID ${field.subsectionId} not found.`);
             return;
          }
-
+         
+         console.log(field, id, changes);
          mergeDeep(field, changes);
       },
 

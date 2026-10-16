@@ -14,7 +14,7 @@ import CurrentlyEditing from "./CurrentlyEditing";
 import Save from "./Save";
 import Copy from "./Copy";
 import Print from "./Print";
-
+import ImportProfile from './ImportProfile';
 
 
 import styles from "../Toolbar.module.css";
@@ -68,6 +68,7 @@ const TopBar = ({ handlePrint }) => {
   //     ? resumeTitle
   //     : resumeTitle.slice(0, 10) + "...";
 
+
   return (
     <div className={styles.topBarContainer}>
       {isMobile && (
@@ -101,6 +102,7 @@ const TopBar = ({ handlePrint }) => {
           <Print handlePrint={handlePrint} />
         </>
       )}
+      <ImportProfile />
       {/* </div> */}
     </div>
   );
