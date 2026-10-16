@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet, useOutletContext, useSearchParams } from 'react-router-dom';
 
@@ -12,11 +12,9 @@ export default function Profile() {
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const [searchParams] = useSearchParams();
-    const [loadState, setLoadState] = useState({ userId: null, error: false });
     const profiles = user.profiles ?? [];
     const selectedProfileId = searchParams.get('profileId');
     const selectedProfile = profiles.find((profile) => String(profile.id) === selectedProfileId);
-    const isLoading = Boolean(user.id) && loadState.userId !== user.id;
 
     useEffect(() => {
         if (!user.id) return;
@@ -28,7 +26,6 @@ export default function Profile() {
             if (data !== null) {
                 dispatch(updateUser({ profiles: data }));
             }
-            setLoadState({ userId: user.id, error: data === null });
         };
 
         void loadProfiles();
@@ -44,8 +41,6 @@ export default function Profile() {
                 ...accountContext,
                 profiles,
                 selectedProfile,
-                isLoading,
-                error: loadState.userId === user.id && loadState.error,
             }} />
         </div>
     );

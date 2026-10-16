@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useOutletContext } from 'react-router-dom';
 import { copyUserProfile, deleteUserProfile } from '@/services/profileServices';
@@ -9,24 +9,13 @@ import { formatCompactDateTime } from "@/utils/formatters";
 import styles from '../Profile.module.css';
 
 export default function Profiles() {
-    const { profiles, isLoading, error } = useOutletContext();
+    const { profiles } = useOutletContext();
     const dispatch = useDispatch();
-    const [copyingProfileId, setCopyingProfileId] = useState(null);
-    const [copyError, setCopyError] = useState('');
 
     const copyProfile = async (profileId) => {
-        if (copyingProfileId !== null) return;
-        setCopyingProfileId(profileId);
-        setCopyError('');
-        try {
-            const copiedProfile = await copyUserProfile(profileId);
-            if (copiedProfile) {
-                dispatch(updateUser({ profiles: [copiedProfile, ...profiles] }));
-            } else {
-                setCopyError('Unable to copy the profile. Please try again.');
-            }
-        } finally {
-            setCopyingProfileId(null);
+        const copiedProfile = await copyUserProfile(profileId);
+        if (copiedProfile) {
+            dispatch(updateUser({ profiles: [copiedProfile, ...profiles] }));
         }
     };
 
@@ -56,9 +45,8 @@ export default function Profiles() {
                     className={styles.editProfileButton}
                     type="button"
                     onClick={() => copyProfile(profile.id)}
-                    disabled={copyingProfileId !== null}
                 >
-                    {copyingProfileId === profile.id ? 'Copying...' : 'Copy'}
+                    Copy
                 </button>
                 <button className={styles.deleteProfileButton} onClick={() => deleteProfile(profile.id)}>Delete</button>
             </div>
@@ -69,10 +57,7 @@ export default function Profiles() {
         <>
             <div className={styles.profileRowsContainer}>
                 <h2 className={styles.profileHeading}>Your Profiles</h2>
-                {copyError && <p role="alert">{copyError}</p>}
-                {isLoading ? <p>Loading profiles...</p> : error ? (
-                    <p>Unable to load profiles.</p>
-                ) : profiles.length === 0 ? (
+                {profiles.length === 0 ? (
                     <p>You have not created any profiles yet.</p>
                 ) : profileRows}
             </div>

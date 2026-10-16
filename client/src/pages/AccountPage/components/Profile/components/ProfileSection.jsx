@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from '../Profile.module.css';
 
-export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, disabled = false, onAddSubsection, isAddingSubsection = false, subsectionError = '', onDeleteSection, onDeleteSubsection, deletingItem }) {
+export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, onAddSubsection, onDeleteSection, onDeleteSubsection }) {
 
     if (!section) {
         return null;
@@ -12,8 +12,8 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
         <div className={styles.profileSectionWrapper}>
             <div className={styles.profileSectionHeader}>
                 <h2>{section.label}</h2>
-                <button className={styles.deleteSectionButton} type="button" disabled={disabled} onClick={() => onDeleteSection(section.id)}>
-                    {deletingItem?.type === 'section' && deletingItem.id === section.id ? 'Deleting…' : 'Delete Section'}
+                <button className={styles.deleteSectionButton} type="button" onClick={() => onDeleteSection(section.id)}>
+                    Delete Section
                 </button>
             </div>
             {(section.subsections ?? []).map((subsection, index) => {
@@ -21,8 +21,8 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                     <div key={subsection.id} className={styles.profileSubsectionWrapper}>
                         <div className={styles.profileSubsectionHeader}>
                             <h2>Subsection {index + 1}</h2>
-                            <button className={styles.deleteSubsectionButton} type="button" disabled={disabled} onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
-                                {deletingItem?.type === 'subsection' && deletingItem.id === subsection.id ? 'Deleting…' : 'Delete Subsection'}
+                            <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
+                                Delete Subsection
                             </button>
                         </div>
                         {(subsection.fields ?? []).map((field) => {
@@ -39,7 +39,6 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                                     style={{ padding: isMultiline ? '0.5rem' : undefined }}
                                     onChange={(event) => onFieldChange(field, event.target.value)}
                                     readOnly={!onFieldChange}
-                                    disabled={disabled}
                                 />
                             </div>
                             );
@@ -52,13 +51,11 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                 <button
                     className={styles.addSubsectionButton}
                     type="button"
-                    disabled={disabled}
                     onClick={() => onAddSubsection(section.id)}
                 >
-                    {isAddingSubsection ? 'Adding…' : '+ Add Subsection'}
+                    + Add Subsection
                 </button>
             )}
-            {subsectionError && <p role="alert">{subsectionError}</p>}
 
         </div>
     );

@@ -8,7 +8,7 @@ import { createUserProfile } from '@/services/profileServices';
 import styles from '../Profile.module.css';
 
 export default function CreateProfileForm() {
-    const { profiles, isLoading } = useOutletContext();
+    const { profiles } = useOutletContext();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,7 +18,7 @@ export default function CreateProfileForm() {
 
     const submitCreateProfile = async (e) => {
         e.preventDefault();
-        if (isLoading || isSubmitting) return;
+        if (isSubmitting) return;
         setIsSubmitting(true);
         try {
             const createdProfile = await createUserProfile(profileData.title);
@@ -46,7 +46,7 @@ export default function CreateProfileForm() {
                         onChange={(e) => setProfileData({ ...profileData, title: e.target.value })}
                     />
                 </div>
-                <button type="submit" className={styles.profileFormSubmitButton} disabled={isLoading || isSubmitting}>
+                <button type="submit" className={styles.profileFormSubmitButton} disabled={isSubmitting}>
                     {isSubmitting ? 'Creating...' : 'Create Profile'}
                 </button>
             </form>
