@@ -49,7 +49,10 @@ function ProfileEditor({ initialProfile }) {
 
     const saveChanges = async (event) => {
         event.preventDefault();
-        if (!hasChanges) return;
+        if (!hasChanges) {
+            window.alert('No changes to save.');
+            return;
+        };
         if (titleChanged && !title.trim()) return;
         const fields = Object.entries(fieldChanges).map(([id, value]) => ({ id: Number(id), value }));
         const response = await updateProfileFieldsInApi(profile.id, fields, titleChanged ? title : undefined);
@@ -70,6 +73,7 @@ function ProfileEditor({ initialProfile }) {
         setTitle(updatedProfile.title ?? '');
         dispatch(updateProfile(updatedProfile));
         setFieldChanges({});
+        window.alert('Changes saved successfully.');
     };
 
     const addProfileSection = async (sectionType) => {
@@ -138,15 +142,14 @@ function ProfileEditor({ initialProfile }) {
             ? current : [...current, { type: section.type, label: section.label }]);
     };
 
+    const [openSections, setOpenSections] = useState([]);
+
     return (
         <div className={styles.editProfileContainer}>
             <h2 className={styles.profileHeading}>Edit Profile</h2>
             <form className={styles.editProfileForm} onSubmit={saveChanges}>
-                <button className={styles.saveChangesButton} type="submit" disabled={!hasChanges}>
-                    Save Changes
-                </button>
                 <div className={styles.editProfileFormGroup}>
-                    <label className={styles.profileFormLabel} htmlFor="profile-title">Profile Title:</label>
+                    <label className={styles.profileFormLabel} htmlFor="profile-title"><h2>Profile Title:</h2></label>
                     <input
                         className={styles.profileFormInput}
                         type="text"
@@ -167,10 +170,14 @@ function ProfileEditor({ initialProfile }) {
                             onAddSubsection={addProfileSubsection}
                             onDeleteSection={deleteProfileSection}
                             onDeleteSubsection={deleteProfileSubsection}
+                            openSections={openSections}
+                            setOpenSections={setOpenSections}
                         />
                     ))}
                 </div>
-
+                <button className={styles.saveChangesButton} type="submit">
+                    Save Changes
+                </button>
                 {availableSections.length > 0 && (
                     <div className={styles.availableSectionsWrapper}>
                         {availableSections.map((section) => (
@@ -180,6 +187,7 @@ function ProfileEditor({ initialProfile }) {
                         ))}
                     </div>
                 )}
+
             </form>
             <Link to="..">Back to Profiles</Link>
         </div>
