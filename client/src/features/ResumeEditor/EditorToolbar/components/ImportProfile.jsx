@@ -1,4 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { MdArrowDropDown } from 'react-icons/md';
+import TextFormatDropdown from '../../TextFormatting/shared/TextFormatDropdown';
 
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -52,28 +55,21 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue) {
 export default function ImportProfile() {
 
     const dispatch = useDispatch();
-    const firstProfile = useSelector((state) => state.user.profiles?.[0]);
-    const firstProfileId = firstProfile?.id;
-    const profileSections = firstProfile?.sections;
+    const profiles = useSelector((state) => state.user.profiles) ?? [];
+    const [dropdownIsOpen, setDropdownIsOpen] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const [importError, setImportError] = useState('');
+    const importRequest = useRef(0);
     const resumeSections = useSelector((state) => state.resume.present?.sections?.byId);
     const reduxResume = useSelector((state) => state.resume.present);
     const resumeFields = reduxResume.fields.byId;
     const resumeSubsections = reduxResume.subsections.byId;
 
-    useEffect(() => {
-        if (!firstProfileId) return;
-        let active = true;
-        const setUserProfileInfo = async () => {
+    useEffect(() => () => {
+        importRequest.current += 1;
+    }, []);
 
-            const userProfileInfo = await getUserProfile(firstProfileId);
-            if (active && userProfileInfo) dispatch(updateProfile(userProfileInfo));
-        }
-
-        setUserProfileInfo();
-        return () => { active = false; };
-    }, [firstProfileId, dispatch]);
-
-    const handleImportProfileButtonClick = () => {
+    const importProfileSections = (profileSections) => {
         if (!resumeFields || !resumeSubsections || !resumeSections || !Array.isArray(profileSections)) return;
 
         const profileSubsectionsByType = new Map();
@@ -127,7 +123,72 @@ export default function ImportProfile() {
         }
     }
 
+    const handleProfileSelect = async (profileId) => {
+        if (!profileId || isImporting) return;
+        const requestId = ++importRequest.current;
+        setDropdownIsOpen(false);
+        setIsImporting(true);
+        setImportError('');
+        try {
+            const profile = await getUserProfile(profileId);
+            if (requestId !== importRequest.current) return;
+            if (!profile || !Array.isArray(profile.sections)) {
+                setImportError('Unable to import this profile. Please try again.');
+                return;
+            }
+            dispatch(updateProfile(profile));
+            importProfileSections(profile.sections);
+        } catch {
+            if (requestId === importRequest.current) {
+                setImportError('Unable to import this profile. Please try again.');
+            }
+        } finally {
+            if (requestId === importRequest.current) {
+                setIsImporting(false);
+            }
+        }
+    };
+
+    if (profiles.length === 0) {
+        return <Link className="buttonMain" to="/account/profile/create">Create a Profile</Link>;
+    }
+
     return (
-        <button onClick={handleImportProfileButtonClick}>Profile</button>
-    )
+        <div onKeyDown={(event) => {
+            if (event.key === 'Escape') setDropdownIsOpen(false);
+        }}>
+            <button
+                type="button"
+                className="buttonMain"
+                data-id="open-close-dropdown-button"
+                aria-expanded={dropdownIsOpen}
+                onClick={() => setDropdownIsOpen(!dropdownIsOpen)}
+                disabled={isImporting}
+                aria-busy={isImporting}
+            >
+                {isImporting ? 'Importing…' : 'Import Profile'}
+                <MdArrowDropDown style={{ marginLeft: '0.25rem', marginRight: '-0.25rem' }} />
+            </button>
+            {dropdownIsOpen && (
+                <TextFormatDropdown
+                    isOpen={dropdownIsOpen}
+                    setIsOpen={setDropdownIsOpen}
+                    wrapperStyling={{ flexDirection: 'column', width: 'max-content' }}
+                    containerStyling={{ maxHeight: '20rem', overflowY: 'auto' }}
+                    dropdownOptions={profiles.map((profile) => (
+                        <button
+                            key={profile.id}
+                            type="button"
+                            className="buttonMain"
+                            style={{ width: '100%', justifyContent: 'flex-start' }}
+                            onClick={() => handleProfileSelect(profile.id)}
+                        >
+                            {profile.title || 'Untitled Profile'}
+                        </button>
+                    ))}
+                />
+            )}
+            {importError && <span role="alert">{importError}</span>}
+        </div>
+    );
 }
