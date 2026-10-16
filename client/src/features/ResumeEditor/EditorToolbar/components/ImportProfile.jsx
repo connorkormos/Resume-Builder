@@ -31,6 +31,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue) {
                 // if (child.text.length === 0) return child;
                 if (!child.text || child.text.length === 0) return { ...child };
                 // console.log('CHILD BEFORE UPDATE', child);
+                const slateFieldTextIsAllCaps = child.text === child.text.toUpperCase();
                 const leadingWhitespace = child.text.match(/^\s*/)[0];
                 const trailingWhitespace = child.text.match(/\s*$/)[0];
                 const replacementText = hasMultipleItems
@@ -40,7 +41,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue) {
                     : profileFieldValue;
                 return {
                     ...child,
-                    text: leadingWhitespace + replacementText.trim() + trailingWhitespace,
+                    text: leadingWhitespace + (slateFieldTextIsAllCaps ? replacementText.trim().toUpperCase() : replacementText.trim()) + trailingWhitespace,
                 };
             }),
         }
@@ -92,15 +93,21 @@ export default function ImportProfile() {
         for (const sectionId of sectionIds) {
             const section = resumeSections[sectionId];
             if (!section?.type) continue;
-            const profileSubsections = profileSubsectionsByType.get(section.type) ?? [];
+            let matchingType = section.type;
+            if (!profileSubsectionsByType.has(matchingType) && section.type === 'defaultSection') {
+                matchingType = [...profileSubsectionsByType.keys()].find((type) =>
+                    type.toLowerCase() === section.label?.trim().toLowerCase(),
+                );
+            }
+            const profileSubsections = profileSubsectionsByType.get(matchingType) ?? [];
 
             for (const subsectionId of section.subsectionIds) {
                 const subsection = resumeSubsections[subsectionId];
                 if (!subsection) continue;
-                const profileIndex = nextSubsectionByType.get(section.type) ?? 0;
+                const profileIndex = nextSubsectionByType.get(matchingType) ?? 0;
                 const profileSubsection = profileSubsections[profileIndex];
                 if (!profileSubsection) break;
-                nextSubsectionByType.set(section.type, profileIndex + 1);
+                nextSubsectionByType.set(matchingType, profileIndex + 1);
 
                 for (const fieldId of subsection.fieldIds) {
                     const field = resumeFields[fieldId];
