@@ -50,7 +50,7 @@ export default function CreateProfileForm() {
                     {isSubmitting ? 'Creating...' : 'Create Profile'}
                 </button>
             </form>
-            <Link to="..">Back to Profiles</Link>
+            <Link to=".." style={{marginTop: '2.5rem'}}>Back to Profiles</Link>
         </div>
     );
 }

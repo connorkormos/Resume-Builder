@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useOutletContext } from 'react-router-dom';
 
-import { getAvailableProfileSectionsFromApi, addProfileSectionToApi, addProfileSubsectionToApi, updateProfileFieldsInApi } from '@/services/profileServices';
+import { getAvailableProfileSectionsFromApi, addProfileSectionToApi, addProfileSubsectionToApi, deleteProfileSectionFromApi, deleteProfileSubsectionFromApi, updateProfileFieldsInApi } from '@/services/profileServices';
 import { updateProfile } from '@/store/userSlice';
 
 import ProfileSection from './ProfileSection';
@@ -27,10 +27,12 @@ function ProfileEditor({ initialProfile }) {
     const [isSaving, setIsSaving] = useState(false);
     const [isAddingSection, setIsAddingSection] = useState(false);
     const [addingSubsectionId, setAddingSubsectionId] = useState(null);
+    const [deletingItem, setDeletingItem] = useState(null);
     const [subsectionError, setSubsectionError] = useState(null);
+    const [deleteError, setDeleteError] = useState('');
     const [saveMessage, setSaveMessage] = useState('');
     const [saveError, setSaveError] = useState('');
-    const isBusy = isSaving || isAddingSection || addingSubsectionId !== null;
+    const isBusy = isSaving || isAddingSection || addingSubsectionId !== null || deletingItem !== null;
     const titleChanged = title !== (profile.title ?? '');
     const hasChanges = titleChanged || Object.keys(fieldChanges).length > 0;
 
@@ -137,6 +139,72 @@ function ProfileEditor({ initialProfile }) {
         }
     };
 
+    const removeFieldChanges = (fieldIds) => {
+        setFieldChanges((current) => {
+            const next = { ...current };
+            for (const id of fieldIds) delete next[id];
+            return next;
+        });
+    };
+
+    const deleteProfileSubsection = async (sectionId, subsectionId, number) => {
+        if (isBusy) return;
+        const section = profile.sections.find((item) => item.id === sectionId);
+        const subsection = section?.subsections?.find((item) => item.id === subsectionId);
+        if (!subsection || !window.confirm(`Delete subsection ${number} from ${section.label}? Its fields will also be deleted.`)) return;
+
+        setDeletingItem({ type: 'subsection', id: subsectionId });
+        setDeleteError('');
+        try {
+            if (!await deleteProfileSubsectionFromApi(sectionId, subsectionId)) {
+                setDeleteError('Unable to delete subsection. Please try again.');
+                return;
+            }
+            const updatedProfile = {
+                ...profile,
+                sections: profile.sections.map((item) => item.id === sectionId ? {
+                    ...item,
+                    subsections: item.subsections.filter((child) => child.id !== subsectionId),
+                } : item),
+            };
+            removeFieldChanges(subsection.fields.map((field) => field.id));
+            setProfile(updatedProfile);
+            dispatch(updateProfile(updatedProfile));
+            setSubsectionError(null);
+            setSaveMessage('');
+        } finally {
+            setDeletingItem(null);
+        }
+    };
+
+    const deleteProfileSection = async (sectionId) => {
+        if (isBusy) return;
+        const section = profile.sections.find((item) => item.id === sectionId);
+        if (!section || !window.confirm(`Delete the ${section.label} section? Its subsections and fields will also be deleted.`)) return;
+
+        setDeletingItem({ type: 'section', id: sectionId });
+        setDeleteError('');
+        try {
+            if (!await deleteProfileSectionFromApi(sectionId)) {
+                setDeleteError('Unable to delete section. Please try again.');
+                return;
+            }
+            const updatedProfile = {
+                ...profile,
+                sections: profile.sections.filter((item) => item.id !== sectionId),
+            };
+            removeFieldChanges(section.subsections.flatMap((subsection) => subsection.fields.map((field) => field.id)));
+            setProfile(updatedProfile);
+            dispatch(updateProfile(updatedProfile));
+            setAvailableSections((current) => current.some((item) => item.type === section.type)
+                ? current : [...current, { type: section.type, label: section.label }]);
+            setSubsectionError(null);
+            setSaveMessage('');
+        } finally {
+            setDeletingItem(null);
+        }
+    };
+
     return (
         <div className={styles.editProfileContainer}>
             <h2 className={styles.profileHeading}>Edit Profile</h2>
@@ -171,12 +239,16 @@ function ProfileEditor({ initialProfile }) {
                             onAddSubsection={addProfileSubsection}
                             isAddingSubsection={addingSubsectionId === section.id}
                             subsectionError={subsectionError?.sectionId === section.id ? subsectionError.message : ''}
+                            onDeleteSection={deleteProfileSection}
+                            onDeleteSubsection={deleteProfileSubsection}
+                            deletingItem={deletingItem}
                         />
                     ))}
                 </div>
 
                 {saveMessage && <p role="status">{saveMessage}</p>}
                 {saveError && <p role="alert">{saveError}</p>}
+                {deleteError && <p role="alert">{deleteError}</p>}
                 {availableSections.length > 0 && (
                     <div className={styles.availableSectionsWrapper}>
                         {availableSections.map((section) => (

@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from '../Profile.module.css';
 
-export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, disabled = false, onAddSubsection, isAddingSubsection = false, subsectionError = '' }) {
+export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, disabled = false, onAddSubsection, isAddingSubsection = false, subsectionError = '', onDeleteSection, onDeleteSubsection, deletingItem }) {
 
     if (!section) {
         return null;
@@ -10,11 +10,21 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
 
     return (
         <div className={styles.profileSectionWrapper}>
-            <h2>{section.label}</h2>
+            <div className={styles.profileSectionHeader}>
+                <h2>{section.label}</h2>
+                <button className={styles.deleteSectionButton} type="button" disabled={disabled} onClick={() => onDeleteSection(section.id)}>
+                    {deletingItem?.type === 'section' && deletingItem.id === section.id ? 'Deleting…' : 'Delete Section'}
+                </button>
+            </div>
             {(section.subsections ?? []).map((subsection, index) => {
                 return (
                     <div key={subsection.id} className={styles.profileSubsectionWrapper}>
-                        <h2>Subsection {index + 1}</h2>
+                        <div className={styles.profileSubsectionHeader}>
+                            <h2>Subsection {index + 1}</h2>
+                            <button className={styles.deleteSubsectionButton} type="button" disabled={disabled} onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
+                                {deletingItem?.type === 'subsection' && deletingItem.id === subsection.id ? 'Deleting…' : 'Delete Subsection'}
+                            </button>
+                        </div>
                         {(subsection.fields ?? []).map((field) => {
                             const isMultiline = ['summary', 'description'].includes((field.label ?? '').trim().toLowerCase());
                             const FieldInput = isMultiline ? 'textarea' : 'input';

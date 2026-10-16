@@ -13,6 +13,20 @@
     .profileFormLabel {
         font-weight: bold;
     }
+
+    .createNewProfileButton {
+        padding: 1rem 3rem;
+        background-color: var(--bootstrap-purple);
+        color: white;
+        border: none;
+        border-radius: 2.5rem;
+        margin: 2.5rem auto 2.5rem 0;
+        cursor: pointer;
+
+        &:hover {
+            filter: brightness(1.1);
+        }
+    }
 }
 
 .createProfileFormContainer {
@@ -125,7 +139,7 @@ textarea.profileFormInput {
 
     .profileRowWrapper {
         display: flex;
-        align-items: center;
+        align-items: end;
         justify-content: space-between;
         height: max-content;
         gap: 2.5rem;
@@ -146,14 +160,14 @@ textarea.profileFormInput {
             display: flex;
             gap: 1rem;
             justify-content: space-between;
-            align-items: center;
+            align-items: end;
 
         }
         
         .editProfileButton,
         .deleteProfileButton {
-            padding: 0.5rem 1rem;
-            background-color: var(--bootstrap-purple);
+            padding: 0.25rem 1rem;
+            background-color: var(--bootstrap-blue-soft);
             color: white;
             border: none;
             border-radius: 0.25rem;
@@ -214,6 +228,30 @@ textarea.profileFormInput {
             gap: 1rem;
             /* width: max-content; */
             width: 100%;
+
+            .profileSectionHeader,
+            .profileSubsectionHeader {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+            }
+
+            .deleteSectionButton,
+            .deleteSubsectionButton {
+                padding: 0.4rem 0.75rem;
+                background-color: var(--bootstrap-dark-red);
+                color: white;
+                border: none;
+                border-radius: 0.25rem;
+                cursor: pointer;
+            }
+
+            .deleteSectionButton:disabled,
+            .deleteSubsectionButton:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
 
             .profileSubsectionWrapper {
                 display: flex;

@@ -12,6 +12,32 @@ export const addProfileSubsectionToApi = async (sectionId) => {
    }
 };
 
+export const deleteProfileSubsectionFromApi = async (sectionId, subsectionId) => {
+   try {
+      await fetchApi({
+         endpoint: `/profiles/sections/${sectionId}/subsections/${subsectionId}`,
+         options: { method: 'DELETE' },
+      });
+      return true;
+   } catch (error) {
+      console.error('Error deleting profile subsection: ', error);
+      return false;
+   }
+};
+
+export const deleteProfileSectionFromApi = async (sectionId) => {
+   try {
+      await fetchApi({
+         endpoint: `/profiles/sections/${sectionId}`,
+         options: { method: 'DELETE' },
+      });
+      return true;
+   } catch (error) {
+      console.error('Error deleting profile section: ', error);
+      return false;
+   }
+};
+
 export const updateProfileFieldsInApi = async (profileId, fields, title) => {
    try {
       return await fetchApi({

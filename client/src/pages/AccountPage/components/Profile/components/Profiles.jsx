@@ -66,15 +66,17 @@ export default function Profiles() {
     ));
 
     return (
-        <div className={styles.profileRowsContainer}>
-            <h2 className={styles.profileHeading}>Your Profiles</h2>
-            <Link to="create">Create Profile</Link>
-            {copyError && <p role="alert">{copyError}</p>}
-            {isLoading ? <p>Loading profiles...</p> : error ? (
-                <p>Unable to load profiles.</p>
-            ) : profiles.length === 0 ? (
-                <p>You have not created any profiles yet.</p>
-            ) : profileRows}
-        </div>
+        <>
+            <div className={styles.profileRowsContainer}>
+                <h2 className={styles.profileHeading}>Your Profiles</h2>
+                {copyError && <p role="alert">{copyError}</p>}
+                {isLoading ? <p>Loading profiles...</p> : error ? (
+                    <p>Unable to load profiles.</p>
+                ) : profiles.length === 0 ? (
+                    <p>You have not created any profiles yet.</p>
+                ) : profileRows}
+            </div>
+                <Link to="create" className={styles.createNewProfileButton}>Create New Profile</Link>
+        </>
     );
 }

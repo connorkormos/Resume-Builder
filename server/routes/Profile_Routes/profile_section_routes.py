@@ -1,11 +1,11 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from sqlalchemy.exc import SQLAlchemyError
 
 from lib.defaults import SECTION_DEFINITIONS
 
 from routes.Profile_Routes.profile_helpers import get_profile
 from routes.Profile_Routes.profile_builders import add_profile_section as build_profile_section
-from models import db
+from models import Profile, Profile_Section, db
 from utils.responses import generate_error
 
 profile_section_bp = Blueprint(
@@ -82,3 +82,31 @@ def add_profile_section(profile_id):
         )
 
     return jsonify(profile_section.to_dict(include_subsections=True)), 201
+
+
+@profile_section_bp.route("/<int:section_id>", methods=["DELETE"])
+def delete_profile_section(section_id):
+    section = (
+        Profile_Section.query.join(Profile_Section.profile)
+        .filter(Profile_Section.id == section_id, Profile.user_id == session.get("user_id"))
+        .first()
+    )
+    if section is None:
+        return generate_error(
+            error_type="NOT_FOUND",
+            code="PROFILE_SECTION_NOT_FOUND",
+            message="Profile section not found.",
+        )
+
+    try:
+        db.session.delete(section)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return generate_error(
+            error_type="SERVER_ERROR",
+            code="ERROR_DELETING_PROFILE_SECTION",
+            message="Failed to delete profile section.",
+        )
+
+    return "", 204

@@ -136,7 +136,7 @@ export default function AccountPage() {
                      isMobile && setSideBarIsOpen(false)
                   }}
                >
-                  Profile
+                  Profiles
                </Link>
             </div>
             <div className={styles.sideBarRow}>
