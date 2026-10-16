@@ -2,9 +2,12 @@ import React from 'react';
 
 import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
 import styles from '../Profile.module.css';
 
 export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, onAddSubsection, onDeleteSection, onDeleteSubsection, openSections, setOpenSections }) {
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     if (!section) {
         return null;
@@ -24,9 +27,9 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                     <MdExpandMore className={styles.toggleShowSectionButton} />
                     {/* {openSections.includes(section.id) ? 'Collapse' : 'Expand'} */}
                 </span>
-                    <button className={styles.deleteSectionButton} type="button" onClick={() => onDeleteSection(section.id)}>
-                        Delete Section
-                    </button>
+                <button className={styles.deleteSectionButton} type="button" onClick={() => onDeleteSection(section.id)}>
+                    Delete {!isMobile && 'Section'}
+                </button>
             </div>
             {openSections.includes(section.id) && (section.subsections ?? []).map((subsection, index) => {
                 return (
@@ -46,7 +49,7 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                                     <FieldInput
                                         id={`profile-field-${field.id}`}
                                         className={styles.profileFormInput}
-                                        {...(isMultiline ? { rows: '10'} : { type: 'text' })}
+                                        {...(isMultiline ? { rows: '10' } : { type: 'text' })}
                                         value={fieldChanges[field.id] ?? field.value ?? ''}
                                         style={{ padding: isMultiline ? '0.5rem' : undefined }}
                                         onChange={(event) => onFieldChange(field, event.target.value)}
@@ -67,10 +70,10 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                             type="button"
                             onClick={() => onAddSubsection(section.id)}
                         >
-                            + Add Subsection
+                            + Add {!isMobile && 'Subsection'}
                         </button>
                         <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
-                            Delete Subsection
+                            Delete {!isMobile && 'Subsection'}
                         </button>
                     </div>
                 </>

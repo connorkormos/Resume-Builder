@@ -10,6 +10,10 @@
         margin: 0 auto;
         margin-bottom: 2.5rem;
         font-size: 2rem;
+
+        @media(max-width: 768px) {
+            font-size: 1.5rem;
+        }
     }
 
     .profileFormLabel {
@@ -43,7 +47,7 @@
         display: flex;
         align-items: end;
         justify-content: space-between;
-            align-items: center;
+        align-items: center;
         height: max-content;
         gap: 2.5rem;
 
@@ -86,6 +90,21 @@
     }
 }
 
+@media(max-width: 768px) {
+    .profileRowsContainer {
+        max-width: 100%;
+
+        .profileRowWrapper {
+            flex-direction: column;
+
+            .profileRowTimeStampsWrapper {
+                flex-direction: column;
+                margin: auto;
+                align-items: center;
+            }
+        }
+    }
+}
 
 .createProfileFormContainer {
     display: flex;
@@ -129,11 +148,28 @@
     }
 }
 
+@media(max-width: 768px) {
+    .createProfileFormContainer {
+        width: 100%;
+        margin: 0 auto;
 
+        .profileRowWrapper {
+            flex-direction: column;
+
+            .profileRowTimeStampsWrapper {
+                flex-direction: column;
+                margin: auto;
+                align-items: center;
+            }
+        }
+    }
+}
 
 .profileFormInput {
     /* width: 100%; */
-    width: 20rem;
+    /* width: 20rem; */
+    /* width: content; */
+    field-sizing: content;
     box-sizing: border-box;
     padding: 0.25rem 0.5rem;
     border: none;
@@ -361,4 +397,50 @@ textarea.profileFormInput {
 
     /* max-width: 60rem; */
     /* margin: 0 auto; */
+}
+
+
+@media(max-width: 768px) {
+    .editProfileContainer {
+        width: 100%;
+
+        .profileSectionsWrapper {
+
+            .profileSectionWrapper {
+
+                .profileSectionHeader {
+
+                    .deleteSectionButton {
+                        margin: auto;
+                        margin-right: 0;
+                        /* font-size: 0.5rem; */
+                        padding: 0.25rem 0.5rem;
+                    }
+                }
+
+                .profileSubsectionWrapper {
+                    display: flex;
+                    flex-direction: column;
+
+                    .profileFieldWrapper {
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                }
+
+                .subsectionButtonsWrapper {
+                    width: 100%;
+                    flex-direction: row;
+                    justify-content: space-between;
+
+                    .addSubsectionButton,
+                    .deleteSubsectionButton {
+                        padding: 0.25rem 0.5rem;
+                    }
+                }
+            }
+        }
+    }
+
 }
