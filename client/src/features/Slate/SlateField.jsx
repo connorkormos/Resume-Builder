@@ -7,14 +7,28 @@ import { useResumeSlateEditor } from "./useResumeSlateEditor.js";
 import Leaf from "./renderLeaf.jsx";
 import RenderElement from "./RenderElement.jsx";
 
-import { getNodeString } from "@/helpers/getNodeString.js";
-import { getMinWidth } from "@/helpers/getMinWidth.js";
+import { getNodeString } from "@/features/Slate/helpers/getNodeString.js";
 import {
   getCascadedFontSize,
   getCascadedLineHeight,
-} from "@/helpers/leafHelpers.js";
+} from "@/features/Slate/helpers/leafHelpers.js";
+
+const getMinWidth = ({
+   text,
+   fontSize = '16px',
+   fontWeight = '400',
+   fontFamily = 'Arial',
+}) => {
+   const canvas = document.createElement('canvas');
+   const context = canvas.getContext('2d');
+
+   context.font = `${fontWeight} ${fontSize} ${fontFamily}`;
+
+   return context.measureText(text).width;
+}
 
 const SlateField = ({ field }) => {
+  
   const fieldPlainText = getNodeString(field);
   const fieldMinWidth = !fieldPlainText ? getMinWidth(field.label) : "auto";
 

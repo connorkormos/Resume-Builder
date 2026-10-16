@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useStore } from 'react-redux';
-import { createSlateHistoryGrouping, observeHistoryOperations } from '../helpers/slateHelpers/historyGrouping.js';
+import { createSlateHistoryGrouping, observeHistoryOperations } from '../features/Slate/helpers/historyGrouping.js';
 
 export function useSlateHistoryGrouping(editor, editorId) {
   const store = useStore();

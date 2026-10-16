@@ -8,7 +8,7 @@ import Leaf from "@/features/Slate/renderLeaf.jsx";
 import {
   getCascadedFontSize,
   getCascadedLineHeight,
-} from "@/helpers/leafHelpers.js";
+} from "@/features/Slate/helpers/leafHelpers.js";
 import RenderElement from "./RenderElement.jsx";
 
 const SlateHeading = ({ section }) => {

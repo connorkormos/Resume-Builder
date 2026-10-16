@@ -2,7 +2,7 @@ import styles from "./ResumePreviewCard.module.css";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchApi } from "@/lib/fetch";
-import normalizeResumeFromApi from "@/utils/normalizeResumeFromApi";
+import normalizeResumeFromApi from "@/utils/normalizers/normalizeResumeFromApi";
 import PreviewPaper from "./components/PreviewPaper";
 import PreviewZoom from "./components/PreviewZoom";
 import { TbExternalLink } from "react-icons/tb";

@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Element, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/helpers/slateHelpers/editorSchemaRules.js';
-import { toggleList } from '../src/helpers/blocks.js';
-import { indentList, outdentList, addListItem } from '../src/helpers/listBehavior.js';
+import { withInlineVoidIcons } from '../src/features/Slate/helpers/editorSchemaRules.js';
+import { toggleList } from '../src/features/Slate/helpers/blocks.js';
+import { indentList, outdentList, addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const p = text => ({ type: 'paragraph', children: [{ text }] });
 const li = text => ({ type: 'list-item', children: [{ text }] });

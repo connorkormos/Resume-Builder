@@ -1,5 +1,5 @@
 import { parseRemValue } from "@/utils/formatters";
-import SectionBorder from "@/features/ResumeEditor/ResumePaper/components/SectionBorder";
+import SectionBorder from "@/pages/ResumeEditorPage/features/ResumePaper/components/SectionBorder";
 import RichText from "./RichText";
 import PreviewSubsection from "./PreviewSubsection";
 

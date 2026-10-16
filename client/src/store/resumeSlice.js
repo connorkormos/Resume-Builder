@@ -1,5 +1,5 @@
-import { normalizeSlateValue } from "../utils/normalizeSlateValue.js";
-import { normalizeSectionLayout } from "../utils/normalizeSectionLayout.js";
+import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
+import { normalizeSectionLayout } from "../utils/normalizers/normalizeSectionLayout.js";
 import { createSlice } from '@reduxjs/toolkit';
 
 import { mergeDeep } from "./helpers/mergeDeep.js";
@@ -733,7 +733,6 @@ export const {
 
    addSubsection,
    updateSubsection,
-   updateSubsectionFlexDirection,
    deleteSubsection,
    reorderSubsections,
 

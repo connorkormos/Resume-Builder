@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveEditorContext } from '../src/helpers/resumeContext.js';
-import { getCascadedColor, getCascadedFontSize, getCascadedLineHeight } from '../src/helpers/leafHelpers.js';
+import { resolveEditorContext } from '../src/utils/resumeContext.js';
+import { getCascadedColor, getCascadedFontSize, getCascadedLineHeight } from '../src/features/Slate/helpers/leafHelpers.js';
 
 const fixture = () => ({
   styling: { fontSize: '12px', lineHeight: 1.2, color: 'black' },

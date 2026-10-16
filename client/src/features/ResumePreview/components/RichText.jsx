@@ -1,7 +1,7 @@
 import {
   getCascadedFontSize,
   getCascadedLineHeight,
-} from "@/helpers/leafHelpers";
+} from "@/features/Slate/helpers/leafHelpers";
 import { ICONS_MAP } from "@/lib/iconLibrary";
 
 const typography = (styling) => ({

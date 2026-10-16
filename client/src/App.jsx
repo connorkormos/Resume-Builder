@@ -16,7 +16,6 @@ import AccountPage from "./pages/AccountPage/AccountPage";
 import Resumes from "./pages/AccountPage/components/Resumes/Resumes.jsx";
 import Settings from "./pages/AccountPage/components/Settings/Settings.jsx";
 import Profile from "./pages/AccountPage/components/Profile/Profile.jsx";
-import Profiles from "./pages/AccountPage/components/Profile/components/Profiles.jsx";
 import CreateProfileForm from "./pages/AccountPage/components/Profile/components/CreateProfileForm.jsx";
 import EditProfile from "./pages/AccountPage/components/Profile/components/EditProfile.jsx";
 
@@ -40,9 +39,6 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      {/* {tempResumeData && (
-         <ResumeEditor tempResumeId={tempResumeId} styling={{ scale: 0.5}} resumeData={tempResumeData} />
-      )} */}
       <Routes>
         <Route element={<NavbarLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -57,7 +53,6 @@ const App = () => {
           <Route path="my-resumes" element={<Resumes />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<Profile />}>
-            <Route index element={<Profiles />} />
             <Route path="create" element={<CreateProfileForm />} />
             <Route path="edit" element={<EditProfile />} />
           </Route>

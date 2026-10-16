@@ -1,8 +1,8 @@
 import { Editor } from "slate";
 
-import { toggleMark } from "@/helpers/marks";
-import { toggleList } from "@/helpers/blocks";
-import { outdentList, indentList, addListItem } from "@/helpers/listBehavior";
+import { toggleMark } from "@/features/Slate/helpers/marks";
+import { toggleList } from "@/features/Slate/helpers/blocks";
+import { outdentList, indentList, addListItem } from "@/features/Slate/helpers/listBehavior";
 import { saveResumeToApi } from "@/services/resumeServices";
 
 export const handleGlobalHotKey = (resume, event) => {

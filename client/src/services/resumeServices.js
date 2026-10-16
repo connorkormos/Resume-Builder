@@ -1,5 +1,5 @@
 import { fetchApi } from "@/lib/fetch";
-import normalizeResumeFromApi from "@/utils/normalizeResumeFromApi";
+import normalizeResumeFromApi from "@/utils/normalizers/normalizeResumeFromApi";
 
 export const addFieldToApi = async (subsectionId) => {
    try {

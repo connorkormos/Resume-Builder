@@ -12,7 +12,6 @@ import {
 // import styles from './Account.module.css';
 import { formatDateTime, formatCompactDateTime } from "@/utils/formatters";
 import ResumePreviewCard from "@/features/ResumePreview/ResumePreviewCard";
-import { getNodeString } from "@/helpers/getNodeString";
 
 import styles from "./Resumes.module.css";
 
@@ -54,15 +53,6 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
   };
 
   const handleViewResumeDetails = () => {
-    // const fieldsById = resume.fields.byId;
-    // const profileInfo = [];
-    // for (const id in fieldsById) {
-    //   profileInfo.push({
-    //     label: fieldsById[id].label,
-    //     value: getNodeString(fieldsById[id]),
-    //   });
-    // }
-    // console.log("Field Data", profileInfo);
     navigate(`/account/profile`, { state: { resume } });
   };
 
@@ -120,7 +110,6 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
             >
               Delete
             </button>
-            {/* Future implementation: Buttons for viewing, editing, and deleting the resume */}
           </div>
         </div>
       )}

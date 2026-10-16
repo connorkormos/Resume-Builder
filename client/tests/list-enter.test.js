@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/helpers/slateHelpers/editorSchemaRules.js';
-import { addListItem } from '../src/helpers/listBehavior.js';
+import { withInlineVoidIcons } from '../src/features/Slate/helpers/editorSchemaRules.js';
+import { addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const item = children => ({ type: 'list-item', children });
 const setup = (type, children = [{ text: 'abcdef' }]) => {

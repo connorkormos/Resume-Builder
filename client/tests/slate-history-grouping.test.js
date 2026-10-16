@@ -4,9 +4,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import undoable, { ActionCreators, excludeAction } from 'redux-undo';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import reducer, { updateField, updateSection, setActiveEditorSelection } from '../src/store/resumeSlice.js';
-import { createSlateHistoryGrouping, observeHistoryOperations } from '../src/helpers/slateHelpers/historyGrouping.js';
-import { withInlineVoidIcons } from '../src/helpers/slateHelpers/editorSchemaRules.js';
-import { addListItem } from '../src/helpers/listBehavior.js';
+import { createSlateHistoryGrouping, observeHistoryOperations } from '../src/features/Slate/helpers/historyGrouping.js';
+import { withInlineVoidIcons } from '../src/features/Slate/helpers/editorSchemaRules.js';
+import { addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
 const flush = async () => { await Promise.resolve(); };

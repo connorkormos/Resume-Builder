@@ -1,7 +1,7 @@
 import {
   getCascadedFontSize,
   getCascadedLineHeight,
-} from "@/helpers/leafHelpers";
+} from "@/features/Slate/helpers/leafHelpers";
 import React from "react";
 
 import { getFaIcon } from "@/lib/iconLibrary";

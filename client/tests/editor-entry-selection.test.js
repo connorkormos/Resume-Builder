@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Range } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { selectOnEditorEntry } from '../src/helpers/slateHelpers/selectOnEditorEntry.js';
+import { selectOnEditorEntry } from '../src/features/Slate/helpers/selectOnEditorEntry.js';
 
 const setup = (t) => {
   const editor = createEditor();

@@ -3,9 +3,9 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { useDispatch } from "react-redux";
 
-import { editorRegistry } from "@/helpers/editorRegistry.js";
-import { withInlineVoidIcons } from "@/helpers/slateHelpers/editorSchemaRules.js";
-import { selectOnEditorEntry } from "@/helpers/slateHelpers/selectOnEditorEntry.js";
+import { editorRegistry } from "@/features/Slate/helpers/editorRegistry.js";
+import { withInlineVoidIcons } from "@/features/Slate/helpers/editorSchemaRules.js";
+import { selectOnEditorEntry } from "@/features/Slate/helpers/selectOnEditorEntry.js";
 import { useSlateHistoryGrouping } from "@/hooks/useSlateHistoryGrouping.js";
 import { handleHotKey } from "@/utils/hotKeys.js";
 import {
