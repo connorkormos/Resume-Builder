@@ -57,6 +57,7 @@ export default function ImportProfile() {
     const resumeSections = useSelector((state) => state.resume.present?.sections?.byId);
     const reduxResume = useSelector((state) => state.resume.present);
     const resumeFields = reduxResume.fields.byId;
+    const resumeSubsections = reduxResume.subsections.byId;
 
     useEffect(() => {
         if (!firstProfileId) return;
@@ -72,37 +73,50 @@ export default function ImportProfile() {
     }, [firstProfileId, dispatch]);
 
     const handleImportProfileButtonClick = () => {
-        if (!resumeFields || !Array.isArray(profileSections)) return;
+        if (!resumeFields || !resumeSubsections || !resumeSections || !Array.isArray(profileSections)) return;
 
-        const resumeFieldLabels = Object.values(resumeFields).map((field) => {
-            return field.label;
-        });
+        const profileSubsectionsByType = new Map();
+        for (const section of profileSections) {
+            if (!section.type) continue;
+            const subsections = profileSubsectionsByType.get(section.type) ?? [];
+            subsections.push(...section.subsections);
+            profileSubsectionsByType.set(section.type, subsections);
+        }
 
-        const profileFieldLabels = profileSections.map((section) => {
-            return section.subsections.map((subsection) => {
-                return subsection.fields.map((field) => field.label.toLowerCase());
-            });
-        }).flat(2);
+        const nextSubsectionByType = new Map();
+        const usedProfileFields = new Set();
+        const sectionIds = reduxResume.columns.allIds.flatMap(
+            (columnId) => reduxResume.columns.byId[columnId].sectionIds,
+        );
 
-        const sharedFieldLabels = resumeFieldLabels.filter(label => profileFieldLabels.includes(label.toLowerCase()));
-        const sharedFields = Object.values(resumeFields)
-            .filter(field => sharedFieldLabels.includes(field.label))
-            .map(field => field);
-        for (const field of sharedFields) {
-            const fieldId = field.id;
-            const fieldLabel = field.label;
-            const slateFieldValue = field.value;
+        for (const sectionId of sectionIds) {
+            const section = resumeSections[sectionId];
+            if (!section?.type) continue;
+            const profileSubsections = profileSubsectionsByType.get(section.type) ?? [];
 
-            // console.log('SLATE FIELD VALUE', slateFieldValue);
-            const profileFieldValue = profileSections
-                .map((section) => section.subsections)
-                .flat()
-                .map((subsection) => subsection.fields)
-                .flat()
-                .find((profileField) => profileField.label.toLowerCase() === fieldLabel.toLowerCase()).value;
-            if (!profileFieldValue) continue;
-            const newSlateFieldValue = replaceFieldValueText(slateFieldValue, profileFieldValue);
-            dispatch(updateField({ id: fieldId, value: newSlateFieldValue }));
+            for (const subsectionId of section.subsectionIds) {
+                const subsection = resumeSubsections[subsectionId];
+                if (!subsection) continue;
+                const profileIndex = nextSubsectionByType.get(section.type) ?? 0;
+                const profileSubsection = profileSubsections[profileIndex];
+                if (!profileSubsection) break;
+                nextSubsectionByType.set(section.type, profileIndex + 1);
+
+                for (const fieldId of subsection.fieldIds) {
+                    const field = resumeFields[fieldId];
+                    if (!field) continue;
+                    const profileField = profileSubsection.fields.find((candidate) =>
+                        !usedProfileFields.has(candidate)
+                        && candidate.label.toLowerCase() === field.label.toLowerCase(),
+                    );
+                    if (!profileField) continue;
+                    usedProfileFields.add(profileField);
+                    if (!profileField.value) continue;
+
+                    const newSlateFieldValue = replaceFieldValueText(field.value, profileField.value);
+                    dispatch(updateField({ id: fieldId, value: newSlateFieldValue }));
+                }
+            }
         }
     }
 
