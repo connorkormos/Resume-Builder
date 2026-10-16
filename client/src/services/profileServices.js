@@ -100,6 +100,18 @@ export const createUserProfile = async (profileTitle) => {
    }
 };
 
+export const copyUserProfile = async (profileId) => {
+   try {
+      return await fetchApi({
+         endpoint: `/profiles/${profileId}/copy`,
+         options: { method: 'POST' },
+      });
+   } catch (error) {
+      console.error(`Error copying profile of ID ${profileId}: `, error);
+      return null;
+   }
+};
+
 export const deleteUserProfile = async (profileId) => {
    try {
       const responseData = await fetchApi({

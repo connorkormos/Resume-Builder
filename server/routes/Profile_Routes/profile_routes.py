@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify, session
+from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import Forbidden, NotFound
 from models import db, Profile, Profile_Section, Profile_Subsection, Profile_Field
 from routes.Profile_Routes.profile_helpers import check_user, get_profile
+from routes.Profile_Routes.profile_builders import build_profile_copy
 
 from utils.authorization import check_resume_access
 from utils.responses import (
@@ -47,6 +49,23 @@ def get_user_profiles():
 def get_user_profile(profile_id):
     profile = get_profile(profile_id)
     return jsonify(profile.to_dict(include_sections=True)), 200
+
+
+@profile_bp.route("/<int:profile_id>/copy", methods=["POST"])
+def copy_user_profile(profile_id):
+    source = get_profile(profile_id)
+    try:
+        copied_profile = build_profile_copy(source)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        return generate_error(
+            error_type="SERVER_ERROR",
+            code="ERROR_COPYING_PROFILE",
+            message="Failed to copy profile.",
+        )
+
+    return jsonify(copied_profile.to_dict(include_sections=True)), 201
 
 
 @profile_bp.route("/", methods=["POST"])

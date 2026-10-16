@@ -1,7 +1,33 @@
 """Build profile sections, subsections, and plain-text fields without committing."""
 
 from lib.defaults import SECTION_DEFINITIONS
-from models import Profile_Field, Profile_Section, Profile_Subsection, db
+from models import Profile, Profile_Field, Profile_Section, Profile_Subsection, db
+
+
+def build_profile_copy(source):
+    """Copy a profile's hierarchy while letting the database assign new IDs."""
+    copy = Profile(user_id=source.user_id, title=f"{source.title} (Copy)")
+    for section in source.sections:
+        new_section = Profile_Section(
+            profile=copy,
+            type=section.type,
+            label=section.label,
+            position=section.position,
+        )
+        for subsection in section.subsections:
+            new_subsection = Profile_Subsection(
+                profile_section=new_section,
+                position=subsection.position,
+            )
+            for field in subsection.fields:
+                Profile_Field(
+                    profile_subsection=new_subsection,
+                    label=field.label,
+                    value=field.value,
+                    position=field.position,
+                )
+    db.session.add(copy)
+    return copy
 
 
 def add_profile_section(profile, section_type):
