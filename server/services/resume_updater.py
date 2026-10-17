@@ -1,8 +1,60 @@
+from collections import Counter
+import re
+
 from models import db, Resume, Column, Section, Subsection, Field
+from lib.defaults import SECTION_DEFINITIONS
 
 from services.updaters import update_column_widths
 from services.plain_text import build_resume_plain_text
 from services.resume_tags import normalize_resume_tags
+
+
+def normalize_generic_section_types(resume_id):
+    """Resolve default/custom section labels without duplicating a section type."""
+    def type_key(value):
+        # Compare lowercase ASCII letters only; retain canonical spelling when saving.
+        return re.sub(r"[^a-z]", "", (value or "").lower())
+
+    generic_types = {"default", "defaultsection", "custom"}
+    canonical_types = {
+        type_key(definition["type"]): definition["type"]
+        for definition in SECTION_DEFINITIONS.values()
+    }
+    sections = (
+        Section.query.join(Column)
+        .filter(Column.resume_id == resume_id)
+        .order_by(Column.position, Column.id, Section.position, Section.id)
+        .all()
+    )
+    used_types = Counter(type_key(section.type) for section in sections)
+    converted_types = {}
+
+    for section in sections:
+        current_type = type_key(section.type)
+        if current_type not in generic_types:
+            continue
+        target_type = canonical_types.get(type_key(section.label))
+        if target_type is None:
+            continue
+        # Use the same normalization for conflicts elsewhere in the resume.
+        target_key = type_key(target_type)
+        if used_types[target_key] > (1 if current_type == target_key else 0):
+            continue
+        if section.type == target_type:
+            continue
+
+        section.type = target_type
+        converted_types[section.id] = target_type
+        # Reserve the type immediately if multiple generic sections share this label.
+        used_types[current_type] -= 1
+        used_types[target_key] += 1
+
+    if converted_types:
+        # Query the final parent IDs, including subsections moved by this save.
+        subsections = Subsection.query.filter(Subsection.section_id.in_(converted_types)).all()
+        for subsection in subsections:
+            subsection.type = converted_types[subsection.section_id]
+
 
 def update_resume_with_form_data(resume_id, data):
     # ! Condiser potentially mismatched form data, where incoming column/section/subsection IDs may not match those actually belonging to the resume..
@@ -210,6 +262,8 @@ def update_resume_with_form_data(resume_id, data):
         if "subsectionId" in field_data:
             field.subsection_id = field_data["subsectionId"]
 
+    db.session.flush()
+    normalize_generic_section_types(resume_id)
     db.session.flush()
     resume.plain_text = build_resume_plain_text(resume)
 
