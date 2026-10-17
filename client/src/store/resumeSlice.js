@@ -393,7 +393,7 @@ const resumeSlice = createSlice({
             return;
          }
          
-         console.log(field, id, changes);
+         // console.log(field, id, changes);
          mergeDeep(field, changes);
       },
 

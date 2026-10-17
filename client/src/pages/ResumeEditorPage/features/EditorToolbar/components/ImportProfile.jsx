@@ -9,10 +9,13 @@ import { updateField } from "@/store/resumeSlice";
 import { updateProfile } from "@/store/userSlice";
 
 import { getUserProfile } from '@/services/profileServices';
+import { pairProfileSubsections, matchProfileFields, findProbableMatches, logUnmatchedProfileItems } from '../helpers/importProfileHelpers';
 
-function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = false) {
+function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = false, fontColor = null) {
     if (typeof profileFieldValue !== 'string') return slateFieldValue;
 
+    // Preserve existing leaf colors unless the caller explicitly supplies one.
+    const colorOverride = fontColor != null ? { color: fontColor } : {};
     const profileText = profileFieldValue.trim();
     const parts = isList
         ? profileText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -32,7 +35,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = fals
         if (item.type === 'unordered-list' || item.type === 'ordered-list') {
             return {
                 ...item,
-                children: replaceFieldValueText(item.children, profileFieldValue, true),
+                children: replaceFieldValueText(item.children, profileFieldValue, true, fontColor),
             };
         }
 
@@ -52,12 +55,14 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = fals
         return {
             ...item,
             children: item.children.map((child) => {
-                if (!child.text || child.text.length === 0) return { ...child };
+                if (typeof child.text !== 'string') return { ...child };
+                if (child.text.length === 0) return { ...child, ...colorOverride };
                 const slateFieldTextIsAllCaps = child.text === child.text.toUpperCase();
                 const leadingWhitespace = child.text.match(/^\s*/)[0];
                 const trailingWhitespace = child.text.match(/\s*$/)[0];
                 return {
                     ...child,
+                    ...colorOverride,
                     text: leadingWhitespace
                         + (slateFieldTextIsAllCaps ? replacementText.toUpperCase() : replacementText)
                         + trailingWhitespace,
@@ -87,55 +92,26 @@ export default function ImportProfile() {
     const importProfileSections = (profileSections) => {
         if (!resumeFields || !resumeSubsections || !resumeSections || !Array.isArray(profileSections)) return;
 
-        const profileSubsectionsByType = new Map();
-        for (const section of profileSections) {
-            if (!section.type) continue;
-            const subsections = profileSubsectionsByType.get(section.type) ?? [];
-            subsections.push(...section.subsections);
-            profileSubsectionsByType.set(section.type, subsections);
+        // Pair subsections by section type, then match their fields by label.
+        const pairs = pairProfileSubsections(profileSections, reduxResume);
+        const { matchedFields, potentialMatches } = matchProfileFields(pairs.subsectionPairs, resumeFields);
+
+        // Replace text using the existing Slate formatting and save each field.
+        for (const { resumeField, profileField } of matchedFields) {
+            const value = replaceFieldValueText(resumeField.value, profileField.value);
+            dispatch(updateField({ id: resumeField.id, value }));
         }
 
-        const nextSubsectionByType = new Map();
-        const usedProfileFields = new Set();
-        const sectionIds = reduxResume.columns.allIds.flatMap(
-            (columnId) => reduxResume.columns.byId[columnId].sectionIds,
-        );
+        const probableMatches = findProbableMatches(potentialMatches);
 
-        for (const sectionId of sectionIds) {
-            const section = resumeSections[sectionId];
-            if (!section?.type) continue;
-            let matchingType = section.type;
-            if (!profileSubsectionsByType.has(matchingType) && section.type === 'defaultSection') {
-                matchingType = [...profileSubsectionsByType.keys()].find((type) =>
-                    type.toLowerCase() === section.label?.trim().toLowerCase(),
-                );
-            }
-            const profileSubsections = profileSubsectionsByType.get(matchingType) ?? [];
-
-            for (const subsectionId of section.subsectionIds) {
-                const subsection = resumeSubsections[subsectionId];
-                if (!subsection) continue;
-                const profileIndex = nextSubsectionByType.get(matchingType) ?? 0;
-                const profileSubsection = profileSubsections[profileIndex];
-                if (!profileSubsection) break;
-                nextSubsectionByType.set(matchingType, profileIndex + 1);
-
-                for (const fieldId of subsection.fieldIds) {
-                    const field = resumeFields[fieldId];
-                    if (!field) continue;
-                    const profileField = profileSubsection.fields.find((candidate) =>
-                        !usedProfileFields.has(candidate)
-                        && candidate.label.toLowerCase() === field.label.toLowerCase(),
-                    );
-                    if (!profileField) continue;
-                    usedProfileFields.add(profileField);
-                    if (!profileField.value) continue;
-
-                    const newSlateFieldValue = replaceFieldValueText(field.value, profileField.value);
-                    dispatch(updateField({ id: fieldId, value: newSlateFieldValue }));
-                }
-            }
+        for (const { resumeField, profileField } of probableMatches) {
+            const value = replaceFieldValueText(resumeField.value, profileField.value, false, 'red');
+            dispatch(updateField({ id: resumeField.id, value }));
         }
+
+        console.log('Probable matches:', probableMatches);
+
+        logUnmatchedProfileItems({ profileSections, resume: reduxResume, pairs, matchedFields, potentialMatches });
     }
 
     const handleProfileSelect = async (profileId) => {
