@@ -308,21 +308,21 @@ textarea.profileFormInput {
                 gap: 1rem;
                 align-items: center;
                 margin-right: auto;
+            }
 
-                .addSubsectionButton,
-                .deleteSubsectionButton {
-                    /* align-self: flex-start; */
-                    padding: 0.5rem 1rem;
-                    background-color: var(--bootstrap-blue-soft);
-                    color: white;
-                    border: none;
-                    border-radius: 0.25rem;
-                    cursor: pointer;
-                }
+            .addSubsectionButton,
+            .deleteSubsectionButton {
+                /* align-self: flex-start; */
+                padding: 0.5rem 1rem;
+                background-color: var(--bootstrap-blue-soft);
+                color: white;
+                border: none;
+                border-radius: 0.25rem;
+                cursor: pointer;
+            }
 
-                .deleteSubsectionButton {
-                    background-color: var(--bootstrap-dark-red);
-                }
+            .deleteSubsectionButton {
+                background-color: var(--bootstrap-dark-red);
             }
 
             .deleteSectionButton {
@@ -429,11 +429,11 @@ textarea.profileFormInput {
                     width: 100%;
                     flex-direction: row;
                     justify-content: space-between;
+                }
 
-                    .addSubsectionButton,
-                    .deleteSubsectionButton {
-                        padding: 0.25rem 0.5rem;
-                    }
+                .addSubsectionButton,
+                .deleteSubsectionButton {
+                    padding: 0.25rem 0.5rem;
                 }
             }
         }

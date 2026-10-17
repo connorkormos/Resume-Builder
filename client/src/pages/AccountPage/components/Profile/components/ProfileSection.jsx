@@ -59,24 +59,24 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                             );
                         })}
                         {/* Render subsection content here */}
+                        <>
+                            {/* <div className={styles.subsectionButtonsWrapper}> */}
+                                <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
+                                    Delete {!isMobile && 'Subsection'}
+                                </button>
+                            {/* </div> */}
+                        </>
                     </div>
                 );
             })}
             {openSections.includes(section.id) && (
-                <>
-                    <div className={styles.subsectionButtonsWrapper}>
-                        <button
-                            className={styles.addSubsectionButton}
-                            type="button"
-                            onClick={() => onAddSubsection(section.id)}
-                        >
-                            + Add {!isMobile && 'Subsection'}
-                        </button>
-                        <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
-                            Delete {!isMobile && 'Subsection'}
-                        </button>
-                    </div>
-                </>
+                <button
+                    className={styles.addSubsectionButton}
+                    type="button"
+                    onClick={() => onAddSubsection(section.id)}
+                >
+                    + Add {!isMobile && 'Subsection'}
+                </button>
             )}
 
         </div>
