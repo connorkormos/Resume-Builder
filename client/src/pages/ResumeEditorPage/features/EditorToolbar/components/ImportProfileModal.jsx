@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-
+import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setActiveEditorId, applyManualProfileMatch } from '@/store/resumeSlice';
 import { ActionCreators as UndoActionCreators } from "redux-undo";
@@ -61,67 +61,69 @@ export default function ImportProfileModal({ sessionId, unmatchedFields, replace
         acc[section].push(field);
         return acc;
     }, {});
-    return (
+    return createPortal(
         <div className={styles.unmatchedFieldsModalContainer}>
             {/* <div className={styles.modalOverlay}></div> */}
-            <div className={styles.unmatchedFieldsModalContent}>
+            <div className={styles.unmatchedFieldsModalHeader}>
                 <h2>Unmatched Profile Fields</h2>
                 <p className={styles.unmatchedFieldsModalDescription}>Some profile fields could not be matched with your resume.</p>
+            </div>
+            <div className={styles.unmatchedFieldsModalContent}>
                 {Object.entries(groupedFields).map(([section, fields]) => (
                     <div key={section}>
-                        <h3>{section}</h3>
+                        <h3 className={styles.unmatchedFieldsSectionTitle}>{section}</h3>
                         <ul className={styles.unmatchedFieldsModalList}>
                             {fields.map((field) => {
                                 const { isMatched, canUndo, canRedo } = getManualProfileMatchStatus(resumeHistory, sessionId, field.id);
                                 return (
-                                <li key={field.id} className={styles.unmatchedFieldsModalListItem}>
-                                    <div className={styles.unmatchedFieldsModalRow}>
-                                        <span>{field.label || 'Unnamed Field'}: </span>
-                                        <span>{field.value || 'No Value'}</span>
-                                    </div>
-                                    <div className={styles.unmatchedFieldsModalRow}>
-                                        {/* <button
+                                    <li key={field.id} className={styles.unmatchedFieldsModalListItem}>
+                                        <div className={styles.unmatchedFieldsModalRow}>
+                                            <span><strong>{field.label || 'Unnamed Field'}: </strong></span>
+                                            <span>{field.value || 'No Value'}</span>
+                                        </div>
+                                        <div className={styles.unmatchedFieldsModalRow}>
+                                            {/* <button
                                             className={styles.foundMatchButton}
                                             onClick={() => handleManualMatchButtonClick(field)}
                                         >
                                             Select Field to Match
                                         </button> */}
 
-                                        {isMatched
-                                            ? canUndo
-                                                ? (
-                                                    <button
-                                                        className={styles.undoMatchButton}
-                                                        type="button"
-                                                        onClick={() => handleHistoryAction(UndoActionCreators.undo())}
-                                                    >
-                                                        Undo
-                                                    </button>
-                                                ) : (
-                                                    <FaCheck size={25} />
-                                                ) : (
-                                                <>
-                                                    {canRedo && (
+                                            {isMatched
+                                                ? canUndo
+                                                    ? (
+                                                        <button
+                                                            className={styles.undoMatchButton}
+                                                            type="button"
+                                                            onClick={() => handleHistoryAction(UndoActionCreators.undo())}
+                                                        >
+                                                            Undo
+                                                        </button>
+                                                    ) : (
+                                                        <FaCheck size={25} />
+                                                    ) : (
+                                                    <>
+                                                        {canRedo && (
+                                                            <button
+                                                                className={styles.foundMatchButton}
+                                                                type="button"
+                                                                onClick={() => handleHistoryAction(UndoActionCreators.redo())}
+                                                            >
+                                                                Redo
+                                                            </button>
+                                                        )}
                                                         <button
                                                             className={styles.foundMatchButton}
                                                             type="button"
-                                                            onClick={() => handleHistoryAction(UndoActionCreators.redo())}
+                                                            onClick={() => handleManualMatchButtonClick(field)}
                                                         >
-                                                            Redo
+                                                            Select Field to Match
                                                         </button>
-                                                    )}
-                                                    <button
-                                                        className={styles.foundMatchButton}
-                                                        type="button"
-                                                        onClick={() => handleManualMatchButtonClick(field)}
-                                                    >
-                                                        Select Field to Match
-                                                    </button>
-                                                </>
-                                            )}
+                                                    </>
+                                                )}
 
-                                    </div>
-                                </li>
+                                        </div>
+                                    </li>
                                 );
                             })}
                         </ul>
@@ -135,8 +137,11 @@ export default function ImportProfileModal({ sessionId, unmatchedFields, replace
                         </li>
                     ))}
                 </ul> */}
+            </div>
+            <div className={styles.unmatchedFieldsModalFooter}>
                 <button className={styles.closeModalButton} onClick={onClose}>Close</button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

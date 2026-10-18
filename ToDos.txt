@@ -13,6 +13,10 @@ MAJOR BUGS:
 
 MEDIUM BUGS:
 
+-Profile Links only apply to entire field
+   -Needs to be applied to certain parts of the text too
+      -May require using a slate editor for profile fields
+
 -FontSizeOffset Appears to be restricted to round numbers (i.e. it can't be 1.5 as the offset)
 
 -Dragging Fields is Clunky/Buggy
@@ -44,9 +48,6 @@ OTHER BUGS:
 STRETCH FEATURES:
 
 -Sharing Resumes Publicly
-
--Prefilled Resume Info, for Auto Filling Purposes
-   -Probably goes into account settings, maybe a new tab, with option for various job title information that can be plugged into resume templates or blank resumes
 
 MAIN FEATURES:
 

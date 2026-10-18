@@ -121,24 +121,41 @@
 
 .unmatchedFieldsModalContainer {
     position: fixed;
-    top: calc(var(--height-toolbar) * 2);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+    top: 50%;
+    transform: translateY(calc(-50% + var(--height-toolbar) / 2)) translateX(-25%);
     background: var(--background-toolbar);
     border: none;
     border-radius: 0.5rem;
-    padding: 1rem;
-    /* left: 100%; */
+    color: white;
     right: 0;
-
-    width: fit-content;
-
+    
+    width: max-content;
+    max-width: 30rem;
+    max-height: calc(100vh - var(--height-toolbar) * 2 - 2rem);
+    
+    .unmatchedFieldsModalHeader, .unmatchedFieldsModalFooter {
+      text-align: center;
+    }
+    
     .unmatchedFieldsModalContent {
+      overflow-y: scroll;
       display: flex;
       flex-direction: column;
       gap: 1rem;
 
+      .unmatchedFieldsSectionTitle {
+        font-size: 1.75rem;
+        margin: 1.5rem auto;
+      }
+      /* overflow-y: scroll; */
+      
       .unmatchedFieldsModalDescription {
-        width: 0;
-        min-width: 100%;
+        /* width: 0; */
+        /* min-width: 100%; */
       }
 
       .unmatchedFieldsModalList {
@@ -150,11 +167,12 @@
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.75rem;
 
           .unmatchedFieldsModalRow {
             display: flex;
-            gap: 0.5rem;
+            flex-direction: column;
+            gap: 0.25rem;
 
             .foundMatchButton, .undoMatchButton {
               padding: 0.25rem 0.5rem;
@@ -163,6 +181,7 @@
               border-radius: 0.25rem;
               cursor: pointer;
               background-color: var(--bootstrap-blue-soft);
+              width: fit-content;
             }
 
             .undoMatchButton {
@@ -171,15 +190,15 @@
           }
         }
       }
-      .closeModalButton {
-        /* margin: auto auto auto 0; */
-        margin: auto;
-        padding: 0.5rem 2rem;
-        border: none;
-        border-radius: 0.25rem;
-        cursor: pointer;
-        background-color: var(--bootstrap-dark-red);
-      }
+    }
+    .closeModalButton {
+      /* margin: auto auto auto 0; */
+      margin: auto;
+      padding: 0.5rem 2rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      background-color: var(--bootstrap-dark-red);
     }
 }
 
