@@ -33,22 +33,22 @@
   }
 }
 
-  .tooltip {
-    /* display: none; */
-    position: fixed;
-    transform: translateX(-50%);
-    z-index: 10000;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #222;
-    color: #fff;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.4;
-    white-space: nowrap;
-    pointer-events: none;
-  }
+.tooltip {
+  /* display: none; */
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #222;
+  color: #fff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
 
 
@@ -83,7 +83,8 @@
     flex: 4;
   }
 
-  .saveCopyButton, .printButton {
+  .saveCopyButton,
+  .printButton {
     flex: 0.25;
   }
 
@@ -120,86 +121,108 @@
 }
 
 .unmatchedFieldsModalContainer {
-    position: fixed;
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+  top: 50%;
+  transform: translateY(calc(-50% + var(--height-toolbar) / 2)) translateX(-25%);
+  background: var(--background-toolbar);
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
+  right: 0;
+
+  width: max-content;
+  max-width: 30rem;
+  max-height: calc(100vh - var(--height-toolbar) * 2 - 2rem);
+
+
+
+  .unmatchedFieldsModalHeader,
+  .unmatchedFieldsModalFooter {
+    text-align: center;
+
+    .unmatchedFieldsModalDescription {
+      margin-top: 0.5rem;
+      text-align: justify;
+    }
+  }
+
+  .unmatchedFieldsModalContent {
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
     gap: 1rem;
-    top: 50%;
-    transform: translateY(calc(-50% + var(--height-toolbar) / 2)) translateX(-25%);
-    background: var(--background-toolbar);
-    border: none;
-    border-radius: 0.5rem;
-    color: white;
-    right: 0;
-    
-    width: max-content;
-    max-width: 30rem;
-    max-height: calc(100vh - var(--height-toolbar) * 2 - 2rem);
-    
-    .unmatchedFieldsModalHeader, .unmatchedFieldsModalFooter {
-      text-align: center;
+
+    .unmatchedFieldsSectionTitle {
+      font-size: 1.75rem;
+      margin: 1.5rem auto;
     }
-    
-    .unmatchedFieldsModalContent {
-      overflow-y: scroll;
+
+    .unmatchedFieldsModalList {
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      align-items: flex-start;
 
-      .unmatchedFieldsSectionTitle {
-        font-size: 1.75rem;
-        margin: 1.5rem auto;
-      }
-      /* overflow-y: scroll; */
-      
-      .unmatchedFieldsModalDescription {
-        /* width: 0; */
-        /* min-width: 100%; */
-      }
-
-      .unmatchedFieldsModalList {
+      .unmatchedFieldsModalListItem {
+        list-style: none;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-        .unmatchedFieldsModalListItem {
-          list-style: none;
+        gap: 0.75rem;
+
+        .unmatchedFieldsModalRow {
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 0.25rem;
 
-          .unmatchedFieldsModalRow {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
+          .foundMatchButton,
+          .undoMatchButton {
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background-color: var(--bootstrap-blue-soft);
+            width: fit-content;
+          }
 
-            .foundMatchButton, .undoMatchButton {
-              padding: 0.25rem 0.5rem;
-              font-size: 1rem;
-              border: none;
-              border-radius: 0.25rem;
-              cursor: pointer;
-              background-color: var(--bootstrap-blue-soft);
-              width: fit-content;
-            }
-
-            .undoMatchButton {
-              background-color: var(--bootstrap-dark-red);
-            }
+          .undoMatchButton {
+            background-color: var(--bootstrap-dark-red);
           }
         }
       }
     }
-    .closeModalButton {
-      /* margin: auto auto auto 0; */
-      margin: auto;
-      padding: 0.5rem 2rem;
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      background-color: var(--bootstrap-dark-red);
-    }
+  }
+
+  .closeModalButton {
+    /* margin: auto auto auto 0; */
+    margin: auto;
+    padding: 0.5rem 2rem;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    background-color: var(--bootstrap-dark-red);
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* max-height: calc(100vh - var(--height-toolbar) * 2 - 1rem); */
+  .unmatchedFieldsModalContainer {
+    position: relative;
+    height: 100dvh;
+    width: 90vw;
+    /* margin: calc(-2 * var(--height-toolbar)) auto; */
+    margin: auto;
+    transform: none;
+    /* top: 100%; */
+    top: 0;
+    left: 0;
+    z-index: var(--z-modal);
+  }
 }
 
 @media print {
@@ -212,7 +235,9 @@
 @media (min-width: 2560px) {
   .toolbarContainer {
     .toolbarContent {
-      button, input {
+
+      button,
+      input {
 
         /* font-size: 20px; */
         font-size: 1.25rem;

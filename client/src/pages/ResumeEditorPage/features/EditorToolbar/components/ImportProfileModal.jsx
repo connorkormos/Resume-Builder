@@ -66,7 +66,7 @@ export default function ImportProfileModal({ sessionId, unmatchedFields, replace
             {/* <div className={styles.modalOverlay}></div> */}
             <div className={styles.unmatchedFieldsModalHeader}>
                 <h2>Unmatched Profile Fields</h2>
-                <p className={styles.unmatchedFieldsModalDescription}>Some profile fields could not be matched with your resume.</p>
+                <p className={styles.unmatchedFieldsModalDescription}>Some profile fields could not be matched with your resume, but you can manually match them below.</p>
             </div>
             <div className={styles.unmatchedFieldsModalContent}>
                 {Object.entries(groupedFields).map(([section, fields]) => (
