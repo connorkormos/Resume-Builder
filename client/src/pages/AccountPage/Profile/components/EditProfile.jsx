@@ -35,14 +35,19 @@ function ProfileEditor({ initialProfile }) {
         return () => { active = false; };
     }, [profile.id]);
 
-    const changeField = (field, value) => {
+    const changeField = (field, value, property = 'value') => {
+        const nextValue = property === 'link' && !value.trim() ? null : value;
+        const originalValue = property === 'link' ? field.link || null : field.value ?? '';
         setFieldChanges((current) => {
             const next = { ...current };
-            if (value === (field.value ?? '')) {
-                delete next[field.id];
+            const changes = { ...current[field.id] };
+            if (nextValue === originalValue) {
+                delete changes[property];
             } else {
-                next[field.id] = value;
+                changes[property] = nextValue;
             }
+            if (Object.keys(changes).length > 0) next[field.id] = changes;
+            else delete next[field.id];
             return next;
         });
     };
@@ -54,7 +59,16 @@ function ProfileEditor({ initialProfile }) {
             return;
         };
         if (titleChanged && !title.trim()) return;
-        const fields = Object.entries(fieldChanges).map(([id, value]) => ({ id: Number(id), value }));
+        const originalFields = new Map(profile.sections
+            .flatMap((section) => section.subsections)
+            .flatMap((subsection) => subsection.fields)
+            .map((field) => [field.id, field]));
+        const fields = Object.entries(fieldChanges).map(([id, changes]) => ({
+            id: Number(id),
+            // The endpoint requires a value even when only the link changed.
+            value: changes.value ?? originalFields.get(Number(id))?.value ?? '',
+            ...(Object.hasOwn(changes, 'link') ? { link: changes.link } : {}),
+        }));
         const response = await updateProfileFieldsInApi(profile.id, fields, titleChanged ? title : undefined);
         if (!response) return;
         const savedFields = new Map(response.fields.map((field) => [field.id, field]));
@@ -167,6 +181,7 @@ function ProfileEditor({ initialProfile }) {
                             section={section}
                             fieldChanges={fieldChanges}
                             onFieldChange={changeField}
+                            onFieldLinkChange={(field, link) => changeField(field, link, 'link')}
                             onAddSubsection={addProfileSubsection}
                             onDeleteSection={deleteProfileSection}
                             onDeleteSubsection={deleteProfileSubsection}

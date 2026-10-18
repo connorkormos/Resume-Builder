@@ -4,9 +4,11 @@ import { MdExpandMore, MdExpandLess } from "react-icons/md";
 
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
+import ProfileField from './ProfileField';
+
 import styles from '../Profile.module.css';
 
-export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, onAddSubsection, onDeleteSection, onDeleteSubsection, openSections, setOpenSections }) {
+export default function ProfileSection({ section, fieldChanges = {}, onFieldChange, onFieldLinkChange, onAddSubsection, onDeleteSection, onDeleteSubsection, openSections, setOpenSections }) {
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     if (!section) {
@@ -40,30 +42,21 @@ export default function ProfileSection({ section, fieldChanges = {}, onFieldChan
                                 Delete Subsection
                             </button> */}
                         </div>
-                        {(subsection.fields ?? []).map((field) => {
-                            const isMultiline = ['summary', 'description'].includes((field.label ?? '').trim().toLowerCase());
-                            const FieldInput = isMultiline ? 'textarea' : 'textarea';
-                            return (
-                                <div key={field.id} className={styles.profileFieldWrapper}>
-                                    <label className={styles.profileFormLabel} style={{ marginBottom: isMultiline ? 'auto' : undefined }} htmlFor={`profile-field-${field.id}`}>{field.label}:</label>
-                                    <textarea
-                                        id={`profile-field-${field.id}`}
-                                        className={styles.profileFormInput}
-                                        // {...(isMultiline ? { rows: '10' } : { type: 'text' })}
-                                        value={fieldChanges[field.id] ?? field.value ?? ''}
-                                        style={{ padding: isMultiline ? '0.5rem' : undefined, resize: 'none' }}
-                                        onChange={(event) => onFieldChange(field, event.target.value)}
-                                        readOnly={!onFieldChange}
-                                    />
-                                </div>
-                            );
-                        })}
+                        {(subsection.fields ?? []).map((field) => (
+                                <ProfileField 
+                                    key={field.id}
+                                    field={field}
+                                    fieldChanges={fieldChanges}
+                                    onFieldChange={onFieldChange}
+                                    onFieldLinkChange={onFieldLinkChange}
+                                />
+                        ))}
                         {/* Render subsection content here */}
                         <>
                             {/* <div className={styles.subsectionButtonsWrapper}> */}
-                                <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
-                                    Delete {!isMobile && 'Subsection'}
-                                </button>
+                            <button className={styles.deleteSubsectionButton} type="button" onClick={() => onDeleteSubsection(section.id, subsection.id, index + 1)}>
+                                Delete {!isMobile && 'Subsection'}
+                            </button>
                             {/* </div> */}
                         </>
                     </div>

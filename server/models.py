@@ -220,6 +220,7 @@ class Profile_Field(db.Model):
     profile_subsection_id = db.Column(db.Integer, db.ForeignKey("profile_subsections.id"), nullable=False)
     label = db.Column(db.String, nullable=False, default="Untitled Field")
     value = db.Column(db.Text, nullable=False, default="", server_default="")
+    link = db.Column(db.String, nullable=True)
     position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
     created_at = created_at_column()
     updated_at = updated_at_column()
@@ -230,6 +231,7 @@ class Profile_Field(db.Model):
             "profileSubsectionId": self.profile_subsection_id,
             "label": self.label,
             "value": self.value,
+            "link": self.link,
             "position": self.position,
             "createdAt": serialize_datetime(self.created_at),
             "updatedAt": serialize_datetime(self.updated_at),

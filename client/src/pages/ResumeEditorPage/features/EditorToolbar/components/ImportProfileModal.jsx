@@ -41,7 +41,7 @@ export default function ImportProfileModal({ sessionId, unmatchedFields, replace
             if (!activeEditorId || !resumeField) return;
 
             pendingMatchHistory.current = null;
-            const value = replaceFieldValueText(resumeField.value, selectedProfileField.value);
+            const value = replaceFieldValueText(resumeField.value, selectedProfileField);
             dispatch(applyManualProfileMatch({ sessionId, profileFieldId: selectedProfileField.id, resumeFieldId: activeEditorId, value }));
             dispatch(setActiveEditorId(null));
             setSelectedProfileField(null);

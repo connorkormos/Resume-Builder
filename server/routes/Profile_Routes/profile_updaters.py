@@ -27,13 +27,17 @@ def update_profile_field(field_id, form_data):
 
     if not isinstance(form_data["value"], str):
         raise BadRequest(description="Field value must be a string.")
+    if "link" in form_data and form_data["link"] is not None and not isinstance(form_data["link"], str):
+        raise BadRequest(description="Field link must be a string or null.")
 
     field.value = form_data["value"]
+    if "link" in form_data:
+        field.link = form_data["link"]
     return field
 
 
 def update_profile_fields(profile, form_data):
-    """Validate a complete batch before changing values; the caller commits."""
+    """Validate a complete batch before changing values and links; the caller commits."""
     user_id = session.get("user_id")
     if not user_id:
         raise Unauthorized(description="User not logged in.")
@@ -60,7 +64,11 @@ def update_profile_fields(profile, form_data):
             raise BadRequest(description="Each field id may appear only once.")
         if not isinstance(field_data.get("value"), str):
             raise BadRequest(description="Each field value must be a string.")
-        changes[field_id] = field_data["value"]
+        if "link" in field_data and field_data["link"] is not None and not isinstance(field_data["link"], str):
+            raise BadRequest(description="Each field link must be a string or null.")
+        changes[field_id] = {"value": field_data["value"]}
+        if "link" in field_data:
+            changes[field_id]["link"] = field_data["link"]
 
     fields = (
         Profile_Field.query
@@ -73,8 +81,10 @@ def update_profile_fields(profile, form_data):
         raise NotFound(description="One or more fields were not found in this profile.")
 
     fields_by_id = {field.id: field for field in fields}
-    for field_id, value in changes.items():
-        fields_by_id[field_id].value = value
+    for field_id, field_data in changes.items():
+        fields_by_id[field_id].value = field_data["value"]
+        if "link" in field_data:
+            fields_by_id[field_id].link = field_data["link"]
     if "title" in form_data:
         profile.title = form_data["title"]
     return [fields_by_id[field_id] for field_id in changes]

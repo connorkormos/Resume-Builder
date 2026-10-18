@@ -13,11 +13,11 @@ import AuthPage from "./pages/AuthPage/AuthPage";
 import ResumeEditorPage from "./pages/ResumeEditorPage/ResumeEditorPage";
 
 import AccountPage from "./pages/AccountPage/AccountPage";
-import Resumes from "./pages/AccountPage/components/Resumes/Resumes.jsx";
-import Settings from "./pages/AccountPage/components/Settings/Settings.jsx";
-import Profile from "./pages/AccountPage/components/Profile/Profile.jsx";
-import CreateProfileForm from "./pages/AccountPage/components/Profile/components/CreateProfileForm.jsx";
-import EditProfile from "./pages/AccountPage/components/Profile/components/EditProfile.jsx";
+import Resumes from "./pages/AccountPage/Resumes/Resumes.jsx";
+import Settings from "./pages/AccountPage/Settings/Settings.jsx";
+import Profile from "./pages/AccountPage/Profile/Profile.jsx";
+import CreateProfileForm from "./pages/AccountPage/Profile/components/CreateProfileForm.jsx";
+import EditProfile from "./pages/AccountPage/Profile/components/EditProfile.jsx";
 
 import Search from "./pages/SearchPage/Search";
 

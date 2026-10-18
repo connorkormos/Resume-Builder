@@ -12,8 +12,19 @@ import { getUserProfile } from '@/services/profileServices';
 import { pairProfileSubsections, matchProfileFields, findProbableMatches, logUnmatchedProfileItems } from '../helpers/importProfileHelpers';
 import ImportProfileModal from './ImportProfileModal';
 
-function replaceFieldValueText(slateFieldValue, profileFieldValue, containsListItems = false) {
+function replaceFieldValueText(slateFieldValue, profileField, containsListItems = false) {
+    const profileFieldValue = profileField.value;
+    const profileFieldLink = profileField.link ?? null;
     if (typeof profileFieldValue !== 'string') return slateFieldValue;
+
+    // Link marks belong on every text leaf, including empty and nested leaves.
+    const applyProfileFieldLink = (node) => {
+        if (typeof node.text === 'string') return { ...node, link: profileFieldLink };
+        if (Array.isArray(node.children)) {
+            return { ...node, children: node.children.map(applyProfileFieldLink) };
+        }
+        return { ...node };
+    };
 
     // Preserve existing leaf colors unless the caller explicitly supplies one.
     // const colorOverride = fontColor != null ? { color: fontColor } : {};
@@ -37,7 +48,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue, containsListI
         if (slateNode.type === 'unordered-list' || slateNode.type === 'ordered-list') {
             return {
                 ...slateNode,
-                children: replaceFieldValueText(slateNode.children, profileFieldValue, true),
+                children: replaceFieldValueText(slateNode.children, profileField, true),
             };
         }
 
@@ -72,7 +83,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue, containsListI
         return {
             ...slateNode,
             children: slateNode.children.map((child, childIndex) => {
-                if (!replacementIndexes.has(childIndex)) return { ...child };
+                if (!replacementIndexes.has(childIndex)) return applyProfileFieldLink(child);
                 const slateFieldTextIsAllCaps = /\p{L}/u.test(child.text)
                     && child.text === child.text.toUpperCase();
                 const leadingWhitespace = child.text.match(/^\s*/)[0];
@@ -81,6 +92,7 @@ function replaceFieldValueText(slateFieldValue, profileFieldValue, containsListI
                     ? child.text.match(/\s*$/)[0] : '';
                 return {
                     ...child,
+                    link: profileFieldLink,
                     // ...colorOverride,
                     text: leadingWhitespace
                         + (slateFieldTextIsAllCaps ? replacementText.toUpperCase() : replacementText)
@@ -119,16 +131,16 @@ export default function ImportProfile() {
         const pairs = pairProfileSubsections(profileSections, reduxResume);
         const { matchedFields, potentialMatches } = matchProfileFields(pairs.subsectionPairs, resumeFields);
 
-        // Replace text using the existing Slate formatting and save each field.
+        // Import text and links using the existing Slate formatting and save each field.
         for (const { resumeField, profileField } of matchedFields) {
-            const value = replaceFieldValueText(resumeField.value, profileField.value);
+            const value = replaceFieldValueText(resumeField.value, profileField);
             dispatch(updateField({ id: resumeField.id, value }));
         }
 
         const probableMatches = findProbableMatches(potentialMatches);
 
         for (const { resumeField, profileField } of probableMatches) {
-            const value = replaceFieldValueText(resumeField.value, profileField.value);
+            const value = replaceFieldValueText(resumeField.value, profileField);
             dispatch(updateField({ id: resumeField.id, value }));
         }
 

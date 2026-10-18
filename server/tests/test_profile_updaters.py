@@ -14,7 +14,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound, Unauthorized
 from app import app, db
 from models import Profile, Profile_Field, User
 from routes.Profile_Routes.profile_builders import add_profile_section
-from routes.Profile_Routes.profile_updaters import update_profile_field
+from routes.Profile_Routes.profile_updaters import update_profile_field, update_profile_fields
 
 
 class ProfileUpdatersTest(unittest.TestCase):
@@ -102,6 +102,79 @@ class ProfileUpdatersTest(unittest.TestCase):
             update_profile_field(self.field_id, {"value": "Temporary"})
             db.session.rollback()
         self.assert_value_unchanged()
+
+    def test_single_field_link_is_saved_preserved_and_removed(self):
+        with app.test_request_context():
+            session["user_id"] = self.owner.id
+            for link_changes, expected in [
+                ({"link": "https://example.test"}, "https://example.test"),
+                ({}, "https://example.test"),
+                ({"link": "https://updated.test"}, "https://updated.test"),
+                ({"link": None}, None),
+            ]:
+                with self.subTest(link_changes=link_changes):
+                    update_profile_field(self.field_id, {"value": "Original", **link_changes})
+                    db.session.commit()
+                    db.session.expire_all()
+                    self.assertEqual(db.session.get(Profile_Field, self.field_id).link, expected)
+
+    def test_invalid_single_field_link_does_not_change_text_or_link(self):
+        self.field.link = "https://original.test"
+        db.session.commit()
+        with app.test_request_context():
+            session["user_id"] = self.owner.id
+            for link in [False, 0, [], {}]:
+                with self.subTest(link=link):
+                    with self.assertRaises(BadRequest):
+                        update_profile_field(self.field_id, {"value": "Changed", "link": link})
+                    self.assert_value_unchanged()
+                    self.assertEqual(self.field.link, "https://original.test")
+
+    def test_batch_api_saves_preserves_and_removes_links(self):
+        client = app.test_client()
+        with client.session_transaction() as client_session:
+            client_session["user_id"] = self.owner.id
+        for link_changes, expected in [
+            ({"link": "https://example.test"}, "https://example.test"),
+            ({}, "https://example.test"),
+            ({"link": "https://updated.test"}, "https://updated.test"),
+            ({"link": None}, None),
+        ]:
+            with self.subTest(link_changes=link_changes):
+                response = client.patch(f"/profiles/{self.profile.id}/fields", json={
+                    "fields": [{"id": self.field_id, "value": "Updated", **link_changes}],
+                })
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json["fields"][0]["link"], expected)
+                db.session.expire_all()
+                self.assertEqual(self.field.link, expected)
+                profile = client.get(f"/profiles/{self.profile.id}").json
+                saved_field = profile["sections"][0]["subsections"][0]["fields"][0]
+                self.assertEqual(saved_field["link"], expected)
+                self.assertEqual(saved_field["value"], "Updated")
+
+    def test_invalid_batch_link_rejects_all_changes_before_mutating(self):
+        self.field.link = "https://original.test"
+        second_field = self.field.profile_subsection.fields[1]
+        second_field.link = "https://second.test"
+        db.session.commit()
+        with app.test_request_context():
+            session["user_id"] = self.owner.id
+            for link in [False, 0, [], {}]:
+                with self.subTest(link=link):
+                    with self.assertRaises(BadRequest):
+                        update_profile_fields(self.profile, {
+                            "title": "Changed title",
+                            "fields": [
+                                {"id": self.field_id, "value": "Changed", "link": "https://changed.test"},
+                                {"id": second_field.id, "value": "Changed", "link": link},
+                            ],
+                        })
+                    self.assert_value_unchanged()
+                    self.assertEqual(self.field.link, "https://original.test")
+                    self.assertEqual(second_field.value, "")
+                    self.assertEqual(second_field.link, "https://second.test")
+                    self.assertEqual(self.profile.title, "Test profile")
 
 
 if __name__ == "__main__":
