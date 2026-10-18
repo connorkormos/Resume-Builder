@@ -187,6 +187,8 @@ export const initialState = {
    activeEditorId: null,
    activeEditorSelection: null,
    resumeRef: null,
+   // Client-only records restored alongside manual profile replacements by undo/redo.
+   manualProfileMatches: {},
 };
 
 const resumeSlice = createSlice({
@@ -199,6 +201,7 @@ const resumeSlice = createSlice({
             ...action.payload,
             activeEditorId: null,
             activeEditorSelection: null,
+            manualProfileMatches: {},
          };
       },
       setResume(state, action) {
@@ -208,6 +211,7 @@ const resumeSlice = createSlice({
             ...action.payload,
             activeEditorId: null,
             activeEditorSelection: null,
+            manualProfileMatches: {},
          };
       },
       setResumeId(state, action) {
@@ -395,6 +399,31 @@ const resumeSlice = createSlice({
          
          // console.log(field, id, changes);
          mergeDeep(field, changes);
+      },
+
+      applyManualProfileMatch: {
+         prepare({ sessionId, profileFieldId, resumeFieldId, value }) {
+            const matchId = crypto.randomUUID();
+            return {
+               payload: { sessionId, profileFieldId, resumeFieldId, value, matchId },
+               meta: { historyGroup: `manual-profile-match:${matchId}` },
+            };
+         },
+         reducer(state, action) {
+            const { sessionId, profileFieldId, resumeFieldId, value, matchId } = action.payload;
+            const field = state.fields.byId[resumeFieldId];
+            if (!sessionId || profileFieldId == null || !field
+               || !state.subsections.byId[field.subsectionId]) return;
+
+            // Commit the value and its match record in the same undo step.
+            mergeDeep(field, { value });
+            state.manualProfileMatches = {
+               [sessionId]: {
+                  ...state.manualProfileMatches?.[sessionId],
+                  [profileFieldId]: { matchId, profileFieldId, resumeFieldId },
+               },
+            };
+         },
       },
 
       swapFieldPositions(state, action) {
@@ -739,6 +768,7 @@ export const {
    addField,
    deleteField,
    updateField,
+   applyManualProfileMatch,
    swapFieldPositions,
    reorderFields,
 

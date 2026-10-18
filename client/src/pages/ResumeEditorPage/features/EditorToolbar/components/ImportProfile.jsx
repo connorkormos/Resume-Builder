@@ -10,59 +10,78 @@ import { updateProfile } from "@/store/userSlice";
 
 import { getUserProfile } from '@/services/profileServices';
 import { pairProfileSubsections, matchProfileFields, findProbableMatches, logUnmatchedProfileItems } from '../helpers/importProfileHelpers';
+import ImportProfileModal from './ImportProfileModal';
 
-function replaceFieldValueText(slateFieldValue, profileFieldValue, isList = false, fontColor = null) {
+function replaceFieldValueText(slateFieldValue, profileFieldValue, containsListItems = false) {
     if (typeof profileFieldValue !== 'string') return slateFieldValue;
 
     // Preserve existing leaf colors unless the caller explicitly supplies one.
-    const colorOverride = fontColor != null ? { color: fontColor } : {};
+    // const colorOverride = fontColor != null ? { color: fontColor } : {};
     const profileText = profileFieldValue.trim();
-    const parts = isList
-        ? profileText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+    const profileTextSegments = containsListItems
+        ? profileText.split(/\r?\n/).map((textSegment) => textSegment.trim()).filter(Boolean)
         : profileText.split(/\s+/).filter(Boolean);
 
     // Keep an empty list item when importing blank text so the list stays editable.
-    if (isList && parts.length === 0) parts.push('');
-    const valueItems = isList
-        ? parts.map((line, index) => slateFieldValue[index] ?? slateFieldValue.at(-1) ?? {
-            type: 'list-item',
-            children: [{ text: line }],
-        })
-        : slateFieldValue;
+    if (containsListItems && profileTextSegments.length === 0) profileTextSegments.push('');
+    const slateNodesToUpdate =
+        containsListItems
+            ? profileTextSegments.map((textSegment, index) => slateFieldValue[index] ?? slateFieldValue.at(-1) ?? {
+                type: 'list-item',
+                children: [{ text: textSegment }],
+            })
+            : slateFieldValue;
     let wordIndex = 0;
 
-    return valueItems.map((item, index) => {
-        if (item.type === 'unordered-list' || item.type === 'ordered-list') {
+    return slateNodesToUpdate.map((slateNode, index) => {
+        if (slateNode.type === 'unordered-list' || slateNode.type === 'ordered-list') {
             return {
-                ...item,
-                children: replaceFieldValueText(item.children, profileFieldValue, true, fontColor),
+                ...slateNode,
+                children: replaceFieldValueText(slateNode.children, profileFieldValue, true),
             };
         }
 
         let replacementText = profileText;
-        if (isList) {
-            replacementText = parts[index];
-        } else if (valueItems.length > 1) {
-            const originalText = item.children.map((child) => child.text ?? '').join('');
+        if (containsListItems) {
+            replacementText = profileTextSegments[index];
+        } else if (slateNodesToUpdate.length > 1) {
+            const originalText = slateNode.children.map((child) => child.text ?? '').join('');
             const originalWordCount = originalText.trim().split(/\s+/).filter(Boolean).length;
-            const endIndex = index === valueItems.length - 1
-                ? parts.length
+            const endIndex = index === slateNodesToUpdate.length - 1
+                ? profileTextSegments.length
                 : wordIndex + originalWordCount;
-            replacementText = parts.slice(wordIndex, endIndex).join(' ');
+            replacementText = profileTextSegments.slice(wordIndex, endIndex).join(' ');
             wordIndex = endIndex;
         }
 
+        const textChildIndexes = slateNode.children.flatMap((child, childIndex) =>
+            typeof child.text === 'string' ? [childIndex] : [],
+        );
+        const contentChildIndexes = textChildIndexes.filter(
+            (childIndex) => slateNode.children[childIndex].text.trim().length > 0,
+        );
+        const lastIconIndex = slateNode.children.findLastIndex((child) => child.type === 'icon');
+        // Empty blocks get one destination; existing text keeps its current slots.
+        // Prefer text after the last icon, preserving its leading caret placeholder.
+        const emptyTextTargetIndex = textChildIndexes.find((childIndex) => childIndex > lastIconIndex)
+            ?? textChildIndexes[0];
+        const replacementIndexes = new Set(contentChildIndexes.length > 0
+            ? contentChildIndexes
+            : emptyTextTargetIndex !== undefined ? [emptyTextTargetIndex] : []);
+
         return {
-            ...item,
-            children: item.children.map((child) => {
-                if (typeof child.text !== 'string') return { ...child };
-                if (child.text.length === 0) return { ...child, ...colorOverride };
-                const slateFieldTextIsAllCaps = child.text === child.text.toUpperCase();
+            ...slateNode,
+            children: slateNode.children.map((child, childIndex) => {
+                if (!replacementIndexes.has(childIndex)) return { ...child };
+                const slateFieldTextIsAllCaps = /\p{L}/u.test(child.text)
+                    && child.text === child.text.toUpperCase();
                 const leadingWhitespace = child.text.match(/^\s*/)[0];
-                const trailingWhitespace = child.text.match(/\s*$/)[0];
+                // Whitespace-only destinations retain their whitespace once, as a prefix.
+                const trailingWhitespace = child.text.trim().length > 0
+                    ? child.text.match(/\s*$/)[0] : '';
                 return {
                     ...child,
-                    ...colorOverride,
+                    // ...colorOverride,
                     text: leadingWhitespace
                         + (slateFieldTextIsAllCaps ? replacementText.toUpperCase() : replacementText)
                         + trailingWhitespace,
@@ -85,6 +104,10 @@ export default function ImportProfile() {
     const resumeFields = reduxResume.fields.byId;
     const resumeSubsections = reduxResume.subsections.byId;
 
+    const [unmatchedFields, setUnmatchedFields] = useState([]);
+    const [showUnmatchedFieldsModal, setShowUnmatchedFieldsModal] = useState(false);
+    const [manualMatchSessionId, setManualMatchSessionId] = useState(null);
+
     useEffect(() => () => {
         importRequest.current += 1;
     }, []);
@@ -105,13 +128,19 @@ export default function ImportProfile() {
         const probableMatches = findProbableMatches(potentialMatches);
 
         for (const { resumeField, profileField } of probableMatches) {
-            const value = replaceFieldValueText(resumeField.value, profileField.value, false, 'red');
+            const value = replaceFieldValueText(resumeField.value, profileField.value);
             dispatch(updateField({ id: resumeField.id, value }));
         }
 
         console.log('Probable matches:', probableMatches);
 
-        logUnmatchedProfileItems({ profileSections, resume: reduxResume, pairs, matchedFields, potentialMatches });
+        const { unmatchedProfileFields } = logUnmatchedProfileItems({ profileSections, resume: reduxResume, pairs, matchedFields, probableMatches, potentialMatches });
+        if (unmatchedProfileFields.length > 0) {
+            console.log('Unmatched profile fields:', unmatchedProfileFields);
+            setUnmatchedFields(unmatchedProfileFields);
+            setManualMatchSessionId(crypto.randomUUID());
+            setShowUnmatchedFieldsModal(true);
+        }
     }
 
     const handleProfileSelect = async (profileId) => {
@@ -145,41 +174,52 @@ export default function ImportProfile() {
     }
 
     return (
-        <div onKeyDown={(event) => {
-            if (event.key === 'Escape') setDropdownIsOpen(false);
-        }}>
-            <button
-                type="button"
-                className="buttonMain"
-                data-id="open-close-dropdown-button"
-                aria-expanded={dropdownIsOpen}
-                onClick={() => setDropdownIsOpen(!dropdownIsOpen)}
-                disabled={isImporting}
-                aria-busy={isImporting}
-            >
-                {isImporting ? 'Importing…' : 'Import Profile'}
-                <MdArrowDropDown style={{ marginLeft: '0.25rem', marginRight: '-0.25rem' }} />
-            </button>
-            {dropdownIsOpen && (
-                <TextFormatDropdown
-                    isOpen={dropdownIsOpen}
-                    setIsOpen={setDropdownIsOpen}
-                    wrapperStyling={{ flexDirection: 'column', width: 'max-content' }}
-                    containerStyling={{ maxHeight: '20rem', overflowY: 'auto' }}
-                    dropdownOptions={profiles.map((profile) => (
-                        <button
-                            key={profile.id}
-                            type="button"
-                            className="buttonMain"
-                            style={{ width: '100%', justifyContent: 'flex-start' }}
-                            onClick={() => handleProfileSelect(profile.id)}
-                        >
-                            {profile.title || 'Untitled Profile'}
-                        </button>
-                    ))}
+        <>
+            <div onKeyDown={(event) => {
+                if (event.key === 'Escape') setDropdownIsOpen(false);
+            }}>
+                <button
+                    type="button"
+                    className="buttonMain"
+                    data-id="open-close-dropdown-button"
+                    aria-expanded={dropdownIsOpen}
+                    onClick={() => setDropdownIsOpen(!dropdownIsOpen)}
+                    disabled={isImporting}
+                    aria-busy={isImporting}
+                >
+                    {isImporting ? 'Importing…' : 'Import Profile'}
+                    <MdArrowDropDown style={{ marginLeft: '0.25rem', marginRight: '-0.25rem' }} />
+                </button>
+                {dropdownIsOpen && (
+                    <TextFormatDropdown
+                        isOpen={dropdownIsOpen}
+                        setIsOpen={setDropdownIsOpen}
+                        wrapperStyling={{ flexDirection: 'column', width: 'max-content' }}
+                        containerStyling={{ maxHeight: '20rem', overflowY: 'auto' }}
+                        dropdownOptions={profiles.map((profile) => (
+                            <button
+                                key={profile.id}
+                                type="button"
+                                className="buttonMain"
+                                style={{ width: '100%', justifyContent: 'flex-start' }}
+                                onClick={() => handleProfileSelect(profile.id)}
+                            >
+                                {profile.title || 'Untitled Profile'}
+                            </button>
+                        ))}
+                    />
+                )}
+                {importError && <span role="alert">{importError}</span>}
+            </div>
+            {showUnmatchedFieldsModal && (
+                <ImportProfileModal
+                    key={`${reduxResume.id}:${manualMatchSessionId}`}
+                    sessionId={manualMatchSessionId}
+                    unmatchedFields={unmatchedFields}
+                    replaceFieldValueText={replaceFieldValueText}
+                    onClose={() => setShowUnmatchedFieldsModal(false)}
                 />
             )}
-            {importError && <span role="alert">{importError}</span>}
-        </div>
+        </>
     );
 }

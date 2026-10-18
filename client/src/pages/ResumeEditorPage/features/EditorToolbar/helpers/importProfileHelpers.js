@@ -153,7 +153,7 @@ export function checkUnmatchedFields(subsectionPairs, matchedFields, resumeField
 }
 
 // Report unused items with the same parent context and console layout as the import.
-export function logUnmatchedProfileItems({ profileSections, resume, pairs, matchedFields, potentialMatches }) {
+export function logUnmatchedProfileItems({ profileSections, resume, pairs, matchedFields, probableMatches = [], potentialMatches }) {
     const resumeSections = resume.sections.byId;
     const resumeSubsections = resume.subsections.byId;
     const resumeFields = resume.fields.byId;
@@ -163,9 +163,13 @@ export function logUnmatchedProfileItems({ profileSections, resume, pairs, match
         matchedProfileSubsectionIds,
         matchedResumeSubsectionIds,
     } = pairs;
-    const importedProfileFieldIds = new Set(matchedFields.map(({ profileField }) => profileField.id));
-    const updatedResumeFieldIds = new Set(matchedFields.map(({ resumeField }) => resumeField.id));
-    const potentialProfileFieldIds = new Set(potentialMatches.map(({ profileField }) => profileField.id));
+    // Both exact matches and probable matches have already been assigned by the caller.
+    const assignedMatches = [...matchedFields, ...probableMatches];
+    const importedProfileFieldIds = new Set(assignedMatches.map(({ profileField }) => profileField.id));
+    const updatedResumeFieldIds = new Set(assignedMatches.map(({ resumeField }) => resumeField.id));
+    const potentialProfileFieldIds = new Set(potentialMatches
+        .filter(({ profileField }) => !importedProfileFieldIds.has(profileField.id))
+        .map(({ profileField }) => profileField.id));
 
     // Include unused fields beneath unmatched sections and subsections as well.
     // Add parent context to diagnostic copies, keeping the source data untouched.
@@ -230,12 +234,16 @@ export function logUnmatchedProfileItems({ profileSections, resume, pairs, match
         ...getResumeSubsectionContext(resumeSubsections[field.subsectionId]),
     }));
 
-    console.group('Profile import: unmatched items');
-    if (unmatchedProfileSections.length > 0) console.log(`Profile sections (${unmatchedProfileSections.length}):`, unmatchedProfileSections);
-    if (unmatchedResumeSections.length > 0) console.log(`Resume sections (${unmatchedResumeSections.length}):`, unmatchedResumeSections);
-    if (unmatchedProfileSubsections.length > 0) console.log(`Profile subsections (${unmatchedProfileSubsections.length}):`, unmatchedProfileSubsections);
-    if (unmatchedResumeSubsections.length > 0) console.log(`Resume subsections (${unmatchedResumeSubsections.length}):`, unmatchedResumeSubsections);
-    if (unmatchedProfileFields.length > 0) console.log(`Profile fields (${unmatchedProfileFields.length}; ${potentialMatches.length} should have matched):`, unmatchedProfileFields);
-    if (unmatchedResumeFields.length > 0) console.log(`Resume fields (${unmatchedResumeFields.length}):`, unmatchedResumeFields);
-    console.groupEnd();
+    // console.group('Profile import: unmatched items');
+    // if (unmatchedProfileSections.length > 0) console.log(`Profile sections (${unmatchedProfileSections.length}):`, unmatchedProfileSections);
+    // if (unmatchedResumeSections.length > 0) console.log(`Resume sections (${unmatchedResumeSections.length}):`, unmatchedResumeSections);
+    // if (unmatchedProfileSubsections.length > 0) console.log(`Profile subsections (${unmatchedProfileSubsections.length}):`, unmatchedProfileSubsections);
+    // if (unmatchedResumeSubsections.length > 0) console.log(`Resume subsections (${unmatchedResumeSubsections.length}):`, unmatchedResumeSubsections);
+    // if (unmatchedProfileFields.length > 0) console.log(`Profile fields (${unmatchedProfileFields.length}; ${potentialProfileFieldIds.size} should have matched):`, unmatchedProfileFields);
+    // if (unmatchedResumeFields.length > 0) console.log(`Resume fields (${unmatchedResumeFields.length}):`, unmatchedResumeFields);
+    // console.groupEnd();
+
+    return {
+        unmatchedProfileFields,
+    };
 }

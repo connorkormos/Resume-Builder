@@ -313,12 +313,13 @@ export const copyResumeToApi = async (resumeId) => {
 
 export const saveResumeToApi = async (resume) => {
    try {
+      const { manualProfileMatches: _manualProfileMatches, ...resumeData } = resume;
       console.log(`Resume of ID ${resume.id} being saved to api: `)
       await fetchApi({
          endpoint: `/resumes/${resume.id}`,
          options: {
             method: 'PUT',
-            body: JSON.stringify(resume)
+            body: JSON.stringify(resumeData)
          }
       })
 
