@@ -17,7 +17,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.schema import CreateTable
 
 from app import app, db
-from models import User, Resume, Column
+from models import User, Resume, Container
 from services.resume_tags import InvalidResumeTags, normalize_resume_tags
 
 
@@ -41,7 +41,7 @@ class ResumeTagsTest(unittest.TestCase):
 
     def resume(self, title="Sample", tags=None, text="", owner=1, official=True):
         resume = Resume(title=title, user_id=owner, tags=tags or [], plain_text=text,
-                        is_official_template=official, columns=[Column(position=0)])
+                        is_official_template=official, columns=[Container(position=0)])
         db.session.add(resume)
         db.session.commit()
         return resume

@@ -1,11 +1,11 @@
 from copy import deepcopy
-from models import Column, Field, Section, Subsection, db, Resume
+from models import Container, Field, Section, Subsection, db, Resume
 
 from utils.formatting import format_label
 
 # ** Helper function to set column widths based on manual and auto width settings **
 def update_column_widths(resume_id):
-    columns = Column.query.filter_by(resume_id=resume_id).all()
+    columns = Container.query.filter_by(resume_id=resume_id).all()
 
     def get_width(column):
         layout = column.layout or {}

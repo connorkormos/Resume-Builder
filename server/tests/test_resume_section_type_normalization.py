@@ -10,7 +10,7 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, db
-from models import Column, Field, Resume, Section, Subsection, User
+from models import Container, Field, Resume, Section, Subsection, User
 from services.resume_updater import update_resume_with_form_data
 
 
@@ -21,7 +21,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.context.push()
         db.create_all()
         user = User(first_name="Owner", email="owner@example.test", password_hash="unused")
-        self.resume = Resume(user=user, title="Test", columns=[Column(position=0)])
+        self.resume = Resume(user=user, title="Test", columns=[Container(position=0)])
         db.session.add(self.resume)
         db.session.commit()
 
@@ -90,7 +90,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
 
     def test_existing_type_in_another_column_blocks_conversion_ignoring_case(self):
         generic = self.section("custom", "Skills")
-        column = Column(resume=self.resume, position=1)
+        column = Container(resume=self.resume, position=1)
         db.session.add(column)
         db.session.commit()
         self.section("SKILLS", "Existing", column=column)
@@ -157,7 +157,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
 
     def test_type_used_in_another_resume_does_not_block_conversion(self):
         generic = self.section("defaultSection", "Skills")
-        other_resume = Resume(user_id=self.resume.user_id, title="Other", columns=[Column(position=0)])
+        other_resume = Resume(user_id=self.resume.user_id, title="Other", columns=[Container(position=0)])
         db.session.add(other_resume)
         db.session.commit()
         self.section("skills", "Skills", column=other_resume.columns[0])

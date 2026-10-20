@@ -1,6 +1,6 @@
 from utils.authorization import check_resume_access
 from flask import Blueprint, request, jsonify, session
-from models import db, Resume, Column, Section, Subsection, Field
+from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import (
     build_resume_with_defaults,
@@ -52,9 +52,9 @@ def add_section_to_resume(resume_id):
 
         existing_section = (
             db.session.query(Section)
-            .join(Column, Section.column_id == Column.id)
+            .join(Container, Section.column_id == Container.id)
             .filter(
-                Column.resume_id == resume_id,
+                Container.resume_id == resume_id,
                 Section.type == section_type,
             )
             .first()
@@ -71,8 +71,8 @@ def add_section_to_resume(resume_id):
 
         else:
             first_column = (
-                Column.query.filter_by(resume_id=resume_id)
-                .order_by(Column.position)
+                Container.query.filter_by(resume_id=resume_id)
+                .order_by(Container.position)
                 .first()
             )
 

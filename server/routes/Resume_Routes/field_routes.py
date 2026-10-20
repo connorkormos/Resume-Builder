@@ -2,7 +2,7 @@ from utils.authorization import check_resume_access
 from flask import Blueprint, request, jsonify, session
 from sqlalchemy import func
 
-from models import db, Resume, Column, Section, Subsection, Field
+from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import build_resume_with_defaults, add_column, add_section, add_subsection, add_field, add_default_fields
 from services.resume_updater import update_resume_with_form_data

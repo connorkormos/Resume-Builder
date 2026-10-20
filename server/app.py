@@ -2,7 +2,7 @@ from flask import jsonify, request, make_response, session
 
 from config import app, db
 
-from models import User, Resume, Column, Section, Subsection, Field, Profile, Profile_Section, Profile_Subsection, Profile_Field
+from models import User, Resume, Container, Section, Subsection, Field, Profile, Profile_Section, Profile_Subsection, Profile_Field
 
 from routes.user_routes import user_bp
 from routes.auth_routes import auth_bp

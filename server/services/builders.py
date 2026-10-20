@@ -1,5 +1,5 @@
 from copy import deepcopy
-from models import Column, Field, Section, Subsection, db, Resume
+from models import Container, Field, Section, Subsection, db, Resume
 
 from lib.defaults import (
     RESUME_DEFAULTS,
@@ -52,7 +52,7 @@ def create_resume(title, user_id):
 
 
 def add_column(resume_id, position=0):
-    column = Column(
+    column = Container(
         resume_id=resume_id,
         position=position,
         styling=deepcopy(COLUMN_DEFAULTS["styling"]),
@@ -221,15 +221,15 @@ def build_resume_copy(resume_id, *, user_id):
     # Ordered by position to catch edge cases of conflicting position values
     # This happens for sections, subsections, and fields as well
     original_columns = (
-        Column.query.filter_by(resume_id=original_resume.id)
-        .order_by(Column.position)
+        Container.query.filter_by(resume_id=original_resume.id)
+        .order_by(Container.position)
         .all()
     )
 
     for original_column in original_columns:
         column_copy = copy_instance(
             original_column,
-            Column,
+            Container,
             {"id", "resume_id"},
         )
         column_copy.resume_id = resume_copy.id

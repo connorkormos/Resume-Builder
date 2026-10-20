@@ -1,6 +1,6 @@
 from utils.authorization import check_resume_access
 from flask import Blueprint, request, jsonify, session
-from models import db, Resume, Column, Section, Subsection, Field
+from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import (
     build_resume_with_defaults,
@@ -48,7 +48,7 @@ def add_column(resume_id):
                 message="Resumes cannot have more than 10 columns.",
             )
         
-        new_column = Column(
+        new_column = Container(
             resume_id=resume_id,
             position=column_count,
             # width=None
@@ -60,7 +60,7 @@ def add_column(resume_id):
 
         db.session.commit()
 
-        print_successful_request('Column added successfully.')
+        print_successful_request('Container added successfully.')
         return jsonify(resume.to_dict()), 201
 
     except Exception:
@@ -85,14 +85,14 @@ def delete_last_column(resume_id):
             return error
 
         column_to_delete = (
-            Column.query.filter_by(resume_id=resume_id)
-            .order_by(Column.position.desc())
+            Container.query.filter_by(resume_id=resume_id)
+            .order_by(Container.position.desc())
             .first()
         )
 
         second_to_last_column = (
-            Column.query.filter_by(resume_id=resume_id)
-            .order_by(Column.position.desc())
+            Container.query.filter_by(resume_id=resume_id)
+            .order_by(Container.position.desc())
             .offset(1)
             .first()
         )
@@ -108,7 +108,7 @@ def delete_last_column(resume_id):
             return generate_error(
                 error_type="NOT_FOUND",
                 code="COLUMN_NOT_FOUND",
-                message="Column to delete not found.",
+                message="Container to delete not found.",
             )
 
         max_position = max(
@@ -125,8 +125,8 @@ def delete_last_column(resume_id):
         db.session.flush()
 
         remaining_columns = (
-            Column.query.filter_by(resume_id=resume_id)
-            .order_by(Column.position.asc())
+            Container.query.filter_by(resume_id=resume_id)
+            .order_by(Container.position.asc())
             .all()
         )
         
@@ -155,7 +155,7 @@ def update_column(column_id):
     print_pending_request('PUT', f'/columns/{column_id}', 'to update column of ID:', column_id)
 
     try:
-        column = Column.query.filter_by(id=column_id).one_or_none()
+        column = Container.query.filter_by(id=column_id).one_or_none()
         if not column:
             return generate_error(
                 error_type="NOT_FOUND",

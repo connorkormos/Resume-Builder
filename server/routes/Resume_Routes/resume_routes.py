@@ -2,7 +2,7 @@ import datetime
 
 from flask import Blueprint, request, jsonify, session
 from pytz import timezone
-from models import db, Resume, Column, Section, Subsection, Field
+from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import (
     ResumeNotFoundError,

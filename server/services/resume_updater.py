@@ -1,7 +1,7 @@
 from collections import Counter
 import re
 
-from models import db, Resume, Column, Section, Subsection, Field
+from models import db, Resume, Container, Section, Subsection, Field
 from lib.defaults import SECTION_DEFINITIONS
 
 from services.updaters import update_column_widths
@@ -21,9 +21,9 @@ def normalize_generic_section_types(resume_id):
         for definition in SECTION_DEFINITIONS.values()
     }
     sections = (
-        Section.query.join(Column)
-        .filter(Column.resume_id == resume_id)
-        .order_by(Column.position, Column.id, Section.position, Section.id)
+        Section.query.join(Container)
+        .filter(Container.resume_id == resume_id)
+        .order_by(Container.position, Container.id, Section.position, Section.id)
         .all()
     )
     used_types = Counter(type_key(section.type) for section in sections)
@@ -80,17 +80,17 @@ def update_resume_with_form_data(resume_id, data):
         resume.layout = data["layout"]
 
     # * --------------
-    # * Column updates
+    # * Container updates
     # * --------------
 
     columns_by_id = data.get("columns", {}).get("byId", {})
     incoming_column_ids = {int(column_id) for column_id in columns_by_id.keys()}
-    existing_columns = Column.query.filter(Column.resume_id == resume_id).all()
+    existing_columns = Container.query.filter(Container.resume_id == resume_id).all()
     last_available_column = (
-        Column.query.filter(
-            Column.resume_id == resume_id, Column.id.in_(incoming_column_ids)
+        Container.query.filter(
+            Container.resume_id == resume_id, Container.id.in_(incoming_column_ids)
         )
-        .order_by(Column.position.desc())
+        .order_by(Container.position.desc())
         .first()
     )
     
@@ -114,7 +114,7 @@ def update_resume_with_form_data(resume_id, data):
             db.session.delete(column)
 
     for column_id, column_data in columns_by_id.items():
-        column = Column.query.get(int(column_id))
+        column = Container.query.get(int(column_id))
         if not column:
             continue
 
@@ -142,7 +142,7 @@ def update_resume_with_form_data(resume_id, data):
     # sections_by_id = data.get("sections", {}).get("byId", {})
     incoming_section_ids = {int(section_id) for section_id in sections_by_id.keys()}
     existing_sections = (
-        Section.query.join(Column).filter(Column.resume_id == resume_id).all()
+        Section.query.join(Container).filter(Container.resume_id == resume_id).all()
     )
 
     for section in existing_sections:
@@ -188,8 +188,8 @@ def update_resume_with_form_data(resume_id, data):
 
     existing_subsections = (
         Subsection.query.join(Section)
-        .join(Column)
-        .filter(Column.resume_id == resume_id)
+        .join(Container)
+        .filter(Container.resume_id == resume_id)
         .all()
     )
 
@@ -231,8 +231,8 @@ def update_resume_with_form_data(resume_id, data):
     existing_fields = (
         Field.query.join(Subsection)
         .join(Section)
-        .join(Column)
-        .filter(Column.resume_id == resume_id)
+        .join(Container)
+        .filter(Container.resume_id == resume_id)
         .all()
     )
 

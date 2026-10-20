@@ -97,7 +97,7 @@ if __name__ == "__main__":
 # from datetime import datetime, timezone
 
 # from config import app, db
-# from models import Column, User, Resume
+# from models import Container, User, Resume
 
 # from lorem_text import lorem
 
