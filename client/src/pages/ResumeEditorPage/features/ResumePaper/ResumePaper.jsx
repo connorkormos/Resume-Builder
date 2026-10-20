@@ -165,7 +165,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     setColumnOrder([...columns.allIds]);
   }, [columns]);
 
-  const resumeColumns = columnOrder.map((columnId) => {
+  const resumeColumns = columnOrder.map((columnId, index) => {
     const column = columns.byId[columnId];
 
     if (!column) {
@@ -182,6 +182,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
         previewWidth={previewWidths?.[column.id]}
         onStartResize={startResize}
         columnPreviewWidths={previewWidths}
+        rightColumnId={columnOrder[index + 1]}
         onResizeWithKeyboard={resizeWithKeyboard}
       />
     );

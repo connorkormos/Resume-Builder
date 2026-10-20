@@ -13,6 +13,7 @@ const Column = ({
   sectionById,
   previewWidth,
   columnPreviewWidths,
+  rightColumnId,
   onStartResize,
   onResizeWithKeyboard,
 }) => {
@@ -75,13 +76,15 @@ const Column = ({
     }
   });
 
+  const isResizingPair = columnPreviewWidths?.[column.id] != null
+    && columnPreviewWidths?.[rightColumnId] != null;
   let previewWidthStrings = [];
-  if (columnPreviewWidths) {
+  if (isResizingPair) {
     previewWidthStrings.push(
-      String(Object.values(columnPreviewWidths)[0]).slice(0, 4) + "%",
+      String(columnPreviewWidths[column.id]).slice(0, 4) + "%",
     );
     previewWidthStrings.push(
-      String(Object.values(columnPreviewWidths)[1]).slice(0, 4) + "%",
+      String(columnPreviewWidths[rightColumnId]).slice(0, 4) + "%",
     );
   }
 
@@ -96,7 +99,7 @@ const Column = ({
       {renderedSections}
       {!isLastColumn && (
         <div>
-          {columnPreviewWidths?.[column.id] && (
+          {isResizingPair && (
             <p className={styles.columnPreviewWidthLeft}>
               {previewWidthStrings[0]}
             </p>
@@ -108,7 +111,7 @@ const Column = ({
             onPointerDown={(event) => onStartResize(column.id, event)}
             onKeyDown={(event) => onResizeWithKeyboard(column.id, event)}
           />
-          {columnPreviewWidths?.[column.id] && (
+          {isResizingPair && (
             <p className={styles.columnPreviewWidthRight}>
               {previewWidthStrings[1]}
             </p>
