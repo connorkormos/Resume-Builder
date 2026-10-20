@@ -18,20 +18,13 @@ export default function MarginIndicator({
   const dispatch = useDispatch();
   const reduxResume = useSelector((state) => state.resume.present);
   const resumePadding = reduxResume.layout.padding;
-  const resumeGap = reduxResume.layout.gap;
-  // const resumePadding = useSelector(
-  // (state) => state.resume.present.layout.padding,
-  // );
+
   const { setPreview } = useContext(PaddingPreviewContext);
   const drag = useRef(null);
   const hovered = useRef(false);
   const horizontal = side === "left" || side === "right";
-  const minimumPadding =
-    target === "resume"
-      ? 0
-      : -parseRemValue(
-        resumeGap?.[horizontal ? "horizontal" : "vertical"],
-      );
+  // Offsets may be negative without a per-level clamp; sections clamp the final sum.
+  const minimumPadding = target === 'resume' ? 0 : -Infinity;
   // Section bottom handles grow the section down; page bottom moves inward.
   const direction =
     side === "right" || (side === "bottom" && target === "resume") ? -1 : 1;
@@ -48,12 +41,6 @@ export default function MarginIndicator({
         }),
     );
   };
-  // useEffect(
-  //   () => () => {
-  //     setPreview(null);
-  //   },
-  //   [setPreview],
-  // );
   useEffect(
     () => () => {
       if (drag.current) {
@@ -66,7 +53,6 @@ export default function MarginIndicator({
 
   const nextValue = (event) =>
     Math.max(
-      // 0,  // Commented out but leaving, as this is the original lower bound for padding according to resume gap defaults
       minimumPadding,
       drag.current.startValue +
       (direction *
@@ -147,8 +133,7 @@ export default function MarginIndicator({
 
 
         const next = Math.max(
-          // 0,  // Commented out but leaving, as this is the original lower bound for padding according to resume gap defaults
-          minimumPadding,
+              minimumPadding,
           Math.round(
             (current + direction * (event.key === keys[1] ? 0.1 : -0.1)) * 1000,
           ) / 1000,

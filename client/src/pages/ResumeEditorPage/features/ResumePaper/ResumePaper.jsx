@@ -1,3 +1,5 @@
+import { resolveResumeLayout, deriveSectionBoundaries, resizeColumnWidths } from '@/utils/resumeLayout.js';
+import { EditorLayoutContext } from './helpers/EditorLayoutContext.js';
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 
@@ -25,15 +27,30 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const containers = useSelector((state) => state.resume.present.containers);
   const sectionsById = useSelector((state) => state.resume.present.sections.byId);
 
-  const [containerSectionIds, setContainerSectionIds] = useState({});
-  const previousContainerSectionIds = useRef({});
-  const [containerOrder, setContainerOrder] = useState([]);
+  const [sectionOrderPreview, setSectionOrderPreview] = useState(null);
+  const containerOrder = containers.allIds;
+  const storedSectionIds = Object.fromEntries(containerOrder.map(id => [id, containers.byId[id]?.sectionIds ?? []]));
+  const containerSectionIds = sectionOrderPreview ?? storedSectionIds;
   const [previewWidths, setPreviewWidths] = useState(null);
   const resizeState = useRef(null);
   const previewWidthsRef = useRef(null);
 
-  const getContainerWidth = (containerId) =>
-    parseFloat(containers.byId[containerId]?.layout?.width?.value) || 0;
+  const rowContentWidth = useSelector(state => state.resume.present.layout.rowContentWidth);
+  const resolvedLayout = resolveResumeLayout({
+    rowContentWidth,
+    containersById: containers.byId,
+    orderedContainerIds: containerOrder,
+    widthOverrides: previewWidths ?? {},
+  });
+  const sectionContexts = {};
+  for (const containerId of containerOrder) {
+    const ids = (containerSectionIds[containerId] ?? []).filter(id => sectionsById[id]);
+    for (const id of ids) sectionContexts[id] = {
+      containerId,
+      boundaries: deriveSectionBoundaries(resolvedLayout.boundariesByContainerId[containerId], ids, id),
+    };
+  }
+  const getContainerWidth = (containerId) => resolvedLayout.widthsById[containerId] ?? 0;
 
   const finishResize = () => {
     const resize = resizeState.current;
@@ -59,8 +76,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   };
 
   const startResize = (leftContainerId, event) => {
-    const leftIndex = containerOrder.indexOf(leftContainerId);
-    const rightContainerId = containerOrder[leftIndex + 1];
+    const rightContainerId = resolvedLayout.resizeNeighborsByContainerId[leftContainerId];
     const pageWidth = editorRef.current?.getBoundingClientRect().width;
     const leftWidth = getContainerWidth(leftContainerId);
     const rightWidth = getContainerWidth(rightContainerId);
@@ -73,12 +89,11 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       const resize = resizeState.current;
       if (!resize) return;
 
-      const pairWidth = leftWidth + rightWidth;
       const delta = ((moveEvent.clientX - resize.startX) / pageWidth) * 100;
-      const nextLeftWidth = Math.min(Math.max(leftWidth + delta, 10), pairWidth - 10);
+      const resized = resizeColumnWidths(leftWidth, rightWidth, delta);
       const widths = {
-        [leftContainerId]: nextLeftWidth,
-        [rightContainerId]: pairWidth - nextLeftWidth,
+        [leftContainerId]: resized.leftWidth,
+        [rightContainerId]: resized.rightWidth,
       };
       previewWidthsRef.current = widths;
       setPreviewWidths(widths);
@@ -99,101 +114,53 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
   const resizeWithKeyboard = (leftContainerId, event) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    const leftIndex = containerOrder.indexOf(leftContainerId);
-    const rightContainerId = containerOrder[leftIndex + 1];
+    const rightContainerId = resolvedLayout.resizeNeighborsByContainerId[leftContainerId];
     const leftWidth = getContainerWidth(leftContainerId);
     const rightWidth = getContainerWidth(rightContainerId);
     const adjustment = event.key === "ArrowRight" ? 1 : -1;
-    const nextLeftWidth = leftWidth + adjustment;
-    if (!rightContainerId || nextLeftWidth < 10 || rightWidth - adjustment < 10) return;
+    if (!rightContainerId) return;
+    const resized = resizeColumnWidths(leftWidth, rightWidth, adjustment);
 
     event.preventDefault();
     dispatch(resizeContainerPair({
       leftContainerId,
       rightContainerId,
-      leftWidth: nextLeftWidth,
-      rightWidth: rightWidth - adjustment,
+      ...resized,
     }));
   };
-
-  const gridTemplateColumns = containerOrder.map((containerId) => {
-    const container = containers.byId[containerId];
-    if (container.spanFullPage) return null;
-    const width = containers.byId[containerId]?.layout?.width;
-    const preview = previewWidths?.[containerId];
-
-    const trackSize =
-      preview != null
-        ? `${preview}%`
-        : width?.auto || !width?.value
-          ? "1fr"
-          : width.value;
-
-    return `minmax(0, ${trackSize})`;
-  }).join(" ");
-
-  const gridTemplateRows = "repeat(auto-fill, minmax(0, auto))";
 
   const reduxResumeStyling = useSelector((state) => state.resume.present.styling);
   const resumeStyling = {
     ...reduxResumeStyling,
     display: 'grid',
-    gridTemplateColumns: gridTemplateColumns,
-    gridTemplateRows: gridTemplateRows,
-
+    gridTemplateColumns: resolvedLayout.gridTemplateColumns,
+    gridTemplateRows: resolvedLayout.gridTemplateRows,
+    gap: 0,
+    padding: 0,
   };
 
   useEffect(() => {
-    const pressedKeys = new Set();
 
     const handleKeyDown = (e) => {
 
       if (e.ctrlKey && e.key === "z") {
         e.preventDefault();
-        console.log("Shortcut triggered: Ctrl + Z");
         dispatch(UndoActionCreators.undo());
       }
       if (e.ctrlKey && e.key === "y") {
         e.preventDefault();
-        console.log("Shortcut triggered: Ctrl + Y");
         dispatch(UndoActionCreators.redo());
       }
     };
 
-    const handleKeyUp = (e) => {
-      pressedKeys.delete(e.code);
-    };
-
-    const handleBlur = () => {
-      pressedKeys.clear();
-    };
-
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("blur", handleBlur);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      window.removeEventListener("blur", handleBlur);
     };
-  }, []);
+  }, [dispatch]);
 
-  useEffect(() => {
-    const nextItems = {};
-
-    containers.allIds.forEach((containerId) => {
-      const container = containers.byId[containerId];
-      nextItems[containerId] = Array.isArray(container?.sectionIds)
-        ? [...container.sectionIds]
-        : [];
-    });
-
-    setContainerSectionIds(nextItems);
-    setContainerOrder([...containers.allIds]);
-  }, [containers]);
-
-  const resumeContainers = containerOrder.map((containerId, index) => {
+  const resumeContainers = containerOrder.map((containerId) => {
     const container = containers.byId[containerId];
 
     if (!container) {
@@ -207,10 +174,12 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
         container={container}
         sectionIds={containerSectionIds[container.id] ?? []}
         sectionById={sectionsById}
-        previewWidth={previewWidths?.[container.id]}
         onStartResize={startResize}
         containerPreviewWidths={previewWidths}
-        rightContainerId={containerOrder[index + 1]}
+        rightContainerId={resolvedLayout.resizeNeighborsByContainerId[containerId]}
+        resizeTrackId={resolvedLayout.resizeTrackByContainerId[containerId]}
+        placement={resolvedLayout.placementsByContainerId[containerId]}
+        boundaries={resolvedLayout.boundariesByContainerId[containerId]}
         onResizeWithKeyboard={resizeWithKeyboard}
       />
     );
@@ -218,45 +187,38 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
 
   return (
-    <div className={styles.printPageRef} ref={ref}
-
-    //  style={{ scale: Math.min(1, window.innerWidth / parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--width-editor-page'))) }}
-    >
+    <EditorLayoutContext.Provider value={sectionContexts}>
+    <div className={styles.printPageRef} ref={ref}>
+      {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
       {!isMobile && <MarginRuler pageRef={editorRef} />}
       <div
         className={`${props.isPrinting ? styles.printingPageContainer : styles.editingPageContainer}`}
-        style={{ ...resumeStyling }}
+        style={resumeStyling}
         ref={editorRef}
         id="editorPage"
       >
         <DragDropProvider
-          onDragStart={() => {
-            previousContainerSectionIds.current = containerSectionIds;
-          }}
           onDragOver={(event) => {
             const { source } = event.operation;
 
             if (source?.type === "container") return;
 
-            setContainerSectionIds((currentItems) => move(currentItems, event));
+            setSectionOrderPreview((currentItems) => move(currentItems ?? storedSectionIds, event));
           }}
           onDragEnd={(event) => {
             const { source } = event.operation;
 
             if (event.canceled) {
               if (source?.type === "section") {
-                setContainerSectionIds(previousContainerSectionIds.current);
+                setSectionOrderPreview(null);
               }
 
               return;
             }
 
-            if (source?.type === "container") {
-              setContainerOrder((currentContainerOrder) =>
-                move(currentContainerOrder, event),
-              );
-            }
+            if (source?.type === "container") return;
             dispatch(dndReorderSections({ dndKitDict: containerSectionIds }));
+            setSectionOrderPreview(null);
           }}
         >
           {resumeContainers}
@@ -264,6 +226,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
         <EndPageMarker pageRef={editorRef} />
       </div>
     </div>
+    </EditorLayoutContext.Provider>
   );
 });
 

@@ -1,17 +1,18 @@
+import { normalizeResumeLayout } from '@/utils/sectionSpacing.js';
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
 import { PaddingPreviewContext } from "./PaddingPreviewContext";
 
-export default function useSectionPaddingResize(section, container) {
+export default function useSectionPaddingResize(section, container, orderedSectionIds = container.sectionIds) {
   const dispatch = useDispatch();
-  const verticalGap = useSelector((state) => state.resume.present.layout.gap?.vertical);
+  const sectionGap = useSelector((state) => normalizeResumeLayout(state.resume.present.layout).gap.section);
   const activeIds = useSelector((state) => state.resume.present.activeSectionIds);
-  const nextId = container.sectionIds[container.sectionIds.indexOf(section.id) + 1];
+  const nextId = orderedSectionIds[orderedSectionIds.indexOf(section.id) + 1];
   const nextSection = useSelector((state) => state.resume.present.sections.byId[nextId]);
   const lowerIsSelected = !!nextSection && activeIds.length === 1 && activeIds[0] === nextId;
-  const minimumPadding = -parseRemValue(verticalGap);
+
   const { setPreview } = useContext(PaddingPreviewContext);
   const dragRef = useRef(null);
 
@@ -21,15 +22,19 @@ export default function useSectionPaddingResize(section, container) {
   }, [setPreview]);
 
   // Capture selection and effective padding once, before the drag starts.
-  const startValues = () => ({
-    id: lowerIsSelected ? nextId : section.id,
-    side: lowerIsSelected ? 'top' : 'bottom',
-    direction: lowerIsSelected ? -1 : 1,
-    startValue: Math.max(minimumPadding, parseRemValue(lowerIsSelected
-      ? nextSection.layout?.padding?.top
-      : section.layout?.padding?.bottom)),
-    minimumPadding,
-  });
+  const startValues = () => {
+    const side = lowerIsSelected ? 'top' : 'bottom';
+    const minimumPadding = -parseRemValue(sectionGap) - parseRemValue(container.layout?.padding?.[side]);
+    return {
+      id: lowerIsSelected ? nextId : section.id,
+      side,
+      direction: lowerIsSelected ? -1 : 1,
+      startValue: Math.max(minimumPadding, parseRemValue(lowerIsSelected
+        ? nextSection.layout?.padding?.top
+        : section.layout?.padding?.bottom)),
+      minimumPadding,
+    };
+  };
   const valueAtDelta = (delta, drag) => Math.max(
     drag.minimumPadding, drag.startValue + drag.direction * delta,
   );

@@ -44,10 +44,16 @@ const Gap = () => {
       gapType: "horizontal",
     },
     {
-      label: "Section Gap",
+      label: "Row Gap",
       value: resumeGap.vertical || '0rem',
       icon: <RxRowSpacing />,
       gapType: "vertical",
+    },
+    {
+      label: "Section Gap",
+      value: resumeGap.section || '0rem',
+      icon: <RxRowSpacing />,
+      gapType: "section",
     },
     {
       label: "Subsection Gap",

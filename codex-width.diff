@@ -1,0 +1,214 @@
+diff --git a/CODEX_CHANGES.md b/CODEX_CHANGES.md
+index 99ad2d0..33839f9 100644
+--- a/CODEX_CHANGES.md
++++ b/CODEX_CHANGES.md
+@@ -81,8 +81,20 @@ Verification: 16 focused layout/resize tests pass; targeted lint and production
+ ### Deferred work to revisit
+ 
+ - [ ] Performance: narrow full-resume Redux subscriptions and stabilize shared derived context data; profile before adding memoization.
+-- [ ] Manual width edits: establish whether the edited width should take space from the next column or all other columns. Current normalization treats fixed widths proportionally rather than guaranteeing the entered percentage.
++- [x] Manual width edits: preserve the entered percentage and transfer the difference to the next column (previous column for the rightmost one). Reject values outside the pair's allowed range.
+ - [ ] Percentage display: decide whether rounded labels must sum to exactly 100.0%; equal thirds currently display as 33.3% each despite filling the page.
+ - [ ] Resize lifecycle: extract a hook, distinguish cancellation from completion, and clean up all pointer listeners; no Escape-to-cancel feature exists yet.
+ - [ ] Rendering reuse: one pure presentation resolver for editor and thumbnails, with optional editor-only transient overrides. Preview components remain untouched.
+ - [ ] Settings role labels: derive them centrally and explicitly handle rows-only/all-sidebar arrangements; existing role inference uses the first ordinary column as its reference.
++
++
++## Manual width follow-up
++
++`codex-width.diff` contains the changes from the manual-width follow-up only, excluding the user's intervening settings styling edits. Earlier patches remain snapshots of their respective stages.
++
++- Manual edits preserve the entered percentage, adjust the next column (previous for the rightmost), and leave other resolved widths unchanged.
++- The edited pair becomes fixed-width; unrelated automatic columns retain their automatic setting.
++- The UI shows the available range based on the neighboring pair's total and existing resize minimum. Invalid values are rejected rather than silently normalized. A lone column remains 100%.
++- Both changes occur in one Redux action and undo together.
++- Rounding/display changes, cancellation/hook work, presentation sharing, and role-label changes remain deferred.
++- Verification: 14 layout tests and 2 container-state tests pass, including exact requested widths, legacy/automatic layouts, invalid requests, and undo. Targeted lint and production build pass (existing bundle-size warning remains).
+diff --git a/client/src/pages/ResumeEditorPage/features/SettingsModal/ContainerSettings/ContainerSettings.jsx b/client/src/pages/ResumeEditorPage/features/SettingsModal/ContainerSettings/ContainerSettings.jsx
+index a8502b6..e12caf6 100644
+--- a/client/src/pages/ResumeEditorPage/features/SettingsModal/ContainerSettings/ContainerSettings.jsx
++++ b/client/src/pages/ResumeEditorPage/features/SettingsModal/ContainerSettings/ContainerSettings.jsx
+@@ -1,7 +1,7 @@
+ import { useState } from 'react';
+ import { useSelector, useDispatch } from 'react-redux';
+-import { updateContainer, configureContainer, moveContainer } from '@/store/resumeSlice.js';
+-import { planContainerRole, resolveResumeLayout } from '@/utils/resumeLayout.js';
++import { updateContainer, configureContainer, moveContainer, setColumnWidth } from '@/store/resumeSlice.js';
++import { planContainerRole, resolveResumeLayout, getColumnWidthLimits } from '@/utils/resumeLayout.js';
+ import styles from '../SettingsModal.module.css';
+ 
+ const roles = [
+@@ -22,6 +22,7 @@ export default function ContainerSettings() {
+   const containers = resume.containers;
+   const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds });
+   const isRow = container.type === 'row';
++  const widthLimits = getColumnWidthLimits(layout, container.id);
+   const placement = layout.placementsByContainerId[container.id];
+   const body = containers.allIds.find(id => containers.byId[id].type !== 'row' && !containers.byId[id].spanFullPage);
+   const role = isRow
+@@ -56,17 +57,21 @@ export default function ContainerSettings() {
+         <form className="flexRow" onSubmit={event => {
+           event.preventDefault();
+           const value = Number(widthInput ?? layout.widthsById[container.id]);
+-          if (!(value > 0 && value <= 100)) return;
+-          dispatch(updateContainer({ id: container.id, layout: { width: { value: `${value}%`, auto: false } } }));
++          if (!Number.isFinite(value) || value < widthLimits.min || value > widthLimits.max) return;
++          dispatch(setColumnWidth({ id: container.id, value }));
+           setWidthInput(null);
+         }}>
+-          <label>Column width (%)
++          <label htmlFor={`column-width-${container.id}`}>Column width (%)
+           </label>
+-          <input className='inputMain' type="number" min="1" max="100" step="0.1" required
++          <input className='inputMain' id={`column-width-${container.id}`} type="number"
++            min={widthLimits.min} max={widthLimits.max} step="any" required
+             value={widthInput ?? Number(layout.widthsById[container.id].toFixed(1))}
+             onChange={event => setWidthInput(event.target.value)} />
+           <button type="submit" className="buttonMain">Apply width</button>
+         </form>
++        <p>{widthLimits.neighborId == null
++          ? 'A single column fills 100% of the page width.'
++          : `Adjusts the neighboring column. Available range: ${Number(widthLimits.min.toFixed(2))}%–${Number(widthLimits.max.toFixed(2))}%.`}</p>
+         <label>Automatic width
+           <input type="checkbox" checked={container.layout?.width?.auto ?? false}
+             onChange={event => dispatch(updateContainer({ id: container.id, layout: { width: { auto: event.target.checked } } }))} />
+diff --git a/client/src/store/resumeSlice.js b/client/src/store/resumeSlice.js
+index 3f45852..948c26b 100644
+--- a/client/src/store/resumeSlice.js
++++ b/client/src/store/resumeSlice.js
+@@ -1,4 +1,4 @@
+-import { resolveColumnWidths, resolveResumeLayout, planContainerRole } from '../utils/resumeLayout.js';
++import { resolveColumnWidths, resolveResumeLayout, planContainerRole, getColumnWidthLimits } from '../utils/resumeLayout.js';
+ import { normalizeResumeLayout } from '../utils/sectionSpacing.js';
+ import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
+ import { normalizeSectionLayout } from "../utils/normalizers/normalizeSectionLayout.js";
+@@ -331,6 +331,35 @@ const resumeSlice = createSlice({
+          ids.forEach((candidate, position) => { state.containers.byId[candidate].position = position; });
+       },
+ 
++      setColumnWidth(state, action) {
++         const { id, value } = action.payload;
++         const layout = resolveResumeLayout({
++            containersById: state.containers.byId,
++            orderedContainerIds: state.containers.allIds,
++         });
++         const limits = getColumnWidthLimits(layout, id);
++         if (!limits || !Number.isFinite(value) || value < limits.min || value > limits.max) return;
++
++         // Materialize current resolved widths so legacy unnormalized values do
++         // not change unrelated columns when the edited pair becomes fixed.
++         for (const columnId of layout.columnIds) {
++            const container = state.containers.byId[columnId];
++            container.layout ??= {};
++            container.layout.width = {
++               ...container.layout.width,
++               value: `${layout.widthsById[columnId]}%`,
++            };
++         }
++         const width = state.containers.byId[id].layout.width;
++         width.value = `${value}%`;
++         width.auto = false;
++         if (limits.neighborId != null) {
++            const neighbor = state.containers.byId[limits.neighborId].layout.width;
++            neighbor.value = `${limits.total - value}%`;
++            neighbor.auto = false;
++         }
++      },
++
+       resizeContainerPair(state, action) {
+          const { leftContainerId, rightContainerId, leftWidth, rightWidth } = action.payload;
+          const leftContainer = state.containers.byId[leftContainerId];
+@@ -775,6 +804,7 @@ export const {
+    deleteContainer,
+    updateContainer,
+    resizeContainerPair,
++   setColumnWidth,
+    configureContainer,
+    moveContainer,
+ 
+diff --git a/client/src/utils/resumeLayout.js b/client/src/utils/resumeLayout.js
+index 23742a0..990807a 100644
+--- a/client/src/utils/resumeLayout.js
++++ b/client/src/utils/resumeLayout.js
+@@ -148,3 +148,14 @@ export function resizeColumnWidths(leftWidth, rightWidth, delta) {
+   const left = Math.min(Math.max(leftWidth + delta, minimum), total - minimum);
+   return { leftWidth: left, rightWidth: total - left };
+ }
++
++// A manual edit transfers width only within the same adjacent pair as resizing.
++export function getColumnWidthLimits(layout, id) {
++  const index = layout.columnIds.indexOf(id);
++  if (index < 0) return null;
++  const neighborId = layout.columnIds[index + 1] ?? layout.columnIds[index - 1];
++  if (neighborId == null) return { neighborId: null, min: 100, max: 100, total: 100 };
++  const total = layout.widthsById[id] + layout.widthsById[neighborId];
++  const min = Math.min(10, total / 4);
++  return { neighborId, min, max: total - min, total };
++}
+diff --git a/client/tests/resume-layout.test.js b/client/tests/resume-layout.test.js
+index fea5377..dedf8a3 100644
+--- a/client/tests/resume-layout.test.js
++++ b/client/tests/resume-layout.test.js
+@@ -1,9 +1,10 @@
++import undoable, { ActionCreators } from 'redux-undo';
+ import normalizeResumeFromApi from '../src/utils/normalizers/normalizeResumeFromApi.js';
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+ import { resolveResumeLayout, deriveSectionBoundaries, planContainerRole, resizeColumnWidths } from '../src/utils/resumeLayout.js';
+ import { normalizeResumeLayout, resolveSectionPadding } from '../src/utils/sectionSpacing.js';
+-import reducer, { configureContainer, moveContainer, resizeContainerPair, setResume } from '../src/store/resumeSlice.js';
++import reducer, { configureContainer, moveContainer, resizeContainerPair, setResume, setColumnWidth } from '../src/store/resumeSlice.js';
+ 
+ const column = (id, width = 50, spanFullPage = false) => ({ id, type: 'column', spanFullPage, layout: { width: { value: `${width}%`, auto: false } }, sectionIds: [] });
+ const row = id => ({ ...column(id), type: 'row', spanFullPage: true });
+@@ -133,3 +134,50 @@ test('column resize limits preserve pair width for ordinary and small pairs', ()
+   assert.deepEqual(resizeColumnWidths(5, 5, 100), { leftWidth: 7.5, rightWidth: 2.5 });
+   assert.deepEqual(resizeColumnWidths(7.5, 2.5, 1), { leftWidth: 7.5, rightWidth: 2.5 });
+ });
++
++
++test('manual width edits preserve the entered value and adjust only the next column track', () => {
++  const original = { ...reducer(undefined, { type: 'init' }), containers: fixture([
++    column('side', 20, true), row('header'), column('a', 40), column('b', 40),
++  ]) };
++  const updated = reducer(original, setColumnWidth({ id: 'side', value: 30 }));
++  assert.deepEqual(resolve(updated.containers).widthsById, { side: 30, a: 30, b: 40 });
++  assert.deepEqual(updated.containers.byId.header, original.containers.byId.header);
++  const last = reducer(updated, setColumnWidth({ id: 'b', value: 35 }));
++  assert.deepEqual(resolve(last.containers).widthsById, { side: 30, a: 35, b: 35 });
++});
++
++test('manual edits preserve other resolved widths in legacy and automatic layouts', () => {
++  for (const columns of [
++    [column('a', 30), column('b', 30), column('c', 30)],
++    [column('a', 30), column('b', 30), { ...column('c'), layout: { width: { auto: true } } }],
++    [{ ...column('a'), layout: { width: { auto: true } } }, column('b', 30), column('c', 30)],
++  ]) {
++    const original = { ...reducer(undefined, { type: 'init' }), containers: fixture(columns) };
++    const before = resolve(original.containers).widthsById;
++    const updated = reducer(original, setColumnWidth({ id: 'a', value: 25 }));
++    const after = resolve(updated.containers).widthsById;
++    assert.ok(Math.abs(after.a - 25) < 1e-10);
++    assert.ok(Math.abs(after.b - (before.a + before.b - 25)) < 1e-10);
++    assert.ok(Math.abs(after.c - before.c) < 1e-10);
++  }
++});
++
++test('impossible manual widths are rejected instead of silently normalized', () => {
++  const original = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('a', 20), column('b', 30), column('c', 50)]) };
++  for (const value of [0, 45, NaN, Infinity]) {
++    assert.equal(reducer(original, setColumnWidth({ id: 'a', value })), original);
++  }
++  const single = { ...original, containers: fixture([column('only', 100)]) };
++  assert.equal(reducer(single, setColumnWidth({ id: 'only', value: 50 })), single);
++  assert.equal(resolve(reducer(single, setColumnWidth({ id: 'only', value: 100 })).containers).widthsById.only, 100);
++});
++
++test('one undo restores both manually resized neighbors', () => {
++  const original = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('a', 50), column('b', 50)]) };
++  const history = undoable(reducer);
++  const changed = history({ past: [], present: original, future: [] }, setColumnWidth({ id: 'a', value: 30 }));
++  assert.deepEqual(resolve(changed.present.containers).widthsById, { a: 30, b: 70 });
++  assert.equal(changed.past.length, 1);
++  assert.deepEqual(history(changed, ActionCreators.undo()).present, original);
++});

@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
-import { PaddingPreviewContext, previewLayout } from "./helpers/PaddingPreviewContext";
+import React, { useState, useContext, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   dndReorderSubsections,
@@ -10,12 +9,9 @@ import {
 } from "@/store/resumeSlice.js";
 // import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
 
-import SlateHeading from "../../../../features/Slate/SlateHeading.jsx";
-import styles from "./Section.module.css";
-import SettingsModal from "../SettingsModal/SettingsModal.jsx";
-import SubsectionRenderer from "./Subsection.jsx";
-import { parseRemValue } from "@/utils/formatters.js";
-import SectionBorder from "./components/SectionBorder.jsx";
+import { resolveSectionPadding } from "@/utils/sectionSpacing.js";
+
+import { PaddingPreviewContext, previewLayout } from "./helpers/PaddingPreviewContext";
 import useSectionPaddingResize from "./helpers/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
@@ -25,6 +21,13 @@ import {
 } from "@dnd-kit/react";
 
 import { MdSettings } from "react-icons/md";
+
+import SubsectionRenderer from "./Subsection.jsx";
+import SlateHeading from "@/features/Slate/SlateHeading.jsx";
+import SettingsModal from "../SettingsModal/SettingsModal.jsx";
+import SectionBorder from "./components/SectionBorder.jsx";
+
+import styles from "./Section.module.css";
 
 const sectionPointerSensor = PointerSensor.configure({
   preventActivation(event, source) {
@@ -41,18 +44,12 @@ const sectionPointerSensor = PointerSensor.configure({
 
 const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 
-const Section = ({ id, section, container, index, hasNextSection }) => {
+const Section = ({ section, container, index, hasNextSection, boundaries, orderedSectionIds }) => {
+
   const paddingPreview = useContext(PaddingPreviewContext)?.preview;
   const sectionLayout = useMemo(() => previewLayout(section.layout, paddingPreview, 'section', section.id), [section.layout, section.id, paddingPreview]);
   const containerLayout = useMemo(() => previewLayout(container.layout, paddingPreview, 'container', container.id), [container.layout, container.id, paddingPreview]);
-  const { handleProps } = useSectionPaddingResize(section, container);
-  useEffect(() => {
-    if (!section) {
-      console.error("Section component rendered without a valid section prop.");
-      return null; // <-- prevents early render
-    }
-  }, []);
-
+  const { handleProps } = useSectionPaddingResize(section, container, orderedSectionIds);
   const dispatch = useDispatch();
 
   const { ref } = useSortable({
@@ -67,38 +64,12 @@ const Section = ({ id, section, container, index, hasNextSection }) => {
 
   const storedResumeLayout = useSelector((state) => state.resume.present.layout);
   const resumeLayout = useMemo(() => previewLayout(storedResumeLayout, paddingPreview, 'resume', null), [storedResumeLayout, paddingPreview]);
-  const reduxSections = useSelector((state) => state.resume.present.sections);
-  const containers = useSelector((state) => state.resume.present.containers);
   const activeSectionIds = useSelector(
     (state) => state.resume.present.activeSectionIds,
   );
   const subsections = useSelector((state) => state.resume.present.subsections);
 
-  // Derive layout during rendering so clearing a drag preview never exposes
-  // padding cached from before the Redux update.
-  const isFirstContainer = containers.allIds[0] === container.id;
-  const isLastContainer = containers.allIds.at(-1) === container.id;
-  const isFirstRow = container.sectionIds[0] === section.id;
-  const isLastRow = container.sectionIds.at(-1) === section.id;
-  const verticalGap = parseRemValue(resumeLayout?.gap?.vertical);
-  const horizontalGap = parseRemValue(resumeLayout?.gap?.horizontal);
-  const sectionPadding = {
-    paddingLeft: isFirstContainer
-      ? resumeLayout.padding.left
-      : `${Math.max(0, parseRemValue(containerLayout?.padding?.left) + horizontalGap)}rem`,
-    paddingRight: isLastContainer
-      ? resumeLayout.padding.right
-      : `${Math.max(0, parseRemValue(containerLayout?.padding?.right) + horizontalGap)}rem`,
-    paddingTop: isFirstRow
-      ? resumeLayout.padding.top
-      : `${Math.max(0, parseRemValue(sectionLayout?.padding?.top) + verticalGap)}rem`,
-    paddingBottom: isLastRow
-      ? `${Math.max(0, parseRemValue(sectionLayout?.padding?.bottom) + verticalGap)}rem`
-      // ? 0
-      // ? resumeLayout.padding.bottom
-      : `${Math.max(0, parseRemValue(sectionLayout?.padding?.bottom) + verticalGap)}rem`,
-    flex: isLastRow ? "1" : "none",
-  };
+  const sectionPadding = resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout });
 
   const renderedSubsections = section.subsectionIds?.map((subId) => {
     const subsection = subsections.byId[subId];
@@ -149,6 +120,9 @@ const Section = ({ id, section, container, index, hasNextSection }) => {
       style={{
         ...section.styling,
         ...sectionPadding,
+        flex: hasNextSection ? "0 0 auto" : "1 0 auto",
+        boxSizing: "border-box",
+        minWidth: 0,
         outlineColor: section.styling?.color,
         cursor: "all-scroll",
       }}

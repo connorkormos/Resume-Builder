@@ -22,7 +22,8 @@ RESUME_DEFAULTS = {
         },
         "gap": {
             "horizontal": "1.0rem",
-            "vertical": "0.5rem",
+            "vertical": "1.0rem",
+            "section": "0.5rem",
             "subsection": "0.0rem",
             "field": "0.0rem",
         },

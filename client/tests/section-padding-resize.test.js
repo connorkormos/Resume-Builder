@@ -7,11 +7,11 @@ import reducer, { updateSection } from '../src/store/resumeSlice.js';
 // Exercise the hook's pointer handlers without a browser or React renderer.
 const h = globalThis.paddingHarness = {};
 const bundle = await build({
-  entryPoints: [new URL('../src/features/ResumeEditor/ResumePaper/useSectionPaddingResize.js', import.meta.url).pathname],
+  entryPoints: [new URL('../src/pages/ResumeEditorPage/features/ResumePaper/helpers/useSectionPaddingResize.js', import.meta.url).pathname],
   bundle: true, write: false, format: 'esm', platform: 'node',
   plugins: [{ name: 'hook-harness', setup(b) {
     b.onResolve({ filter: /^(react|react-redux|@\/store\/resumeSlice.js|\.\/PaddingPreviewContext)$/ }, a => ({ path: a.path, namespace: 'mock' }));
-    b.onResolve({ filter: /^@\/utils\/formatters.js$/ }, () => ({ path: new URL('../src/utils/formatters.js', import.meta.url).pathname }));
+    b.onResolve({ filter: /^@\/utils\// }, a => ({ path: new URL('../src/utils/' + a.path.slice('@/utils/'.length), import.meta.url).pathname }));
     b.onLoad({ filter: /.*/, namespace: 'mock' }, () => ({ contents: `
       const h = globalThis.paddingHarness;
       export const useContext = () => ({setPreview: value => h.preview = value});
@@ -84,4 +84,21 @@ test('one undo/redo restores the lower padding while the upper section stays unc
   const undone = history(after, ActionCreators.undo());
   assert.deepEqual(undone.present, original);
   assert.deepEqual(history(undone, ActionCreators.redo()).present, after.present);
+});
+
+test('section handles use section gap and include the container offset in the zero bound', t => {
+  setup(t);
+  h.state.resume.present.layout.gap = { vertical: '9rem', section: '0.25rem' };
+  const withOffsets = { ...container, layout: { padding: { top: '0.75rem' } } };
+  const p = useResize(upper, withOffsets).handleProps;
+  p.onPointerDown(event(0));
+  p.onPointerUp(event(80));
+  assert.equal(h.actions.pop().payload.layout.padding.top, '-1rem');
+});
+
+test('section drag preview order determines the selected lower neighbor', t => {
+  setup(t);
+  const p = useResize(upper, { ...container, sectionIds: ['l', 'u'] }, ['u', 'l']).handleProps;
+  p.onKeyDown({ ...event(0), key: 'ArrowDown' });
+  assert.equal(h.actions.pop().payload.id, 'l');
 });

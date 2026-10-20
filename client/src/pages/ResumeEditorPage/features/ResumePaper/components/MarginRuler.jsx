@@ -1,3 +1,4 @@
+import { EditorLayoutContext } from '../helpers/EditorLayoutContext.js';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import styles from './MarginRuler.module.css';
@@ -14,7 +15,9 @@ const MarginRuler = ({ pageRef }) => {
    const { preview } = useContext(PaddingPreviewContext);
    const activeSectionId = useSelector(state => state.resume.present.activeSectionIds[0] ?? null);
    const sectionId = preview?.target === 'section' ? preview.id : activeSectionId;
-   const containerId = useSelector(state => state.resume.present.sections.byId[sectionId]?.containerId);
+   const layoutContexts = useContext(EditorLayoutContext);
+   const storedContainerId = useSelector(state => state.resume.present.sections.byId[sectionId]?.containerId);
+   const containerId = layoutContexts[sectionId]?.containerId ?? storedContainerId;
    // Share one measurement and observer set between both rulers.
    const geometry = useMarginGeometry(pageRef, containerId, sectionId);
 

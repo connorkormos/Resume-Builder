@@ -1,3 +1,5 @@
+import { resolveResumeLayout, planContainerRole, getColumnWidthLimits, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
+import { normalizeResumeLayout } from '../utils/sectionSpacing.js';
 import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
 import { normalizeSectionLayout } from "../utils/normalizers/normalizeSectionLayout.js";
 import { createSlice } from '@reduxjs/toolkit';
@@ -112,26 +114,29 @@ const deleteFieldById = (state, fieldId) => {
    state.fields.allIds = state.fields.allIds.filter(id => id !== field.id);
 };
 
-const updateAutoContainerWidths = (state) => {
-   let remainingContainerWidth = 100;
-   let autoContainersArr = [];
-   for (let containerId of state.containers.allIds) {
-      const container = state.containers.byId[containerId]
-      if (container.layout.width.auto !== undefined) {
-         if (container.layout.width.auto === true) {
-            autoContainersArr.push(containerId);
-         } else {
-            // } else if (container.autoWith === false) {
-            const containerWidth = parseFloat(container.layout.width.value.replace('%', ''));
-            remainingContainerWidth -= containerWidth;
-         }
-      }
+// A virtual track's width belongs to the page layout, not to any row container.
+const writeTrackWidth = (state, id, value, auto) => {
+   const existing = id === ROW_CONTENT_TRACK
+      ? state.layout.rowContentWidth ?? { auto: true }
+      : state.containers.byId[id].layout?.width ?? {};
+   const width = { ...existing, value: `${value}%` };
+   if (auto !== undefined) width.auto = auto;
+   if (id === ROW_CONTENT_TRACK) state.layout.rowContentWidth = width;
+   else {
+      state.containers.byId[id].layout ??= {};
+      state.containers.byId[id].layout.width = width;
    }
-   const updatedAutoWidthValue = String(remainingContainerWidth / autoContainersArr.length) + '%'
-   for (let containerId of autoContainersArr) {
-      const container = state.containers.byId[containerId];
-      container.layout.width.value = updatedAutoWidthValue;
-   }
+};
+
+const resolveStateLayout = state => resolveResumeLayout({
+   containersById: state.containers.byId,
+   orderedContainerIds: state.containers.allIds,
+   rowContentWidth: state.layout.rowContentWidth,
+});
+
+const updateAutoContainerWidths = state => {
+   const layout = resolveStateLayout(state);
+   for (const id of layout.trackIds) writeTrackWidth(state, id, layout.widthsById[id]);
 };
 
 // * ------------- V
@@ -178,7 +183,8 @@ export const initialState = {
       },
       gap: {
          horizontal: '1rem',
-         vertical: '0.5rem',
+         vertical: '0rem',
+         section: '0.5rem',
          subsection: '0.0rem',
          field: '0.0rem',
       }
@@ -199,6 +205,7 @@ const resumeSlice = createSlice({
          return {
             ...initialState,
             ...action.payload,
+            layout: normalizeResumeLayout(action.payload.layout ?? initialState.layout),
             activeEditorId: null,
             activeEditorSelection: null,
             manualProfileMatches: {},
@@ -209,6 +216,7 @@ const resumeSlice = createSlice({
          return {
             ...initialState,
             ...action.payload,
+            layout: normalizeResumeLayout(action.payload.layout ?? initialState.layout),
             activeEditorId: null,
             activeEditorSelection: null,
             manualProfileMatches: {},
@@ -305,31 +313,64 @@ const resumeSlice = createSlice({
 
          mergeDeep(container, changes);
 
-         if (changes.layout?.width) {
+         if (Object.hasOwn(changes, 'position')) {
+            state.containers.allIds.sort((a, b) => state.containers.byId[a].position - state.containers.byId[b].position);
+            state.containers.allIds.forEach((id, index) => { state.containers.byId[id].position = index; });
+         }
+         if (changes.layout?.width || changes.type) {
             updateAutoContainerWidths(state);
          }
       },
 
+      configureContainer(state, action) {
+         const { id, role } = action.payload;
+         const container = state.containers.byId[id];
+         if (!container || !['column', 'row', 'header', 'footer', 'leftSidebar', 'rightSidebar'].includes(role)) return;
+         const { ids, next, errors } = planContainerRole(state.containers, id, role);
+         if (errors.length) return;
+         state.containers.byId[id] = next;
+         state.containers.allIds = ids;
+         ids.forEach((candidate, index) => { state.containers.byId[candidate].position = index; });
+         updateAutoContainerWidths(state);
+      },
+
+      moveContainer(state, action) {
+         const { id, direction } = action.payload;
+         const ids = [...state.containers.allIds];
+         const index = ids.indexOf(id);
+         const destination = index + direction;
+         if (index < 0 || destination < 0 || destination >= ids.length) return;
+         [ids[index], ids[destination]] = [ids[destination], ids[index]];
+         if (resolveResumeLayout({ containersById: state.containers.byId, orderedContainerIds: ids }).errors.length) return;
+         state.containers.allIds = ids;
+         ids.forEach((candidate, position) => { state.containers.byId[candidate].position = position; });
+      },
+
+      setColumnWidth(state, action) {
+         const { id, value } = action.payload;
+         const layout = resolveStateLayout(state);
+         const limits = getColumnWidthLimits(layout, id);
+         if (!limits || !Number.isFinite(value) || value < limits.min || value > limits.max) return;
+
+         // Materialize current resolved widths so legacy unnormalized values do
+         // not change unrelated columns when the edited pair becomes fixed.
+         for (const trackId of layout.trackIds) writeTrackWidth(state, trackId, layout.widthsById[trackId]);
+         writeTrackWidth(state, id, value, false);
+         if (limits.neighborId != null) writeTrackWidth(state, limits.neighborId, limits.total - value, false);
+      },
+
       resizeContainerPair(state, action) {
          const { leftContainerId, rightContainerId, leftWidth, rightWidth } = action.payload;
-         const leftContainer = state.containers.byId[leftContainerId];
-         const rightContainer = state.containers.byId[rightContainerId];
-
-         if (!leftContainer || !rightContainer) {
-            console.error('Cannot resize containers. One or both containers were not found.');
+         const layout = resolveStateLayout(state);
+         if (!layout.trackIds.includes(leftContainerId) || !layout.trackIds.includes(rightContainerId) ||
+             layout.resizeNeighborsByContainerId[leftContainerId] !== rightContainerId ||
+             !Number.isFinite(leftWidth) || !Number.isFinite(rightWidth) || leftWidth <= 0 || rightWidth <= 0) {
+            console.error('Cannot resize containers: expected adjacent column tracks and positive finite widths.');
             return;
          }
-
-         leftContainer.layout.width = {
-            ...leftContainer.layout.width,
-            auto: false,
-            value: `${leftWidth.toFixed(2)}%`,
-         };
-         rightContainer.layout.width = {
-            ...rightContainer.layout.width,
-            auto: false,
-            value: `${rightWidth.toFixed(2)}%`,
-         };
+         for (const trackId of layout.trackIds) writeTrackWidth(state, trackId, layout.widthsById[trackId]);
+         writeTrackWidth(state, leftContainerId, leftWidth.toFixed(2), false);
+         writeTrackWidth(state, rightContainerId, rightWidth.toFixed(2), false);
       },
 
       updateSection(state, action) {
@@ -751,6 +792,9 @@ export const {
    deleteContainer,
    updateContainer,
    resizeContainerPair,
+   setColumnWidth,
+   configureContainer,
+   moveContainer,
 
    addSection,
    updateSection,

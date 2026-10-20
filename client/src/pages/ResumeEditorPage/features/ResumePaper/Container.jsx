@@ -1,5 +1,5 @@
+import { deriveSectionBoundaries } from '@/utils/resumeLayout.js';
 import React from "react";
-import { useSelector } from "react-redux";
 import { useDroppable } from "@dnd-kit/react";
 
 import Section from "./Section.jsx";
@@ -9,19 +9,16 @@ import { CollisionPriority } from "@dnd-kit/abstract";
 
 const Container = ({
   container,
-  sectionIds,
+  sectionIds = [],
   sectionById,
-  previewWidth,
+  placement,
+  boundaries,
   containerPreviewWidths,
   rightContainerId,
+  resizeTrackId,
   onStartResize,
   onResizeWithKeyboard,
 }) => {
-  const reduxContainers = useSelector(
-    (state) => state.resume.present.containers.allIds,
-  );
-  const isFirstContainer = reduxContainers[0] === container.id;
-  const isLastContainer = reduxContainers[reduxContainers.length - 1] === container.id;
   const { ref } = useDroppable({
     id: container.id,
     type: "container",
@@ -29,90 +26,41 @@ const Container = ({
     collisionPriority: CollisionPriority.High,
   });
 
-  if (!sectionIds) {
-    console.error(`Container with ID ${container.id} is missing sectionIds.`);
-    return (
-      <div key={container.id} className={styles.containerWrapperDiv}>
-        <p>No sections to display.</p>
-      </div>
-    );
-  }
-
-  // If the container doesn't have a valid width, set it to a default value that splits remaining space evenly.
-  // let containerStyling = {
-  //   flex: previewWidth
-  //     ? `0 0 ${previewWidth}%`
-  //     : container?.layout?.width?.auto
-  //       ? "1 1 0%"
-  //       : `0 0 ${container?.layout?.width?.value}`,
-  //   // paddingLeft: container?.layout?.padding?.left ?? resumeLayout.padding.left,
-  //   // paddingRight: container?.layout?.padding?.right ?? resumeLayout.padding.right,
-  // };
-
-  let containerStyling = {
-    position: "relative",
-    gridColumn: "auto",
-    
+  const containerStyling = {
+    position: 'relative',
+    gridRow: `${placement.rowStart} / span ${placement.rowSpan}`,
+    gridColumn: `${placement.columnStart} / span ${placement.columnSpan}`,
   };
+  const renderedIds = sectionIds.filter(id => sectionById[id]);
 
-  
-  if (container.spanFullPage === true) {
-      if (container.type === 'row') {
-        containerStyling.gridColumn = "1 / -1";
-    }
-    }
+  const renderedSections = renderedIds.map((sectionId, index) => (
+    <Section
+      key={sectionId}
+      section={sectionById[sectionId]}
+      container={container}
+      index={index}
+      hasNextSection={index < renderedIds.length - 1}
+      orderedSectionIds={renderedIds}
+      boundaries={deriveSectionBoundaries(boundaries, renderedIds, sectionId)}
+    />
+  ));
 
-  const renderedSections = sectionIds.map((sectionId, index) => {
-    const section = sectionById[sectionId];
-    if (!sectionId) {
-      console.error(
-        `Container with ID ${container.id} has an invalid section ID: ${sectionId}`,
-      );
-      return null;
-    } else if (!section) {
-      return (
-        <div key={sectionId}>
-          <p>No Section to Display.</p>
-        </div>
-      );
-    } else {
-      return (
-        <Section
-          key={sectionId}
-          id={sectionId}
-          section={section}
-          container={container}
-          index={index}
-          hasNextSection={Boolean(sectionById[sectionIds[index + 1]])}
-        />
-      );
-    }
-  });
-
-  const isResizingPair = containerPreviewWidths?.[container.id] != null
+  const isResizingPair = containerPreviewWidths?.[resizeTrackId] != null
     && containerPreviewWidths?.[rightContainerId] != null;
-  let previewWidthStrings = [];
-  if (isResizingPair) {
-    previewWidthStrings.push(
-      String(containerPreviewWidths[container.id]).slice(0, 4) + "%",
-    );
-    previewWidthStrings.push(
-      String(containerPreviewWidths[rightContainerId]).slice(0, 4) + "%",
-    );
-  }
+  const previewWidthStrings = isResizingPair
+    ? [resizeTrackId, rightContainerId].map(id => `${containerPreviewWidths[id].toFixed(1)}%`)
+    : [];
 
   return (
     <div
-      key={container.id}
       id={container.id}
       className={styles.containerWrapperDiv}
-      style={{ ...containerStyling }}
-      // style={{ position: "relative" }}
-      
+      style={containerStyling}
       ref={ref}
     >
       {renderedSections}
-      {!isLastContainer && (
+      {!renderedIds.length && <p>Drop a section here</p>}
+      {rightContainerId && (
         <div>
           {isResizingPair && (
             <p className={styles.containerPreviewWidthLeft}>
@@ -123,8 +71,8 @@ const Container = ({
             type="button"
             className={styles.containerResizeHandle}
             aria-label="Resize adjacent containers"
-            onPointerDown={(event) => onStartResize(container.id, event)}
-            onKeyDown={(event) => onResizeWithKeyboard(container.id, event)}
+            onPointerDown={(event) => onStartResize(resizeTrackId, event)}
+            onKeyDown={(event) => onResizeWithKeyboard(resizeTrackId, event)}
           />
           {isResizingPair && (
             <p className={styles.containerPreviewWidthRight}>

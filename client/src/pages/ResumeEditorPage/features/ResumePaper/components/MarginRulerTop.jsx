@@ -1,3 +1,4 @@
+import { EditorLayoutContext, useResolvedSectionSpacing } from '../helpers/EditorLayoutContext.js';
 import { useContext } from "react";
 import { useSelector } from "react-redux";
 import { PiHouseSimpleFill } from "react-icons/pi";
@@ -18,23 +19,13 @@ export default function MarginRulerTop({
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
   const section = resume.sections.byId[preview?.target === 'section' ? preview.id : resume.activeSectionIds[0]];
-  const container = resume.containers.byId[section?.containerId];
+  const contexts = useContext(EditorLayoutContext);
+  const container = resume.containers.byId[contexts[section?.id]?.containerId ?? section?.containerId];
   const padding = previewLayout(resume.layout, preview, "resume", null).padding;
-  const containerPadding = previewLayout(
-    container?.layout,
-    preview,
-    "container",
-    container?.id,
-  )?.padding;
-  const gap = parseRemValue(resume.layout.gap?.horizontal);
-  const inset = (side) =>
-    Math.max(0, parseRemValue(containerPadding?.[side]) + gap);
-  const containerLeft = geometry
-    ? `calc(${geometry.left}px + ${inset("left")}rem)`
-    : null;
-  const contentLeft = container?.id === resume.containers.allIds[0]
-    ? padding.left
-    : containerLeft;
+  const effectivePadding = useResolvedSectionSpacing(section?.id);
+  const inset = side => parseRemValue(effectivePadding[`padding${side[0].toUpperCase()}${side.slice(1)}`]);
+  const containerLeft = geometry ? `calc(${geometry.left}px + ${inset('left')}rem)` : null;
+  const contentLeft = containerLeft;
   const activeTarget = resume.activeEditorId === section?.id
     ? section
     : resume.fields.byId[resume.activeEditorId];
@@ -90,8 +81,7 @@ export default function MarginRulerTop({
       >
         {parseFloat(padding.right).toFixed(2) + "rem"}
       </span>
-      {container && geometry && container.id
-        !== resume.containers.allIds[0]
+      {container && geometry
         && (
           <>
             <MarginIndicator
@@ -122,7 +112,7 @@ export default function MarginRulerTop({
             </span>
           </>
         )}
-      {container && geometry && container.id !== resume.containers.allIds.at(-1) && (
+      {container && geometry && (
         <>
           <MarginIndicator
             key={`${container.id}-right`}

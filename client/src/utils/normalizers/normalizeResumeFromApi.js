@@ -1,3 +1,4 @@
+import { normalizeResumeLayout } from '../sectionSpacing.js';
 // * ------------------------------ V
 // * API TO FRONT END NORMALIZATION V
 // * ------------------------------ V
@@ -33,7 +34,7 @@ const normalizeResumeFromApi = (apiResume) => {
     },
 
     styling: apiResume.styling ?? {backgroundColor: 'rgba(255, 255, 255, 1)'},
-    layout: apiResume.layout ?? {},
+    layout: normalizeResumeLayout(apiResume.layout),
 
     createdAt: apiResume.createdAt ?? null,
     updatedAt: apiResume.updatedAt ?? null,

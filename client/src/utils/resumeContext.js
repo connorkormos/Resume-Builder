@@ -29,3 +29,76 @@ export function resolveEditorContext(resume, editorId) {
     },
   };
 }
+
+
+export const getResumeContext = (resume, type, id) => {
+  if (!resume) return null;
+  if (resume.present) resume = resume.present;
+  // console.group('getResumeContext')
+  // console.log('resume', resume)
+  // console.log('type', type)
+  // console.log('id', id)
+  // console.log('attribute', attribute)
+  // console.groupEnd()
+
+  const containers = resume.containers ?? {};
+  const sections = resume.sections ?? {};
+  const subsections = resume.subsections ?? {};
+  const fields = resume.fields ?? {};
+
+  let container = null;
+  let section = null;
+  let subsection = null;
+  let field = null;
+
+  switch (type) {
+
+    case "container":
+      container = containers.byId?.[id] ?? null;
+      if (!container) return null;
+      return {
+        resume,
+        container,
+      };
+
+    case "section":
+      section = sections.byId?.[id] ?? null;
+      container = containers.byId?.[section?.containerId] ?? null;
+      if (!section ||!container) return null;
+
+      return {
+        resume,
+        container,
+        section,
+      };
+
+    case "subsection":
+      subsection = subsections.byId?.[id] ?? null;
+      if (!subsection) return null;
+      section = sections.byId?.[subsection.sectionId] ?? null;
+      container = section ? containers.byId?.[section.containerId] ?? null : null;
+      return {
+        resume,
+        container,
+        section,
+        subsection,
+      };
+
+    case "field":
+      field = fields.byId?.[id] ?? null;
+      if (!field) return null;
+      subsection = subsections.byId?.[field.subsectionId] ?? null;
+      section = subsection ? sections.byId?.[subsection.sectionId] ?? null : null;
+      container = section ? containers.byId?.[section.containerId] ?? null : null;
+      return {
+        resume,
+        container,
+        section,
+        subsection,
+        field,
+      };
+
+    default:
+      return null;
+  }
+}

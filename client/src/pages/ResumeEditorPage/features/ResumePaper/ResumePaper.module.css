@@ -34,7 +34,7 @@
 }
 
 .containerWrapperDiv {
-  height: 100%;
+  align-self: stretch;
   min-width: 0;
   display: flex;
   flex-direction: column;

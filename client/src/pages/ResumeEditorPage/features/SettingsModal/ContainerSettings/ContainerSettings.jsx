@@ -1,151 +1,79 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateContainer, configureContainer, moveContainer, setColumnWidth } from '@/store/resumeSlice.js';
+import { planContainerRole, resolveResumeLayout, getColumnWidthLimits, getContainerRole, ROW_CONTENT_TRACK } from '@/utils/resumeLayout.js';
+import styles from '../SettingsModal.module.css';
 
-import { updateContainer } from "@/store/resumeSlice.js";
+const roles = [
+  ['column', 'Content column'],
+  ['header', 'Row above content'],
+  ['footer', 'Row below content'],
+  ['leftSidebar', 'Full-height left column'],
+  ['rightSidebar', 'Full-height right column'],
+];
 
-import styles from "../SettingsModal.module.css";
-
-const ContainerSettings = () => {
+export default function ContainerSettings() {
   const dispatch = useDispatch();
-
-  const activeSectionIds = useSelector((state) => state.resume.present.activeSectionIds);
-  const activeSectionId = activeSectionIds[0] ?? null;
-  const section = useSelector(
-    (state) => state.resume.present.sections.byId[activeSectionId],
-  );
-
-  const reduxContainers = useSelector((state) => state.resume.present.containers);
-
-  const container = useSelector(
-    (state) => state.resume.present.containers.byId[section?.containerId],
-  );
-
-  const [containerWidthInputValue, setContainerWidthInputValue] = useState(
-    container?.layout?.width?.value.replace("%", "") || "auto",
-  );
-  const [autoWidthInputValue, setAutoWidthInputValue] = useState(
-    container?.layout?.width?.auto || false,
-  );
-
-  const handleContainerWidthSubmit = (e) => {
-    e.preventDefault();
-    if (containerWidthInputValue < 0) {
-      alert('Container width must be greater than 0.');
-      return;
-    }
-
-    dispatch(
-      updateContainer({
-        id: container?.id,
-        layout: {
-          width: {
-            value: containerWidthInputValue + "%",
-            auto: false,
-          },
-        },
-      }),
-    );
-    setAutoWidthInputValue(false);
+  const resume = useSelector(state => state.resume.present);
+  const section = resume.sections.byId[resume.activeSectionIds[0]];
+  const container = resume.containers.byId[section?.containerId];
+  const [widthInput, setWidthInput] = useState(null);
+  if (!container) return null;
+  const containers = resume.containers;
+  const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds, rowContentWidth: resume.layout.rowContentWidth });
+  const isRow = container.type === 'row';
+  const widthLimits = getColumnWidthLimits(layout, container.id);
+  const role = getContainerRole(layout, container);
+  const availableRoles = layout.bodyColumnIds.length
+    ? roles
+    : roles.filter(([value]) => value !== 'header' && value !== 'footer').concat([['row', 'Row']]);
+  const canMove = direction => {
+    const ids = [...containers.allIds];
+    const index = ids.indexOf(container.id);
+    const next = index + direction;
+    if (next < 0 || next >= ids.length) return false;
+    [ids[index], ids[next]] = [ids[next], ids[index]];
+    return !resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: ids }).errors.length;
   };
-
-  const handleAutoWidthSubmit = () => {
-    // e.preventDefault();
-    dispatch(
-      updateContainer({
-        id: container?.id,
-        layout: {
-          width: {
-            auto: autoWidthInputValue,
-          },
-        },
-      }),
-    );
-  };
-
-  useEffect(() => {
-    handleAutoWidthSubmit();
-  }, [autoWidthInputValue]);
-
-  const handleSpanFullPage = () => {
-    const currentContainerWidth = parseFloat(container?.layout?.width?.value) || 0;
-
-    const containersToUpdate = reduxContainers.allIds.filter((id) => id !== container?.id);
-
-    containersToUpdate.forEach((id) => {
-      const containerById = reduxContainers.byId[id];
-      let containerWidth = parseFloat(containerById?.layout?.width?.value) || 0;
-      containerWidth += currentContainerWidth / containersToUpdate.length;
-      dispatch(
-        updateContainer({
-          id: id,
-          layout: {
-            width: {
-              value: containerWidth + "%",
-            },
-          },
-        })
-      );
-    })
-    dispatch(
-      updateContainer({
-        id: container?.id,
-        spanFullPage: true,
-        type: 'row',
-        layout: {
-          width: {
-            value: "0%",
-          },
-        }
-      })
-    );
-  };
-
   return (
     <div className={styles.settingsModalWrapper}>
-      <h2 className={styles.settingsModalHeader}>
-        Container {container?.position + 1} Settings:
-      </h2>
-      <div className="flexRow spaceBetween">
-        <button className='buttonMain' onClick={handleSpanFullPage}>
-          Span Full Page Width
-        </button>
-        <form className="flexRow" onSubmit={handleContainerWidthSubmit}>
-          <label htmlFor="containerWidthInput" className="flexRow">
-            <span>Width:</span>
-
-            <input
-              id="containerWidthInput"
-              className="inputMain"
-              style={{
-                textAlign: "left",
-                width: "3.5rem",
-                marginRight: "-1.75rem",
-                padding: "0 0 0 0.5rem",
-              }}
-              type="number"
-              min="1"
-              max="100"
-              step="0.1"
-              value={containerWidthInputValue}
-              onChange={(e) => setContainerWidthInputValue(e.target.value)}
-            />
-            <span style={{ pointerEvents: "none" }}>%</span>
-          </label>
-        </form>
-        <form className="flexRow" onSubmit={handleAutoWidthSubmit}>
-          <label htmlFor="autoWidthInput" className="flexRow">
-            AutoWidth:
-            <input
-              id="autoWidthInput"
-              type="checkbox"
-              checked={autoWidthInputValue}
-              onChange={(e) => setAutoWidthInputValue(e.target.checked)}
-            />
-          </label>
-        </form>
+      <h2>Container {container.position + 1} Settings</h2>
+      <label>
+        Placement
+        <select style={{ backgroundColor: 'var(--background-main)' }} value={role} onChange={event => dispatch(configureContainer({ id: container.id, role: event.target.value }))}>
+          {availableRoles.map(([value, label]) => <option key={value} value={value} style={{ backgroundColor: 'var(--background-main)' }}
+            disabled={planContainerRole(containers, container.id, value).errors.length > 0}>{label}</option>)}
+        </select>
+      </label>
+      <p>Rows span the available width between full-height side columns. Sections stack vertically.</p>
+      <div className="flexRow">
+        <button type="button" className="buttonMain" disabled={!canMove(-1)} onClick={() => dispatch(moveContainer({ id: container.id, direction: -1 }))}>Move earlier</button>
+        <button type="button" className="buttonMain" disabled={!canMove(1)} onClick={() => dispatch(moveContainer({ id: container.id, direction: 1 }))}>Move later</button>
       </div>
+      {!isRow && <>
+        <form className="flexRow" onSubmit={event => {
+          event.preventDefault();
+          const value = Number(widthInput ?? layout.widthsById[container.id]);
+          if (!Number.isFinite(value) || value < widthLimits.min || value > widthLimits.max) return;
+          dispatch(setColumnWidth({ id: container.id, value }));
+          setWidthInput(null);
+        }}>
+          <label htmlFor={`column-width-${container.id}`}>Column width (%)
+          </label>
+          <input className='inputMain' id={`column-width-${container.id}`} type="number"
+            min={widthLimits.min} max={widthLimits.max} step="any" required
+            value={widthInput ?? Number(layout.widthsById[container.id].toFixed(1))}
+            onChange={event => setWidthInput(event.target.value)} />
+          <button type="submit" className="buttonMain">Apply width</button>
+        </form>
+        <p>{widthLimits.neighborId == null
+          ? 'A single column fills 100% of the page width.'
+          : `${widthLimits.neighborId === ROW_CONTENT_TRACK ? 'Adjusts the space for stacked rows.' : 'Adjusts the neighboring column.'} Available range: ${Number(widthLimits.min.toFixed(2))}%–${Number(widthLimits.max.toFixed(2))}%.`}</p>
+        <label>Automatic width
+          <input type="checkbox" checked={container.layout?.width?.auto ?? false}
+            onChange={event => dispatch(updateContainer({ id: container.id, layout: { width: { auto: event.target.checked } } }))} />
+        </label>
+      </>}
     </div>
   );
-};
-
-export default ContainerSettings;
+}

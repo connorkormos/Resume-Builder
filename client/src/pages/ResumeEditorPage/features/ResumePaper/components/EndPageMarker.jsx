@@ -24,7 +24,9 @@ const EndPageMarker = ({ pageRef }) => {
     };
 
     const checkPageLength = () => {
+      const pageBottom = page.getBoundingClientRect().bottom;
       const pageIsTooLong = getContainers().some((container) => (
+        container.getBoundingClientRect().bottom > pageBottom + 1 ||
         getContainerContentHeight(container) > container.getBoundingClientRect().height + 1
       ));
 
@@ -86,7 +88,7 @@ const EndPageMarker = ({ pageRef }) => {
 
   if (!showEndPageMarker) return null;
 
-  return <div className={styles.endPageMarker}>Page is to long</div>;
+  return <div className={styles.endPageMarker}>Content exceeds one page</div>;
 };
 
 export default EndPageMarker;

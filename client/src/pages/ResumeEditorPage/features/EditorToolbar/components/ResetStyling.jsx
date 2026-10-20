@@ -127,6 +127,7 @@ export default function ResetStyling() {
             layout: {
               gap: {
                 vertical: initialState.layout.gap.vertical,
+                section: initialState.layout.gap.section,
               },
             },
           }),
