@@ -13,6 +13,9 @@ const ContainerSettings = () => {
   const section = useSelector(
     (state) => state.resume.present.sections.byId[activeSectionId],
   );
+
+  const reduxContainers = useSelector((state) => state.resume.present.containers);
+
   const container = useSelector(
     (state) => state.resume.present.containers.byId[section?.containerId],
   );
@@ -27,7 +30,8 @@ const ContainerSettings = () => {
   const handleContainerWidthSubmit = (e) => {
     e.preventDefault();
     if (containerWidthInputValue < 0) {
-      alert();
+      alert('Container width must be greater than 0.');
+      return;
     }
 
     dispatch(
@@ -62,12 +66,49 @@ const ContainerSettings = () => {
     handleAutoWidthSubmit();
   }, [autoWidthInputValue]);
 
+  const handleSpanFullPage = () => {
+    const currentContainerWidth = parseFloat(container?.layout?.width?.value) || 0;
+
+    const containersToUpdate = reduxContainers.allIds.filter((id) => id !== container?.id);
+
+    containersToUpdate.forEach((id) => {
+      const containerById = reduxContainers.byId[id];
+      let containerWidth = parseFloat(containerById?.layout?.width?.value) || 0;
+      containerWidth += currentContainerWidth / containersToUpdate.length;
+      dispatch(
+        updateContainer({
+          id: id,
+          layout: {
+            width: {
+              value: containerWidth + "%",
+            },
+          },
+        })
+      );
+    })
+    dispatch(
+      updateContainer({
+        id: container?.id,
+        spanFullPage: true,
+        type: 'row',
+        layout: {
+          width: {
+            value: "0%",
+          },
+        }
+      })
+    );
+  };
+
   return (
     <div className={styles.settingsModalWrapper}>
       <h2 className={styles.settingsModalHeader}>
         Container {container?.position + 1} Settings:
       </h2>
       <div className="flexRow spaceBetween">
+        <button className='buttonMain' onClick={handleSpanFullPage}>
+          Span Full Page Width
+        </button>
         <form className="flexRow" onSubmit={handleContainerWidthSubmit}>
           <label htmlFor="containerWidthInput" className="flexRow">
             <span>Width:</span>

@@ -136,7 +136,7 @@ class MigrationTest(unittest.TestCase):
         output = io.StringIO()
         with Operations.context(MigrationContext.configure(dialect_name='postgresql', opts={'as_sql': True, 'output_buffer': output})):
             migration.upgrade()
-        self.assertIn("ADD CONTAINER tags JSONB DEFAULT '[]' NOT NULL", output.getvalue())
+        self.assertIn("ADD COLUMN tags JSONB DEFAULT '[]' NOT NULL", output.getvalue())
 
     def test_tag_validation(self):
         self.assertEqual(normalize_resume_tags([' Modern ', 'modern', 'two container']), ['modern', 'two container'])

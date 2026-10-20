@@ -15,7 +15,7 @@ import { getResumeFromApi } from '@/services/resumeServices';
 import { useReactToPrint } from 'react-to-print';
 
 import MarginRuler from '@/pages/ResumeEditorPage/features/ResumePaper/components/MarginRuler';
-import { PaddingPreviewContext } from '@/pages/ResumeEditorPage/features/ResumePaper/PaddingPreviewContext';
+import { PaddingPreviewContext } from '@/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { ActionCreators as UndoActionCreators } from "redux-undo";
 

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateResume, updateContainer, updateSection } from "@/store/resumeSlice";
-import { PaddingPreviewContext } from "../PaddingPreviewContext";
+import { PaddingPreviewContext } from "../helpers/PaddingPreviewContext";
 import { parseRemValue } from "@/utils/formatters";
 
 export default function MarginIndicator({
@@ -48,12 +48,22 @@ export default function MarginIndicator({
         }),
     );
   };
+  // useEffect(
+  //   () => () => {
+  //     setPreview(null);
+  //   },
+  //   [setPreview],
+  // );
   useEffect(
     () => () => {
-      setPreview(null);
+      if (drag.current) {
+        drag.current = null;
+        setPreview(null);
+      }
     },
     [setPreview],
   );
+
   const nextValue = (event) =>
     Math.max(
       // 0,  // Commented out but leaving, as this is the original lower bound for padding according to resume gap defaults

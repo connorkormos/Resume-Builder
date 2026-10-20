@@ -8,7 +8,7 @@ const apiResume = () => ({
   containers: [
     { id: 20, position: 1, type: 'row', spanFullPage: true, layout: { width: { auto: false, value: '60%' } }, sections: [] },
     { id: 10, position: 0, layout: { width: { auto: false, value: '40%' } }, sections: [
-      { id: 30, containerId: 10, type: 'header', layout: { grid: { columns: 2 } }, subsections: [] },
+      { id: 30, containerId: 10, type: 'header', layout: { display: 'grid', grid: { columns: 2 } }, subsections: [] },
     ] },
   ],
 });
@@ -36,7 +36,7 @@ test('metadata survives Redux updates, resizing, section moves, and save seriali
   const saved = JSON.parse(JSON.stringify(state));
   assert.equal(saved.containers.byId[20].type, 'column');
   assert.equal(saved.containers.byId[20].spanFullPage, false);
-  assert.equal(saved.containers.byId[10].layout.width.value, '45%');
+  assert.equal(parseFloat(saved.containers.byId[10].layout.width.value), 45);
   assert.equal(saved.sections.byId[30].containerId, 20);
   assert.deepEqual(saved.containers.byId[10].sectionIds, []);
   assert.deepEqual(saved.containers.byId[20].sectionIds, [30]);

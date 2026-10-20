@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { PiHouseSimpleFill } from "react-icons/pi";
 import styles from "./MarginRuler.module.css";
 import MarginIndicator from "./MarginIndicator";
-import { PaddingPreviewContext, previewLayout } from "../PaddingPreviewContext";
+import { PaddingPreviewContext, previewLayout } from "../helpers/PaddingPreviewContext";
 import { parseRemValue } from "@/utils/formatters";
 
 export default function MarginRulerTop({
@@ -90,36 +90,38 @@ export default function MarginRulerTop({
       >
         {parseFloat(padding.right).toFixed(2) + "rem"}
       </span>
-      {container && geometry && container.id !== resume.containers.allIds[0] && (
-        <>
-          <MarginIndicator
-            key={`${container.id}-left`}
-            target="container"
-            id={container.id}
-            side="left"
-            value={container.layout?.padding?.left}
-            pageRef={pageRef}
-            className={styles.sectionMarginIndicatorLeft}
-            style={{
-              marginLeft: containerLeft,
-            }}
-            onLabelShow={() => showMarginLabel(`${container.id}-left`)}
-            onLabelHide={() => delayHideMarginLabel(`${container.id}-left`)}
-            onLabelFlash={() => flashLabel(`${container.id}-left`)}
-          />
-          <span
-            className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${container.id}-left`) ? styles.marginIndicatorLabelVisible : ""}`}
-            aria-hidden={!visibleMarginLabels.has(`${container.id}-left`)}
-            style={{
-              top: "150%",
-              left: containerLeft,
-              transform: `translateX(-50%)`,
-            }}
-          >
-            {parseFloat(inset("left")).toFixed(2) + "rem"}
-          </span>
-        </>
-      )}
+      {container && geometry && container.id
+        !== resume.containers.allIds[0]
+        && (
+          <>
+            <MarginIndicator
+              key={`${container.id}-left`}
+              target="container"
+              id={container.id}
+              side="left"
+              value={container.layout?.padding?.left}
+              pageRef={pageRef}
+              className={styles.sectionMarginIndicatorLeft}
+              style={{
+                marginLeft: containerLeft,
+              }}
+              onLabelShow={() => showMarginLabel(`${container.id}-left`)}
+              onLabelHide={() => delayHideMarginLabel(`${container.id}-left`)}
+              onLabelFlash={() => flashLabel(`${container.id}-left`)}
+            />
+            <span
+              className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${container.id}-left`) ? styles.marginIndicatorLabelVisible : ""}`}
+              aria-hidden={!visibleMarginLabels.has(`${container.id}-left`)}
+              style={{
+                top: "150%",
+                left: containerLeft,
+                transform: `translateX(-50%)`,
+              }}
+            >
+              {parseFloat(inset("left")).toFixed(2) + "rem"}
+            </span>
+          </>
+        )}
       {container && geometry && container.id !== resume.containers.allIds.at(-1) && (
         <>
           <MarginIndicator

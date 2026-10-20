@@ -39,15 +39,28 @@ const Container = ({
   }
 
   // If the container doesn't have a valid width, set it to a default value that splits remaining space evenly.
+  // let containerStyling = {
+  //   flex: previewWidth
+  //     ? `0 0 ${previewWidth}%`
+  //     : container?.layout?.width?.auto
+  //       ? "1 1 0%"
+  //       : `0 0 ${container?.layout?.width?.value}`,
+  //   // paddingLeft: container?.layout?.padding?.left ?? resumeLayout.padding.left,
+  //   // paddingRight: container?.layout?.padding?.right ?? resumeLayout.padding.right,
+  // };
+
   let containerStyling = {
-    flex: previewWidth
-      ? `0 0 ${previewWidth}%`
-      : container?.layout?.width?.auto
-        ? "1 1 0%"
-        : `0 0 ${container?.layout?.width?.value}`,
-    // paddingLeft: container?.layout?.padding?.left ?? resumeLayout.padding.left,
-    // paddingRight: container?.layout?.padding?.right ?? resumeLayout.padding.right,
+    position: "relative",
+    gridColumn: "auto",
+    
   };
+
+  
+  if (container.spanFullPage === true) {
+      if (container.type === 'row') {
+        containerStyling.gridColumn = "1 / -1";
+    }
+    }
 
   const renderedSections = sectionIds.map((sectionId, index) => {
     const section = sectionById[sectionId];
@@ -93,7 +106,9 @@ const Container = ({
       key={container.id}
       id={container.id}
       className={styles.containerWrapperDiv}
-      style={{ ...containerStyling, position: "relative" }}
+      style={{ ...containerStyling }}
+      // style={{ position: "relative" }}
+      
       ref={ref}
     >
       {renderedSections}

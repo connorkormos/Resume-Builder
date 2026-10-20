@@ -17,12 +17,11 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
-   const isMobile = useMediaQuery("(max-width: 768px)");
-   const dispatch = useDispatch();
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const dispatch = useDispatch();
   const localEditorRef = useRef(null);
   const editorRef = props.editorPageRef ?? localEditorRef;
 
-  const resumeStyling = useSelector((state) => state.resume.present.styling);
   const containers = useSelector((state) => state.resume.present.containers);
   const sectionsById = useSelector((state) => state.resume.present.sections.byId);
 
@@ -116,6 +115,34 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       rightWidth: rightWidth - adjustment,
     }));
   };
+
+  const gridTemplateColumns = containerOrder.map((containerId) => {
+    const container = containers.byId[containerId];
+    if (container.spanFullPage) return null;
+    const width = containers.byId[containerId]?.layout?.width;
+    const preview = previewWidths?.[containerId];
+
+    const trackSize =
+      preview != null
+        ? `${preview}%`
+        : width?.auto || !width?.value
+          ? "1fr"
+          : width.value;
+
+    return `minmax(0, ${trackSize})`;
+  }).join(" ");
+
+  const gridTemplateRows = "repeat(auto-fill, minmax(0, auto))";
+
+  const reduxResumeStyling = useSelector((state) => state.resume.present.styling);
+  const resumeStyling = {
+    ...reduxResumeStyling,
+    display: 'grid',
+    gridTemplateColumns: gridTemplateColumns,
+    gridTemplateRows: gridTemplateRows,
+
+  };
+
   useEffect(() => {
     const pressedKeys = new Set();
 
@@ -151,6 +178,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       window.removeEventListener("blur", handleBlur);
     };
   }, []);
+
   useEffect(() => {
     const nextItems = {};
 
@@ -188,9 +216,10 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     );
   });
 
+
   return (
     <div className={styles.printPageRef} ref={ref}
-    
+
     //  style={{ scale: Math.min(1, window.innerWidth / parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--width-editor-page'))) }}
     >
       {!isMobile && <MarginRuler pageRef={editorRef} />}

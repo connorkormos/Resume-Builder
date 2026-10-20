@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
-import { PaddingPreviewContext, previewLayout } from "./PaddingPreviewContext";
+import { PaddingPreviewContext, previewLayout } from "./helpers/PaddingPreviewContext";
 import { useDispatch, useSelector } from "react-redux";
 import {
   dndReorderSubsections,
@@ -16,7 +16,7 @@ import SettingsModal from "../SettingsModal/SettingsModal.jsx";
 import SubsectionRenderer from "./Subsection.jsx";
 import { parseRemValue } from "@/utils/formatters.js";
 import SectionBorder from "./components/SectionBorder.jsx";
-import useSectionPaddingResize from "./useSectionPaddingResize.js";
+import useSectionPaddingResize from "./helpers/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
   DragDropProvider,
@@ -93,7 +93,8 @@ const Section = ({ id, section, container, index, hasNextSection }) => {
       ? resumeLayout.padding.top
       : `${Math.max(0, parseRemValue(sectionLayout?.padding?.top) + verticalGap)}rem`,
     paddingBottom: isLastRow
-      ? 0
+      ? `${Math.max(0, parseRemValue(sectionLayout?.padding?.bottom) + verticalGap)}rem`
+      // ? 0
       // ? resumeLayout.padding.bottom
       : `${Math.max(0, parseRemValue(sectionLayout?.padding?.bottom) + verticalGap)}rem`,
     flex: isLastRow ? "1" : "none",

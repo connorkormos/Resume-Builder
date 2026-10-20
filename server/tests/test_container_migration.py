@@ -123,7 +123,7 @@ class ContainerModelTest(unittest.TestCase):
         self.assertFalse(serialized["spanFullPage"])
         self.assertEqual(serialized["sections"][0]["containerId"], container.id)
         self.assertIn("containers", sa.inspect(db.engine).get_table_names())
-        self.assertNotIn("containers", sa.inspect(db.engine).get_table_names())
+        self.assertNotIn("columns", sa.inspect(db.engine).get_table_names())
 
     def test_copy_preserves_container_type_and_span(self):
         resume = Resume(user_id=1, title="Resume")
