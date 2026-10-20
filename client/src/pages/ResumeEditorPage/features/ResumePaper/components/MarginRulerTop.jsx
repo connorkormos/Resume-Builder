@@ -18,29 +18,29 @@ export default function MarginRulerTop({
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
   const section = resume.sections.byId[preview?.target === 'section' ? preview.id : resume.activeSectionIds[0]];
-  const column = resume.columns.byId[section?.columnId];
+  const container = resume.containers.byId[section?.containerId];
   const padding = previewLayout(resume.layout, preview, "resume", null).padding;
-  const columnPadding = previewLayout(
-    column?.layout,
+  const containerPadding = previewLayout(
+    container?.layout,
     preview,
-    "column",
-    column?.id,
+    "container",
+    container?.id,
   )?.padding;
   const gap = parseRemValue(resume.layout.gap?.horizontal);
   const inset = (side) =>
-    Math.max(0, parseRemValue(columnPadding?.[side]) + gap);
-  const columnLeft = geometry
+    Math.max(0, parseRemValue(containerPadding?.[side]) + gap);
+  const containerLeft = geometry
     ? `calc(${geometry.left}px + ${inset("left")}rem)`
     : null;
-  const contentLeft = column?.id === resume.columns.allIds[0]
+  const contentLeft = container?.id === resume.containers.allIds[0]
     ? padding.left
-    : columnLeft;
+    : containerLeft;
   const activeTarget = resume.activeEditorId === section?.id
     ? section
     : resume.fields.byId[resume.activeEditorId];
   const indentation = parseRemValue(activeTarget?.layout?.marginLeft);
   const showIndentation = Boolean(
-    resume.activeEditorId && section && column && contentLeft != null &&
+    resume.activeEditorId && section && container && contentLeft != null &&
     Number.isFinite(indentation) && indentation !== 0,
   );
 
@@ -90,29 +90,29 @@ export default function MarginRulerTop({
       >
         {parseFloat(padding.right).toFixed(2) + "rem"}
       </span>
-      {column && geometry && column.id !== resume.columns.allIds[0] && (
+      {container && geometry && container.id !== resume.containers.allIds[0] && (
         <>
           <MarginIndicator
-            key={`${column.id}-left`}
-            target="column"
-            id={column.id}
+            key={`${container.id}-left`}
+            target="container"
+            id={container.id}
             side="left"
-            value={column.layout?.padding?.left}
+            value={container.layout?.padding?.left}
             pageRef={pageRef}
             className={styles.sectionMarginIndicatorLeft}
             style={{
-              marginLeft: columnLeft,
+              marginLeft: containerLeft,
             }}
-            onLabelShow={() => showMarginLabel(`${column.id}-left`)}
-            onLabelHide={() => delayHideMarginLabel(`${column.id}-left`)}
-            onLabelFlash={() => flashLabel(`${column.id}-left`)}
+            onLabelShow={() => showMarginLabel(`${container.id}-left`)}
+            onLabelHide={() => delayHideMarginLabel(`${container.id}-left`)}
+            onLabelFlash={() => flashLabel(`${container.id}-left`)}
           />
           <span
-            className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${column.id}-left`) ? styles.marginIndicatorLabelVisible : ""}`}
-            aria-hidden={!visibleMarginLabels.has(`${column.id}-left`)}
+            className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${container.id}-left`) ? styles.marginIndicatorLabelVisible : ""}`}
+            aria-hidden={!visibleMarginLabels.has(`${container.id}-left`)}
             style={{
               top: "150%",
-              left: columnLeft,
+              left: containerLeft,
               transform: `translateX(-50%)`,
             }}
           >
@@ -120,26 +120,26 @@ export default function MarginRulerTop({
           </span>
         </>
       )}
-      {column && geometry && column.id !== resume.columns.allIds.at(-1) && (
+      {container && geometry && container.id !== resume.containers.allIds.at(-1) && (
         <>
           <MarginIndicator
-            key={`${column.id}-right`}
-            target="column"
-            id={column.id}
+            key={`${container.id}-right`}
+            target="container"
+            id={container.id}
             side="right"
-            value={column.layout?.padding?.right}
+            value={container.layout?.padding?.right}
             pageRef={pageRef}
             className={styles.sectionMarginIndicatorRight}
             style={{
               marginLeft: `calc(${geometry.right}px - ${inset("right")}rem)`,
             }}
-            onLabelShow={() => showMarginLabel(`${column.id}-right`)}
-            onLabelHide={() => delayHideMarginLabel(`${column.id}-right`)}
-            onLabelFlash={() => flashLabel(`${column.id}-right`)}
+            onLabelShow={() => showMarginLabel(`${container.id}-right`)}
+            onLabelHide={() => delayHideMarginLabel(`${container.id}-right`)}
+            onLabelFlash={() => flashLabel(`${container.id}-right`)}
           />
           <span
-            className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${column.id}-right`) ? styles.marginIndicatorLabelVisible : ""}`}
-            aria-hidden={!visibleMarginLabels.has(`${column.id}-right`)}
+            className={`${styles.marginIndicatorLabel} ${visibleMarginLabels.has(`${container.id}-right`) ? styles.marginIndicatorLabelVisible : ""}`}
+            aria-hidden={!visibleMarginLabels.has(`${container.id}-right`)}
             style={{
               top: "150%",
               left: `calc(${geometry.right}px - ${inset("right")}rem)`,

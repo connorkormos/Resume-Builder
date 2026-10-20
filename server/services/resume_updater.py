@@ -4,7 +4,7 @@ import re
 from models import db, Resume, Container, Section, Subsection, Field
 from lib.defaults import SECTION_DEFINITIONS
 
-from services.updaters import update_column_widths
+from services.updaters import update_container_widths
 from services.plain_text import build_resume_plain_text
 from services.resume_tags import normalize_resume_tags
 
@@ -57,7 +57,7 @@ def normalize_generic_section_types(resume_id):
 
 
 def update_resume_with_form_data(resume_id, data):
-    # ! Condiser potentially mismatched form data, where incoming column/section/subsection IDs may not match those actually belonging to the resume..
+    # ! Condiser potentially mismatched form data, where incoming container/section/subsection IDs may not match those actually belonging to the resume..
     resume = Resume.query.filter(Resume.id == resume_id).one_or_none()
 
     if not resume:
@@ -83,56 +83,62 @@ def update_resume_with_form_data(resume_id, data):
     # * Container updates
     # * --------------
 
-    columns_by_id = data.get("columns", {}).get("byId", {})
-    incoming_column_ids = {int(column_id) for column_id in columns_by_id.keys()}
-    existing_columns = Container.query.filter(Container.resume_id == resume_id).all()
-    last_available_column = (
+    containers_by_id = data.get("containers", {}).get("byId", {})
+    incoming_container_ids = {int(container_id) for container_id in containers_by_id.keys()}
+    existing_containers = Container.query.filter(Container.resume_id == resume_id).all()
+    last_available_container = (
         Container.query.filter(
-            Container.resume_id == resume_id, Container.id.in_(incoming_column_ids)
+            Container.resume_id == resume_id, Container.id.in_(incoming_container_ids)
         )
         .order_by(Container.position.desc())
         .first()
     )
     
-    if not last_available_column:
-        raise ValueError("Cannot delete all columns from a resume.")
+    if not last_available_container:
+        raise ValueError("Cannot delete all containers from a resume.")
     
 
     sections_by_id = data.get("sections", {}).get("byId", {})
 
-    for column in existing_columns:
-        if column.id not in incoming_column_ids:
-            for section in list(column.sections):
-                last_available_column.sections.append(section)
-                section.column_id = last_available_column.id
+    for container in existing_containers:
+        if container.id not in incoming_container_ids:
+            for section in list(container.sections):
+                last_available_container.sections.append(section)
+                section.container_id = last_available_container.id
 
                 section_data = sections_by_id.get(str(section.id))
                 if section_data:
-                    section_data["columnId"] = last_available_column.id
+                    section_data["containerId"] = last_available_container.id
 
             db.session.flush()
-            db.session.delete(column)
+            db.session.delete(container)
 
-    for column_id, column_data in columns_by_id.items():
-        column = Container.query.get(int(column_id))
-        if not column:
+    for container_id, container_data in containers_by_id.items():
+        container = Container.query.get(int(container_id))
+        if not container:
             continue
 
-        if "styling" in column_data:
-            column.styling = column_data["styling"]
+        if "type" in container_data:
+            container.type = container_data["type"]
+
+        if "spanFullPage" in container_data:
+            container.span_full_page = container_data["spanFullPage"]
+
+        if "styling" in container_data:
+            container.styling = container_data["styling"]
             
-        if "layout" in column_data:
-            column.layout = column_data["layout"]
+        if "layout" in container_data:
+            container.layout = container_data["layout"]
 
-        # if 'autoWidth' in column_data:
-            # column.auto_width = column_data['autoWidth']
+        # if 'autoWidth' in container_data:
+            # container.auto_width = container_data['autoWidth']
 
-        if "position" in column_data:
-            column.position = column_data["position"]
+        if "position" in container_data:
+            container.position = container_data["position"]
             
     db.session.flush()
             
-    update_column_widths(resume_id)
+    update_container_widths(resume_id)
     
 
     # * ---------------
@@ -172,8 +178,8 @@ def update_resume_with_form_data(resume_id, data):
         if "position" in section_data:
             section.position = section_data["position"]
 
-        if "columnId" in section_data:
-            section.column_id = section_data["columnId"]
+        if "containerId" in section_data:
+            section.container_id = section_data["containerId"]
 
         if "showHeading" in section_data:
             section.show_heading = section_data["showHeading"]

@@ -11,7 +11,7 @@ SELECT
 FROM fields AS f
 JOIN subsections AS ss ON ss.id = f.subsection_id
 JOIN sections AS s ON s.id = ss.section_id
-JOIN columns AS c ON c.id = s.column_id
+JOIN containers AS c ON c.id = s.container_id
 JOIN resumes AS r ON r.id = c.resume_id
 WHERE s.type = 'skills'
   AND (f.label IS NULL OR NOT (f.label = ANY(

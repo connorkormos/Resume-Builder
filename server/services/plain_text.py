@@ -45,8 +45,8 @@ def build_resume_plain_text(resume):
     # * Join all items in resume_text_list into one plain text string blob, separated by spaces for searchability
     resume_text_list = [resume.title or ""]
 
-    for column in resume.columns:
-        for section in column.sections:
+    for container in resume.containers:
+        for section in container.sections:
             if section.label:
                 resume_text_list.append(section.label)
             resume_text_list.append(extract_slate_text_with_breaks(section.value))

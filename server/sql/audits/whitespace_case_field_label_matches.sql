@@ -31,7 +31,7 @@ JOIN section_defaults AS d ON d.section_type = s.type
 JOIN LATERAL unnest(d.allowed_labels) AS approved(label)
     ON regexp_replace(lower(f.label), '[[:space:]]+', '', 'g')
      = regexp_replace(lower(approved.label), '[[:space:]]+', '', 'g')
-JOIN columns AS c ON c.id = s.column_id
+JOIN containers AS c ON c.id = s.container_id
 JOIN resumes AS r ON r.id = c.resume_id
 WHERE f.label <> approved.label
 ORDER BY

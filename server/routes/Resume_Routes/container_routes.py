@@ -4,27 +4,27 @@ from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import (
     build_resume_with_defaults,
-    add_column,
+    add_container,
     add_section,
     add_subsection,
     add_field,
     add_default_fields,
 )
 
-from services.updaters import update_column_widths
+from services.updaters import update_container_widths
 
 from services.resume_updater import update_resume_with_form_data
 
 from utils.responses import generate_error, generate_success, print_pending_request, print_successful_request
 
-column_bp = Blueprint("column", __name__, url_prefix="/columns")
+container_bp = Blueprint("container", __name__, url_prefix="/containers")
 
 
 # ** ROUTES ** #
 
-@column_bp.route("/<int:resume_id>", methods=["POST"])
-def add_column(resume_id):
-    print_pending_request('POST', f'/columns/{resume_id}', 'to add column to resume of ID', resume_id)
+@container_bp.route("/<int:resume_id>", methods=["POST"])
+def add_container(resume_id):
+    print_pending_request('POST', f'/containers/{resume_id}', 'to add container to resume of ID', resume_id)
 
     try:
         resume = Resume.query.filter(Resume.id == resume_id).one_or_none()
@@ -32,31 +32,34 @@ def add_column(resume_id):
             return generate_error(
                 error_type="NOT_FOUND",
                 code="RESUME_NOT_FOUND",
-                message=f"Could not find resume of ID {resume_id} to add a column to.",
+                message=f"Could not find resume of ID {resume_id} to add a container to.",
             )
 
         error = check_resume_access(session.get("user_id"), resume_id, request.method)
         if error is not None:
             return error
 
-        column_count = len(resume.columns)
+        container_count = len(resume.containers)
         
-        if column_count >= 10:
+        if container_count >= 10:
             return generate_error(
                 error_type="FORBIDDEN",
-                code="MAX_COLUMN_COUNT_REACHED",
-                message="Resumes cannot have more than 10 columns.",
+                code="MAX_CONTAINER_COUNT_REACHED",
+                message="Resumes cannot have more than 10 containers.",
             )
         
-        new_column = Container(
+        data = request.get_json(silent=True) or {}
+        new_container = Container(
             resume_id=resume_id,
-            position=column_count,
+            position=container_count,
+            type=data.get("type", "column"),
+            span_full_page=data.get("spanFullPage", False),
             # width=None
         )
-        db.session.add(new_column)
+        db.session.add(new_container)
         db.session.flush()
         
-        update_column_widths(resume_id)
+        update_container_widths(resume_id)
 
         db.session.commit()
 
@@ -67,9 +70,9 @@ def add_column(resume_id):
         db.session.rollback()
         raise
      
-@column_bp.route("/<int:resume_id>", methods=["DELETE"])
-def delete_last_column(resume_id):
-    print_pending_request('DELETE', 'the last column', 'in resume of ID', resume_id)
+@container_bp.route("/<int:resume_id>", methods=["DELETE"])
+def delete_last_container(resume_id):
+    print_pending_request('DELETE', 'the last container', 'in resume of ID', resume_id)
 
     try:
         resume = Resume.query.filter_by(id=resume_id).one_or_none()
@@ -84,60 +87,60 @@ def delete_last_column(resume_id):
         if error is not None:
             return error
 
-        column_to_delete = (
+        container_to_delete = (
             Container.query.filter_by(resume_id=resume_id)
             .order_by(Container.position.desc())
             .first()
         )
 
-        second_to_last_column = (
+        second_to_last_container = (
             Container.query.filter_by(resume_id=resume_id)
             .order_by(Container.position.desc())
             .offset(1)
             .first()
         )
 
-        if not second_to_last_column:
+        if not second_to_last_container:
             return generate_error(
                 error_type="FORBIDDEN",
-                code="INVALID_COLUMN_COUNT",
-                message="Resumes require at least one column.",
+                code="INVALID_CONTAINER_COUNT",
+                message="Resumes require at least one container.",
             )
 
-        if not column_to_delete:
+        if not container_to_delete:
             return generate_error(
                 error_type="NOT_FOUND",
-                code="COLUMN_NOT_FOUND",
+                code="CONTAINER_NOT_FOUND",
                 message="Container to delete not found.",
             )
 
         max_position = max(
-            [section.position for section in second_to_last_column.sections],
+            [section.position for section in second_to_last_container.sections],
             default=-1,
         )
 
-        for section in list(column_to_delete.sections):
+        for section in list(container_to_delete.sections):
             max_position += 1
-            section.column = second_to_last_column
+            section.container = second_to_last_container
             section.position = max_position
 
-        db.session.delete(column_to_delete)
+        db.session.delete(container_to_delete)
         db.session.flush()
 
-        remaining_columns = (
+        remaining_containers = (
             Container.query.filter_by(resume_id=resume_id)
             .order_by(Container.position.asc())
             .all()
         )
         
-        update_column_widths(resume_id)
+        update_container_widths(resume_id)
 
-        for index, column in enumerate(remaining_columns):
-            column.position = index
+        for index, container in enumerate(remaining_containers):
+            container.position = index
 
         db.session.commit()
 
-        print_successful_request('Added column successfully.')
+        print_successful_request('Added container successfully.')
 
         return jsonify(resume.to_dict()), 200
 
@@ -145,25 +148,25 @@ def delete_last_column(resume_id):
         db.session.rollback()
         return generate_error(
             error_type="SERVER_ERROR",
-            code="ERROR_DELETING_COLUMN",
-            message="An unknown error occurred while deleting the column.",
+            code="ERROR_DELETING_CONTAINER",
+            message="An unknown error occurred while deleting the container.",
         )
         
         
-@column_bp.route("/<int:column_id>", methods=["PUT"])
-def update_column(column_id):
-    print_pending_request('PUT', f'/columns/{column_id}', 'to update column of ID:', column_id)
+@container_bp.route("/<int:container_id>", methods=["PUT"])
+def update_container(container_id):
+    print_pending_request('PUT', f'/containers/{container_id}', 'to update container of ID:', container_id)
 
     try:
-        column = Container.query.filter_by(id=column_id).one_or_none()
-        if not column:
+        container = Container.query.filter_by(id=container_id).one_or_none()
+        if not container:
             return generate_error(
                 error_type="NOT_FOUND",
-                code="COLUMN_NOT_FOUND",
-                message=f"Could not find column of ID {column_id}.",
+                code="CONTAINER_NOT_FOUND",
+                message=f"Could not find container of ID {container_id}.",
             )
 
-        error = check_resume_access(session.get("user_id"), column.resume_id, request.method)
+        error = check_resume_access(session.get("user_id"), container.resume_id, request.method)
         if error is not None:
             return error
 
@@ -172,7 +175,7 @@ def update_column(column_id):
             return generate_error(
                 error_type="BAD_REQUEST",
                 code="INVALID_DATA",
-                message="No data provided for column update.",
+                message="No data provided for container update.",
             )
 
         new_styling = data.get("styling")
@@ -180,26 +183,32 @@ def update_column(column_id):
         position = data.get("position")
 
         if new_styling is not None:
-            column.styling = new_styling
+            container.styling = new_styling
 
         if new_layout is not None:
-            column.layout = new_layout
+            container.layout = new_layout
 
         if position is not None:
-            column.position = position
+            container.position = position
 
-        update_column_widths(column.resume_id)
+        if "type" in data:
+            container.type = data["type"]
+
+        if "spanFullPage" in data:
+            container.span_full_page = data["spanFullPage"]
+
+        update_container_widths(container.resume_id)
 
         db.session.commit()
 
-        print_successful_request('Sucessfully updated column.')
+        print_successful_request('Sucessfully updated container.')
 
-        return jsonify(column.resume.to_dict()), 200
+        return jsonify(container.resume.to_dict()), 200
 
     except Exception as e:
         db.session.rollback()
         return generate_error(
             error_type="SERVER_ERROR",
-            code="ERROR_UPDATING_COLUMN",
-            message="An unknown error occurred while updating the column.",
+            code="ERROR_UPDATING_CONTAINER",
+            message="An unknown error occurred while updating the container.",
         )

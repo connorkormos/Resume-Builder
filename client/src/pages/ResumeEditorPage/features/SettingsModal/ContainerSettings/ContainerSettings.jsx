@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { updateColumn } from "@/store/resumeSlice.js";
+import { updateContainer } from "@/store/resumeSlice.js";
 
 import styles from "../SettingsModal.module.css";
 
-const ColumnSettings = () => {
+const ContainerSettings = () => {
   const dispatch = useDispatch();
 
   const activeSectionIds = useSelector((state) => state.resume.present.activeSectionIds);
@@ -13,29 +13,29 @@ const ColumnSettings = () => {
   const section = useSelector(
     (state) => state.resume.present.sections.byId[activeSectionId],
   );
-  const column = useSelector(
-    (state) => state.resume.present.columns.byId[section?.columnId],
+  const container = useSelector(
+    (state) => state.resume.present.containers.byId[section?.containerId],
   );
 
-  const [columnWidthInputValue, setColumnWidthInputValue] = useState(
-    column?.layout?.width?.value.replace("%", "") || "auto",
+  const [containerWidthInputValue, setContainerWidthInputValue] = useState(
+    container?.layout?.width?.value.replace("%", "") || "auto",
   );
   const [autoWidthInputValue, setAutoWidthInputValue] = useState(
-    column?.layout?.width?.auto || false,
+    container?.layout?.width?.auto || false,
   );
 
-  const handleColumnWidthSubmit = (e) => {
+  const handleContainerWidthSubmit = (e) => {
     e.preventDefault();
-    if (columnWidthInputValue < 0) {
+    if (containerWidthInputValue < 0) {
       alert();
     }
 
     dispatch(
-      updateColumn({
-        id: column?.id,
+      updateContainer({
+        id: container?.id,
         layout: {
           width: {
-            value: columnWidthInputValue + "%",
+            value: containerWidthInputValue + "%",
             auto: false,
           },
         },
@@ -47,8 +47,8 @@ const ColumnSettings = () => {
   const handleAutoWidthSubmit = () => {
     // e.preventDefault();
     dispatch(
-      updateColumn({
-        id: column?.id,
+      updateContainer({
+        id: container?.id,
         layout: {
           width: {
             auto: autoWidthInputValue,
@@ -65,15 +65,15 @@ const ColumnSettings = () => {
   return (
     <div className={styles.settingsModalWrapper}>
       <h2 className={styles.settingsModalHeader}>
-        Column {column?.position + 1} Settings:
+        Container {container?.position + 1} Settings:
       </h2>
       <div className="flexRow spaceBetween">
-        <form className="flexRow" onSubmit={handleColumnWidthSubmit}>
-          <label htmlFor="columnWidthInput" className="flexRow">
+        <form className="flexRow" onSubmit={handleContainerWidthSubmit}>
+          <label htmlFor="containerWidthInput" className="flexRow">
             <span>Width:</span>
 
             <input
-              id="columnWidthInput"
+              id="containerWidthInput"
               className="inputMain"
               style={{
                 textAlign: "left",
@@ -85,8 +85,8 @@ const ColumnSettings = () => {
               min="1"
               max="100"
               step="0.1"
-              value={columnWidthInputValue}
-              onChange={(e) => setColumnWidthInputValue(e.target.value)}
+              value={containerWidthInputValue}
+              onChange={(e) => setContainerWidthInputValue(e.target.value)}
             />
             <span style={{ pointerEvents: "none" }}>%</span>
           </label>
@@ -107,4 +107,4 @@ const ColumnSettings = () => {
   );
 };
 
-export default ColumnSettings;
+export default ContainerSettings;

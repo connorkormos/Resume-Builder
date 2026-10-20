@@ -28,7 +28,7 @@ class TemplateTagsTest(unittest.TestCase):
                 self.assertEqual(tags, normalize_resume_tags(tags))
                 counts.update(tags)
                 sections = json.loads(sql.split('$resume_data$')[1])
-                columns = []
+                containers = []
                 for position in sorted({section['columnPosition'] for section in sections}):
                     nested = []
                     for section in sections:
@@ -40,8 +40,8 @@ class TemplateTagsTest(unittest.TestCase):
                                 label=sub['label'], fields=[SimpleNamespace(**field) for field in sub['fields']],
                             ) for sub in section['subsections']],
                         ))
-                    columns.append(SimpleNamespace(sections=nested))
-                expected = build_resume_plain_text(SimpleNamespace(title=title, columns=columns))
+                    containers.append(SimpleNamespace(sections=nested))
+                expected = build_resume_plain_text(SimpleNamespace(title=title, containers=containers))
                 self.assertEqual(sql.split('$search_text$')[1], expected)
                 self.assertTrue(sql.rstrip().endswith('FROM new_resume'))
         report_rows = [(tag, int(count)) for tag, count in re.findall(

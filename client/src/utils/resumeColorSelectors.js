@@ -44,8 +44,8 @@ export const selectUsedResumeColors = (state) => {
   collectColorsFromStyle(resume.styling, colors);
   
 
-  Object.values(resume.columns.byId).forEach(column => {
-    collectColorsFromStyle(column.styling, colors);
+  Object.values(resume.containers.byId).forEach(container => {
+    collectColorsFromStyle(container.styling, colors);
   });
 
   Object.values(resume.sections.byId).forEach(section => {

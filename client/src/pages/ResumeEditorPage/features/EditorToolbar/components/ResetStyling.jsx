@@ -3,7 +3,7 @@ import { MdArrowDropDown } from "react-icons/md";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  updateColumn,
+  updateContainer,
   updateResume,
   updateSection,
   updateSubsection,
@@ -82,7 +82,7 @@ export default function ResetStyling() {
           }),
         );
       }
-      if (resetOption === "columnSpacing") {
+      if (resetOption === "containerSpacing") {
         dispatchReset(
           updateResume({
             layout: {
@@ -92,11 +92,11 @@ export default function ResetStyling() {
             },
           }),
         );
-        const columns = reduxResume.columns.allIds;
-        columns.forEach((columnId) => {
+        const containers = reduxResume.containers.allIds;
+        containers.forEach((containerId) => {
           dispatchReset(
-            updateColumn({
-              id: columnId,
+            updateContainer({
+              id: containerId,
               layout: {
                 padding: {
                   left: "0rem",
@@ -131,10 +131,10 @@ export default function ResetStyling() {
             },
           }),
         );
-        reduxResume.columns.allIds.forEach((columnId) => {
+        reduxResume.containers.allIds.forEach((containerId) => {
           dispatchReset(
-            updateColumn({
-              id: columnId,
+            updateContainer({
+              id: containerId,
               layout: {
                 padding: {
                   top: "0rem",
@@ -180,10 +180,10 @@ export default function ResetStyling() {
               },
             }),
           );
-          reduxResume.columns.allIds.forEach((columnId) => {
+          reduxResume.containers.allIds.forEach((containerId) => {
             dispatchReset(
-              updateColumn({
-                id: columnId,
+              updateContainer({
+                id: containerId,
                 styling: stylingChanges,
               }),
             );
@@ -252,8 +252,8 @@ export default function ResetStyling() {
       value: "highlightColor",
     },
     {
-      label: "Reset Column Gap/Spacing",
-      value: "columnSpacing",
+      label: "Reset Container Gap/Spacing",
+      value: "containerSpacing",
     },
     {
       label: "Reset Section Gap/Spacing",

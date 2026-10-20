@@ -6,7 +6,7 @@ import reducer, * as actions from '../src/store/resumeSliceWithHistory.js';
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
 const fixture = () => ({
    id: 'resume-1', userId: 'user-1', title: 'Original',
-   columns: {
+   containers: {
       byId: {
          c1: { id: 'c1', sectionIds: ['s1', 's2'], layout: { width: { auto: true, value: '50%' } } },
          c2: { id: 'c2', sectionIds: [], layout: { width: { auto: true, value: '50%' } } },
@@ -14,8 +14,8 @@ const fixture = () => ({
    },
    sections: {
       byId: {
-         s1: { id: 's1', columnId: 'c1', position: 0, subsectionIds: ['sub1'], value: value('Heading'), styling: { backgroundColor: 'white' }, layout: {} },
-         s2: { id: 's2', columnId: 'c1', position: 1, subsectionIds: [], value: value('Second heading'), styling: {}, layout: {} },
+         s1: { id: 's1', containerId: 'c1', position: 0, subsectionIds: ['sub1'], value: value('Heading'), styling: { backgroundColor: 'white' }, layout: {} },
+         s2: { id: 's2', containerId: 'c1', position: 1, subsectionIds: [], value: value('Second heading'), styling: {}, layout: {} },
       }, allIds: ['s1', 's2'],
    },
    subsections: {
@@ -37,13 +37,13 @@ const undo = state => reducer(state, actions.undoResume());
 const redo = state => reducer(state, actions.redoResume());
 const grouped = (action, group = 'gesture-1', extra = {}) => actions.withResumeHistory(action, { group, ...extra });
 
-test('text, color, and cross-column reorder share one chronological timeline', () => {
+test('text, color, and cross-container reorder share one chronological timeline', () => {
    const original = start();
    const typed = reducer(original, text('Edited text'));
    const colored = reducer(typed, color('red'));
    const reordered = reducer(colored, actions.dndReorderSections({ dndKitDict: { c1: ['s2'], c2: ['s1'] } }));
    assert.equal(reordered.history.past.length, 3);
-   assert.equal(reordered.sections.byId.s1.columnId, 'c2');
+   assert.equal(reordered.sections.byId.s1.containerId, 'c2');
    assert.deepEqual(document(undo(reordered)), document(colored));
    assert.deepEqual(document(undo(undo(reordered))), document(typed));
    const undone = undo(undo(undo(reordered)));

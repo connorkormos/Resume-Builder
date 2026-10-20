@@ -26,7 +26,7 @@ new_resume AS (
     RETURNING id, title
 ),
 new_column AS (
-    INSERT INTO columns (resume_id, position, styling, layout, created_at, updated_at)
+    INSERT INTO containers (resume_id, position, styling, layout, created_at, updated_at)
     SELECT id, 0, '{}'::json,
         '{"width":{"auto":true,"value":"100%"},"padding":{"top":"0rem","right":"0rem","bottom":"0rem","left":"0rem"}}'::json,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
@@ -41,7 +41,7 @@ section_data AS (
 ),
 new_sections AS (
     INSERT INTO sections (
-        column_id, label, type, value, show_heading, position,
+        container_id, label, type, value, show_heading, position,
         styling, layout, created_at, updated_at
     )
     SELECT c.id, s.item->>'label', s.item->>'type',

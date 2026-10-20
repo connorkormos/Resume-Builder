@@ -3,10 +3,10 @@ from models import Container, Field, Section, Subsection, db, Resume
 
 from lib.defaults import (
     RESUME_DEFAULTS,
-    COLUMN_DEFAULTS,
+    CONTAINER_DEFAULTS,
     get_section_definition,
 )
-from services.updaters import update_column_widths
+from services.updaters import update_container_widths
 from services.plain_text import build_resume_plain_text
 from utils.formatting import format_label
 
@@ -51,26 +51,26 @@ def create_resume(title, user_id):
     return resume
 
 
-def add_column(resume_id, position=0):
-    column = Container(
+def add_container(resume_id, position=0):
+    container = Container(
         resume_id=resume_id,
         position=position,
-        styling=deepcopy(COLUMN_DEFAULTS["styling"]),
-        layout=deepcopy(COLUMN_DEFAULTS["layout"]),
+        styling=deepcopy(CONTAINER_DEFAULTS["styling"]),
+        layout=deepcopy(CONTAINER_DEFAULTS["layout"]),
     )
     
-    update_column_widths(resume_id)
+    update_container_widths(resume_id)
 
-    db.session.add(column)
+    db.session.add(container)
     db.session.flush()
 
-    return column
+    return container
 
 
-def add_section(column_id, section_type, position=0):
+def add_section(container_id, section_type, position=0):
     definition = get_section_definition(section_type)
     section = Section(
-        column_id=column_id,
+        container_id=container_id,
         label=definition["label"],
         type=section_type,
         position=position,
@@ -162,7 +162,7 @@ def add_default_fields(subsection_id, section_type):
 def build_resume_with_defaults(title, user_id, sections_data):
     resume = create_resume(title, user_id)
 
-    column = add_column(
+    container = add_container(
         resume_id=resume.id,
         position=0,
     )
@@ -174,7 +174,7 @@ def build_resume_with_defaults(title, user_id, sections_data):
             continue
 
         add_section(
-            column_id=column.id,
+            container_id=container.id,
             section_type=section_type,
             position=section_position,
         )
@@ -192,14 +192,14 @@ def build_resume_copy(resume_id, *, user_id):
     if original_resume is None:
         raise ResumeNotFoundError(f"Resume with ID {resume_id} not found.")
 
-    # Helper function to create deep-copies of a models column-values in a new instance
+    # Helper function to create deep-copies of a models container-values in a new instance
     def copy_instance(instance, model, excluded_names):
         copied = {}
-        for column in model.__table__.columns:
-            column_name = column.name
-            if column_name in excluded_names:
+        for container in model.__table__.columns:
+            container_name = container.name
+            if container_name in excluded_names:
                 continue
-            copied[column_name] = deepcopy(getattr(instance, column_name))
+            copied[container_name] = deepcopy(getattr(instance, container_name))
         return model(**copied)
 
     resume_copy = copy_instance(
@@ -217,28 +217,28 @@ def build_resume_copy(resume_id, *, user_id):
     db.session.add(resume_copy)
     db.session.flush()
 
-    # Copy columns from the original resume to the new resume.
+    # Copy containers from the original resume to the new resume.
     # Ordered by position to catch edge cases of conflicting position values
     # This happens for sections, subsections, and fields as well
-    original_columns = (
+    original_containers = (
         Container.query.filter_by(resume_id=original_resume.id)
         .order_by(Container.position)
         .all()
     )
 
-    for original_column in original_columns:
-        column_copy = copy_instance(
-            original_column,
+    for original_container in original_containers:
+        container_copy = copy_instance(
+            original_container,
             Container,
             {"id", "resume_id"},
         )
-        column_copy.resume_id = resume_copy.id
+        container_copy.resume_id = resume_copy.id
         
-        db.session.add(column_copy)
+        db.session.add(container_copy)
         db.session.flush()
 
         original_sections = (
-            Section.query.filter_by(column_id=original_column.id)
+            Section.query.filter_by(container_id=original_container.id)
             .order_by(Section.position)
             .all()
         )
@@ -247,9 +247,9 @@ def build_resume_copy(resume_id, *, user_id):
             section_copy = copy_instance(
                 original_section,
                 Section,
-                {"id", "column_id"},
+                {"id", "container_id"},
             )
-            section_copy.column_id = column_copy.id
+            section_copy.container_id = container_copy.id
             
             db.session.add(section_copy)
             db.session.flush()

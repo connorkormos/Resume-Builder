@@ -43,7 +43,7 @@ class SectionDefaultsTest(unittest.TestCase):
             response = self.client.post("/resumes", json={"title": "New", "sections": {"header": True}})
             self.assertEqual(response.status_code, 201)
             resume = response.json
-            section = resume["columns"][0]["sections"][0]
+            section = resume["containers"][0]["sections"][0]
             self.assertFalse(section["showHeading"])
             self.assertEqual(section["layout"], {"display": "grid", "grid": {"columns": 2}})
 

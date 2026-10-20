@@ -12,7 +12,7 @@ import TextAlign from "@/pages/ResumeEditorPage/features/TextFormatting/TextAlig
 import Lists from "@/pages/ResumeEditorPage/features/TextFormatting/Lists.jsx";
 import Marks from "@/pages/ResumeEditorPage/features/TextFormatting/Marks.jsx";
 
-import Columns from "./Columns.jsx";
+import Containers from "./Containers.jsx";
 import Gap from "./Gap.jsx";
 import Links from "../../TextFormatting/Links.jsx";
 import Icons from "../../TextFormatting/Icons.jsx";
@@ -36,7 +36,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
   
   const resumeStyling = useSelector((state) => state.resume.present.styling);
   const sections = useSelector((state) => state.resume.present.sections);
-  const columns = useSelector((state) => state.resume.present.columns);
+  const containers = useSelector((state) => state.resume.present.containers);
   const fields = useSelector((state) => state.resume.present.fields);
   const subsections = useSelector((state) => state.resume.present.subsections);
 
@@ -54,9 +54,9 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
   // Keep the context stable during local input edits and unrelated UI updates.
   const editorContext = useMemo(
     () => resolveEditorContext({
-      fields, subsections, sections, columns, styling: resumeStyling,
+      fields, subsections, sections, containers, styling: resumeStyling,
     }, activeEditorId),
-    [fields, subsections, sections, columns, resumeStyling, activeEditorId],
+    [fields, subsections, sections, containers, resumeStyling, activeEditorId],
   );
 
   const lineHeightComponent = (
@@ -73,7 +73,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
     <FontSize
       editor={editor}
       selection={selection}
-      columns={columns}
+      containers={containers}
       context={editorContext}
       activeSectionId={activeSectionId}
       activeSectionIds={activeSectionIds}
@@ -101,7 +101,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
   const marksComponent = <Marks editor={editor} />;
   const linksComponent = <Links editor={editor} selection={selection} />;
   const iconsComponent = <Icons editor={editor} />;
-  const columnsComponent = <Columns label="Columns:" />;
+  const containersComponent = <Containers label="Containers:" />;
   const textAlignComponent = (
     <TextAlign
       editor={editor}
@@ -145,7 +145,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
             {iconsComponent}
           </div>
           <div className={styles.mobileToolbarRow}>
-            {columnsComponent}
+            {containersComponent}
             {gapComponent}
             {bordersComponent}
             {addSectionComponent}
@@ -180,7 +180,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
         {indentationComponent}
         {linksComponent}
         {iconsComponent}
-        {columnsComponent}
+        {containersComponent}
         {bordersComponent}
         {gapComponent}
         {addSectionComponent}

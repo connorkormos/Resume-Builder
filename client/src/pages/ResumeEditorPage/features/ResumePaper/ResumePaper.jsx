@@ -6,12 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { DragDropProvider } from "@dnd-kit/react";
 import { move } from "@dnd-kit/helpers";
 
-import Column from "./Column.jsx";
+import Container from "./Container.jsx";
 import EndPageMarker from "./components/EndPageMarker.jsx";
 import MarginRuler from "./components/MarginRuler.jsx";
 
 import styles from "./ResumePaper.module.css";
-import { dndReorderSections, resizeColumnPair } from "@/store/resumeSlice.js";
+import { dndReorderSections, resizeContainerPair } from "@/store/resumeSlice.js";
 import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 
@@ -23,32 +23,32 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const editorRef = props.editorPageRef ?? localEditorRef;
 
   const resumeStyling = useSelector((state) => state.resume.present.styling);
-  const columns = useSelector((state) => state.resume.present.columns);
+  const containers = useSelector((state) => state.resume.present.containers);
   const sectionsById = useSelector((state) => state.resume.present.sections.byId);
 
-  const [columnSectionIds, setColumnSectionIds] = useState({});
-  const previousColumnSectionIds = useRef({});
-  const [columnOrder, setColumnOrder] = useState([]);
+  const [containerSectionIds, setContainerSectionIds] = useState({});
+  const previousContainerSectionIds = useRef({});
+  const [containerOrder, setContainerOrder] = useState([]);
   const [previewWidths, setPreviewWidths] = useState(null);
   const resizeState = useRef(null);
   const previewWidthsRef = useRef(null);
 
-  const getColumnWidth = (columnId) =>
-    parseFloat(columns.byId[columnId]?.layout?.width?.value) || 0;
+  const getContainerWidth = (containerId) =>
+    parseFloat(containers.byId[containerId]?.layout?.width?.value) || 0;
 
   const finishResize = () => {
     const resize = resizeState.current;
     if (!resize) return;
 
     const widths = previewWidthsRef.current ?? resize.startWidths;
-    const leftWidth = widths[resize.leftColumnId];
-    const rightWidth = widths[resize.rightColumnId];
+    const leftWidth = widths[resize.leftContainerId];
+    const rightWidth = widths[resize.rightContainerId];
     resize.handle.removeEventListener("pointermove", resize.onPointerMove);
 
-    if (leftWidth !== resize.startWidths[resize.leftColumnId]) {
-      dispatch(resizeColumnPair({
-        leftColumnId: resize.leftColumnId,
-        rightColumnId: resize.rightColumnId,
+    if (leftWidth !== resize.startWidths[resize.leftContainerId]) {
+      dispatch(resizeContainerPair({
+        leftContainerId: resize.leftContainerId,
+        rightContainerId: resize.rightContainerId,
         leftWidth,
         rightWidth,
       }));
@@ -59,17 +59,17 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     setPreviewWidths(null);
   };
 
-  const startResize = (leftColumnId, event) => {
-    const leftIndex = columnOrder.indexOf(leftColumnId);
-    const rightColumnId = columnOrder[leftIndex + 1];
+  const startResize = (leftContainerId, event) => {
+    const leftIndex = containerOrder.indexOf(leftContainerId);
+    const rightContainerId = containerOrder[leftIndex + 1];
     const pageWidth = editorRef.current?.getBoundingClientRect().width;
-    const leftWidth = getColumnWidth(leftColumnId);
-    const rightWidth = getColumnWidth(rightColumnId);
-    if (!rightColumnId || !pageWidth || !leftWidth || !rightWidth) return;
+    const leftWidth = getContainerWidth(leftContainerId);
+    const rightWidth = getContainerWidth(rightContainerId);
+    if (!rightContainerId || !pageWidth || !leftWidth || !rightWidth) return;
 
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const startWidths = { [leftColumnId]: leftWidth, [rightColumnId]: rightWidth };
+    const startWidths = { [leftContainerId]: leftWidth, [rightContainerId]: rightWidth };
     const onPointerMove = (moveEvent) => {
       const resize = resizeState.current;
       if (!resize) return;
@@ -78,16 +78,16 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       const delta = ((moveEvent.clientX - resize.startX) / pageWidth) * 100;
       const nextLeftWidth = Math.min(Math.max(leftWidth + delta, 10), pairWidth - 10);
       const widths = {
-        [leftColumnId]: nextLeftWidth,
-        [rightColumnId]: pairWidth - nextLeftWidth,
+        [leftContainerId]: nextLeftWidth,
+        [rightContainerId]: pairWidth - nextLeftWidth,
       };
       previewWidthsRef.current = widths;
       setPreviewWidths(widths);
     };
 
     resizeState.current = {
-      leftColumnId,
-      rightColumnId,
+      leftContainerId,
+      rightContainerId,
       startX: event.clientX,
       startWidths,
       handle: event.currentTarget,
@@ -98,20 +98,20 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     event.currentTarget.addEventListener("pointercancel", finishResize, { once: true });
   };
 
-  const resizeWithKeyboard = (leftColumnId, event) => {
+  const resizeWithKeyboard = (leftContainerId, event) => {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-    const leftIndex = columnOrder.indexOf(leftColumnId);
-    const rightColumnId = columnOrder[leftIndex + 1];
-    const leftWidth = getColumnWidth(leftColumnId);
-    const rightWidth = getColumnWidth(rightColumnId);
+    const leftIndex = containerOrder.indexOf(leftContainerId);
+    const rightContainerId = containerOrder[leftIndex + 1];
+    const leftWidth = getContainerWidth(leftContainerId);
+    const rightWidth = getContainerWidth(rightContainerId);
     const adjustment = event.key === "ArrowRight" ? 1 : -1;
     const nextLeftWidth = leftWidth + adjustment;
-    if (!rightColumnId || nextLeftWidth < 10 || rightWidth - adjustment < 10) return;
+    if (!rightContainerId || nextLeftWidth < 10 || rightWidth - adjustment < 10) return;
 
     event.preventDefault();
-    dispatch(resizeColumnPair({
-      leftColumnId,
-      rightColumnId,
+    dispatch(resizeContainerPair({
+      leftContainerId,
+      rightContainerId,
       leftWidth: nextLeftWidth,
       rightWidth: rightWidth - adjustment,
     }));
@@ -154,35 +154,35 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   useEffect(() => {
     const nextItems = {};
 
-    columns.allIds.forEach((columnId) => {
-      const column = columns.byId[columnId];
-      nextItems[columnId] = Array.isArray(column?.sectionIds)
-        ? [...column.sectionIds]
+    containers.allIds.forEach((containerId) => {
+      const container = containers.byId[containerId];
+      nextItems[containerId] = Array.isArray(container?.sectionIds)
+        ? [...container.sectionIds]
         : [];
     });
 
-    setColumnSectionIds(nextItems);
-    setColumnOrder([...columns.allIds]);
-  }, [columns]);
+    setContainerSectionIds(nextItems);
+    setContainerOrder([...containers.allIds]);
+  }, [containers]);
 
-  const resumeColumns = columnOrder.map((columnId, index) => {
-    const column = columns.byId[columnId];
+  const resumeContainers = containerOrder.map((containerId, index) => {
+    const container = containers.byId[containerId];
 
-    if (!column) {
-      console.error(`Column with ID ${columnId} not found.`);
+    if (!container) {
+      console.error(`Container with ID ${containerId} not found.`);
       return null;
     }
 
     return (
-      <Column
-        key={column.id}
-        column={column}
-        sectionIds={columnSectionIds[column.id] ?? []}
+      <Container
+        key={container.id}
+        container={container}
+        sectionIds={containerSectionIds[container.id] ?? []}
         sectionById={sectionsById}
-        previewWidth={previewWidths?.[column.id]}
+        previewWidth={previewWidths?.[container.id]}
         onStartResize={startResize}
-        columnPreviewWidths={previewWidths}
-        rightColumnId={columnOrder[index + 1]}
+        containerPreviewWidths={previewWidths}
+        rightContainerId={containerOrder[index + 1]}
         onResizeWithKeyboard={resizeWithKeyboard}
       />
     );
@@ -202,35 +202,35 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       >
         <DragDropProvider
           onDragStart={() => {
-            previousColumnSectionIds.current = columnSectionIds;
+            previousContainerSectionIds.current = containerSectionIds;
           }}
           onDragOver={(event) => {
             const { source } = event.operation;
 
-            if (source?.type === "column") return;
+            if (source?.type === "container") return;
 
-            setColumnSectionIds((currentItems) => move(currentItems, event));
+            setContainerSectionIds((currentItems) => move(currentItems, event));
           }}
           onDragEnd={(event) => {
             const { source } = event.operation;
 
             if (event.canceled) {
               if (source?.type === "section") {
-                setColumnSectionIds(previousColumnSectionIds.current);
+                setContainerSectionIds(previousContainerSectionIds.current);
               }
 
               return;
             }
 
-            if (source?.type === "column") {
-              setColumnOrder((currentColumnOrder) =>
-                move(currentColumnOrder, event),
+            if (source?.type === "container") {
+              setContainerOrder((currentContainerOrder) =>
+                move(currentContainerOrder, event),
               );
             }
-            dispatch(dndReorderSections({ dndKitDict: columnSectionIds }));
+            dispatch(dndReorderSections({ dndKitDict: containerSectionIds }));
           }}
         >
-          {resumeColumns}
+          {resumeContainers}
         </DragDropProvider>
         <EndPageMarker pageRef={editorRef} />
       </div>

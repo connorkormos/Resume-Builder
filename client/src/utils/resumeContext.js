@@ -9,8 +9,8 @@ export function resolveEditorContext(resume, editorId) {
   const section = sectionId == null
     ? null
     : resume.sections?.byId?.[sectionId] ?? null;
-  const column = section
-    ? resume.columns?.byId?.[section.columnId] ?? null
+  const container = section
+    ? resume.containers?.byId?.[section.containerId] ?? null
     : null;
 
   return {
@@ -19,10 +19,10 @@ export function resolveEditorContext(resume, editorId) {
     field,
     subsection,
     section,
-    column,
+    container,
     styling: {
       resumeStyling: resume.styling,
-      columnStyling: column?.styling,
+      containerStyling: container?.styling,
       sectionStyling: section?.styling,
       subsectionStyling: subsection?.styling,
       fieldStyling: field?.styling,

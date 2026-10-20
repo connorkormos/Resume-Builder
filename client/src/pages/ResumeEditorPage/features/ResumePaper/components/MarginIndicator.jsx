@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateResume, updateColumn, updateSection } from "@/store/resumeSlice";
+import { updateResume, updateContainer, updateSection } from "@/store/resumeSlice";
 import { PaddingPreviewContext } from "../PaddingPreviewContext";
 import { parseRemValue } from "@/utils/formatters";
 
@@ -42,7 +42,7 @@ export default function MarginIndicator({
         ? updateResume({
           layout: { padding: { ...resumePadding, ...padding } },
         })
-        : (target === "column" ? updateColumn : updateSection)({
+        : (target === "container" ? updateContainer : updateSection)({
           id,
           layout: { padding }
         }),

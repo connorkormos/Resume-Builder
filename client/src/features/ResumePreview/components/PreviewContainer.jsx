@@ -1,7 +1,7 @@
 import PreviewSection from "./PreviewSection";
 
-export default function PreviewColumn({ column, resume, isFirstColumn, isLastColumn }) {
-  const sections = column.sectionIds
+export default function PreviewContainer({ container, resume, isFirstContainer, isLastContainer }) {
+  const sections = container.sectionIds
     .map((id) => resume.sections.byId[id])
     .filter(Boolean);
 
@@ -13,19 +13,19 @@ export default function PreviewColumn({ column, resume, isFirstColumn, isLastCol
         display: "flex",
         flexDirection: "column",
         flex:
-          column.layout?.width?.auto || !column.layout?.width?.value
+          container.layout?.width?.auto || !container.layout?.width?.value
             ? "1 1 0%"
-            : `0 0 ${column.layout.width.value}`,
+            : `0 0 ${container.layout.width.value}`,
       }}
     >
       {sections.map((section, index) => (
         <PreviewSection
           key={section.id}
           section={section}
-          column={column}
+          container={container}
           resume={resume}
-          isFirstColumn={isFirstColumn}
-          isLastColumn={isLastColumn}
+          isFirstContainer={isFirstContainer}
+          isLastContainer={isLastContainer}
           isFirstSection={index === 0}
           isLastSection={index === sections.length - 1}
         />

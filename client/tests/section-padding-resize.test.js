@@ -27,7 +27,7 @@ const bundle = await build({
 const { default: useResize } = await import('data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].text).toString('base64'));
 const upper = { id: 'u', layout: { padding: { bottom: '1rem' } } };
 const lower = { id: 'l', layout: { padding: { top: '0.5rem' } } };
-const column = { sectionIds: ['u', 'l'] };
+const container = { sectionIds: ['u', 'l'] };
 const target = {
   closest: () => ({ offsetHeight: 100, getBoundingClientRect: () => ({ height: 50 }) }),
   setPointerCapture() {}, hasPointerCapture: () => true, releasePointerCapture() {},
@@ -37,7 +37,7 @@ function setup(t, selection = ['l']) {
   t.mock.method(globalThis, 'getComputedStyle', () => ({ fontSize: '16px' }));
   h.ref = { current: null }; h.actions = []; h.preview = null;
   h.state = { resume: { present: { layout: { gap: { vertical: '0.25rem' } }, activeSectionIds: selection, sections: { byId: { u: upper, l: lower } } } } };
-  return useResize(upper, column).handleProps;
+  return useResize(upper, container).handleProps;
 }
 // The hook only needs these two browser globals for zoom/rem conversion.
 globalThis.document = { documentElement: {} };
@@ -58,13 +58,13 @@ test('selection is fixed at drag start; cancel discards previews; keyboard uses 
   let p = setup(t);
   p.onPointerDown(event(0));
   h.state.resume.present.activeSectionIds = ['u'];
-  p = useResize(upper, column).handleProps;
+  p = useResize(upper, container).handleProps;
   p.onPointerUp(event(2));
   assert.equal(h.actions.pop().payload.id, 'l');
   p.onPointerDown(event(0)); p.onPointerMove(event(8)); p.onPointerCancel(event(8));
   assert.equal(h.preview, null); assert.equal(h.actions.length, 0);
   h.state.resume.present.activeSectionIds = ['l'];
-  p = useResize(upper, column).handleProps;
+  p = useResize(upper, container).handleProps;
   p.onKeyDown({ ...event(0), key: 'ArrowDown' });
   assert.equal(h.actions.pop().payload.layout.padding.top, '0.4rem');
 });

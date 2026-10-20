@@ -4,11 +4,11 @@ import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
 import { PaddingPreviewContext } from "./PaddingPreviewContext";
 
-export default function useSectionPaddingResize(section, column) {
+export default function useSectionPaddingResize(section, container) {
   const dispatch = useDispatch();
   const verticalGap = useSelector((state) => state.resume.present.layout.gap?.vertical);
   const activeIds = useSelector((state) => state.resume.present.activeSectionIds);
-  const nextId = column.sectionIds[column.sectionIds.indexOf(section.id) + 1];
+  const nextId = container.sectionIds[container.sectionIds.indexOf(section.id) + 1];
   const nextSection = useSelector((state) => state.resume.present.sections.byId[nextId]);
   const lowerIsSelected = !!nextSection && activeIds.length === 1 && activeIds[0] === nextId;
   const minimumPadding = -parseRemValue(verticalGap);

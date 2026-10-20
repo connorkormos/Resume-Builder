@@ -5,10 +5,10 @@ import PreviewSubsection from "./PreviewSubsection";
 
 export default function PreviewSection({
   section,
-  column,
+  container,
   resume,
-  isFirstColumn,
-  isLastColumn,
+  isFirstContainer,
+  isLastContainer,
   isFirstSection,
   isLastSection,
 }) {
@@ -23,7 +23,7 @@ export default function PreviewSection({
   delete sectionStyle.lineHeightOffset;
   const styling = {
     resumeStyling: resume.styling,
-    columnStyling: column.styling,
+    containerStyling: container.styling,
     sectionStyling: section.styling,
   };
   const subsections = section.subsectionIds
@@ -36,17 +36,17 @@ export default function PreviewSection({
         position: "relative",
         height: "min-content",
         paddingLeft:
-          isFirstColumn
+          isFirstContainer
             ? padding.left
             : withGap(
-                column.layout?.padding?.left,
+                container.layout?.padding?.left,
                 layout.gap?.horizontal,
               ),
         paddingRight:
-          isLastColumn
+          isLastContainer
             ? padding.right
             : withGap(
-                column.layout?.padding?.right,
+                container.layout?.padding?.right,
                 layout.gap?.horizontal,
               ),
         paddingTop:

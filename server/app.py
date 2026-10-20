@@ -10,7 +10,7 @@ from routes.Resume_Routes.resume_routes import resume_bp
 from routes.Resume_Routes.section_routes import section_bp
 from routes.Resume_Routes.subsection_routes import subsection_bp
 from routes.Resume_Routes.field_routes import field_bp
-from routes.Resume_Routes.column_routes import column_bp
+from routes.Resume_Routes.container_routes import container_bp
 from routes.Profile_Routes.profile_routes import profile_bp
 
 app.register_blueprint(user_bp)
@@ -19,7 +19,7 @@ app.register_blueprint(resume_bp)
 app.register_blueprint(section_bp)
 app.register_blueprint(subsection_bp)
 app.register_blueprint(field_bp)
-app.register_blueprint(column_bp)
+app.register_blueprint(container_bp)
 app.register_blueprint(profile_bp)
 
 @app.route("/")

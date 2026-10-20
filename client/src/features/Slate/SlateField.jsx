@@ -40,23 +40,23 @@ const SlateField = ({ field }) => {
   const section = useSelector(
     (state) => state.resume.present.sections.byId[subsection?.sectionId],
   );
-  const column = useSelector(
-    (state) => state.resume.present.columns.byId[section?.columnId],
+  const container = useSelector(
+    (state) => state.resume.present.containers.byId[section?.containerId],
   );
   const fieldStyling = field?.styling;
-  const columnStyling = column?.styling;
+  const containerStyling = container?.styling;
   const sectionStyling = section?.styling;
   const subsectionStyling = subsection?.styling;
   const inheritedFontSize = getCascadedFontSize({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
     subsectionStyling,
     fieldStyling,
   });
   const inheritedLineHeight = getCascadedLineHeight({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
     subsectionStyling,
     fieldStyling,
@@ -74,7 +74,7 @@ const SlateField = ({ field }) => {
         <Leaf
           {...props}
           resumeStyling={resumeStyling}
-          columnStyling={columnStyling}
+          containerStyling={containerStyling}
           sectionStyling={sectionStyling}
           subsectionStyling={subsectionStyling}
           fieldStyling={fieldStyling}
@@ -83,7 +83,7 @@ const SlateField = ({ field }) => {
     },
     [
       resumeStyling,
-      columnStyling,
+      containerStyling,
       sectionStyling,
       subsectionStyling,
       fieldStyling,

@@ -4,7 +4,7 @@ from models import db, Resume, Container, Section, Subsection, Field
 
 from services.builders import (
     build_resume_with_defaults,
-    add_column,
+    add_container,
     add_section,
     add_subsection,
     add_field,
@@ -52,7 +52,7 @@ def add_section_to_resume(resume_id):
 
         existing_section = (
             db.session.query(Section)
-            .join(Container, Section.column_id == Container.id)
+            .join(Container, Section.container_id == Container.id)
             .filter(
                 Container.resume_id == resume_id,
                 Section.type == section_type,
@@ -70,23 +70,23 @@ def add_section_to_resume(resume_id):
             )
 
         else:
-            first_column = (
+            first_container = (
                 Container.query.filter_by(resume_id=resume_id)
                 .order_by(Container.position)
                 .first()
             )
 
-            if not first_column:
+            if not first_container:
                 return generate_error(
                     error_type="SERVER_ERROR",
-                    code="NO_COLUMNS_FOUND",
-                    message="Cannot add a section because this resume has no columns.",
+                    code="NO_CONTAINERS_FOUND",
+                    message="Cannot add a section because this resume has no containers.",
                 )
 
-            new_section_position = len(first_column.sections)
+            new_section_position = len(first_container.sections)
 
             section = add_section(
-                column_id=first_column.id,
+                container_id=first_container.id,
                 section_type=section_type,
                 position=new_section_position,
             )
@@ -121,18 +121,18 @@ def delete_section_from_resume(section_id):
                 message=f"Seciton of ID {section_id} not found.",
             )
 
-        resume = section_to_delete.column.resume
+        resume = section_to_delete.container.resume
         error = check_resume_access(session.get("user_id"), resume.id, request.method)
         if error is not None:
             return error
 
-        column_id = section_to_delete.column_id
+        container_id = section_to_delete.container_id
         deleted_position = section_to_delete.position
 
         db.session.delete(section_to_delete)
 
         Section.query.filter(
-            Section.column_id == column_id, Section.position > deleted_position
+            Section.container_id == container_id, Section.position > deleted_position
         ).update(
             {Section.position: Section.position - 1},
             synchronize_session=False,

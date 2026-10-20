@@ -1,17 +1,17 @@
-import PreviewColumn from "./PreviewColumn";
+import PreviewContainer from "./PreviewContainer";
 
 export default function PreviewPaper({ resume }) {
-  const columns = resume.columns.allIds
-    .map((id) => resume.columns.byId[id])
+  const containers = resume.containers.allIds
+    .map((id) => resume.containers.byId[id])
     .filter(Boolean);
 
-  return columns.map((column, index) => (
-    <PreviewColumn
-      key={column.id}
-      column={column}
+  return containers.map((container, index) => (
+    <PreviewContainer
+      key={container.id}
+      container={container}
       resume={resume}
-      isFirstColumn={index === 0}
-      isLastColumn={index === columns.length - 1}
+      isFirstContainer={index === 0}
+      isLastContainer={index === containers.length - 1}
     />
   ));
 }

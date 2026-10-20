@@ -29,7 +29,7 @@ RESUME_DEFAULTS = {
     },
 }
 
-COLUMN_DEFAULTS = {
+CONTAINER_DEFAULTS = {
     "styling": {},
     "layout": {
         "padding": {

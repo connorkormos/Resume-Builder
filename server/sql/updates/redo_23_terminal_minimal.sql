@@ -242,7 +242,7 @@ field_plan AS (
 ),
 owned_sections AS MATERIALIZED (
     SELECT s.* FROM sections s
-    JOIN columns c ON c.id = s.column_id JOIN target t ON t.id = c.resume_id
+    JOIN containers c ON c.id = s.container_id JOIN target t ON t.id = c.resume_id
 ),
 owned_fields AS MATERIALIZED (
     SELECT f.*, s.type AS section_type

@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 // Measure indicator offsets in pixels relative to the page.
-export default function useMarginGeometry(pageRef, columnId, sectionId) {
-   // Recalculate when Redux column data changes.
-   const columns = useSelector(state => state.resume.present.columns);
+export default function useMarginGeometry(pageRef, containerId, sectionId) {
+   // Recalculate when Redux container data changes.
+   const containers = useSelector(state => state.resume.present.containers);
    const [geometry, setGeometry] = useState(null);
    // Observe layout after React updates the DOM.
    useLayoutEffect(() => {
@@ -11,26 +11,26 @@ export default function useMarginGeometry(pageRef, columnId, sectionId) {
       if (!page) return;
       let frame;
       const measure = () => {
-         // Find the selected column and outer section element.
-         const column = Array.from(page.children).find(
-            element => element.id === String(columnId),
+         // Find the selected container and outer section element.
+         const container = Array.from(page.children).find(
+            element => element.id === String(containerId),
          );
-         const section = column && Array.from(column.children).find(
+         const section = container && Array.from(container.children).find(
             element => element.dataset.sectionId === String(sectionId),
          );
          let next = null;
-         if (column && section) {
+         if (container && section) {
             // Convert viewport coordinates to page offsets.
             const pageRect = page.getBoundingClientRect();
-            const columnRect = column.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
             const sectionRect = section.getBoundingClientRect();
             const scaleX = pageRect.width / page.offsetWidth || 1;
             const scaleY = pageRect.height / page.offsetHeight || 1;
             next = {
-               columnId,
+               containerId,
                sectionId,
-               left: (columnRect.left - pageRect.left) / scaleX,
-               right: (columnRect.right - pageRect.left) / scaleX,
+               left: (containerRect.left - pageRect.left) / scaleX,
+               right: (containerRect.right - pageRect.left) / scaleX,
                top: (sectionRect.top - pageRect.top) / scaleY,
                bottom: (sectionRect.bottom - pageRect.top) / scaleY,
             };
@@ -45,14 +45,14 @@ export default function useMarginGeometry(pageRef, columnId, sectionId) {
          cancelAnimationFrame(frame);
          frame = requestAnimationFrame(measure);
       };
-      // Track size changes across the page, columns, and sections.
+      // Track size changes across the page, containers, and sections.
       const resizeObserver = new ResizeObserver(scheduleMeasure);
       const observeLayout = () => {
          resizeObserver.disconnect();
          resizeObserver.observe(page);
-         for (const column of page.children) {
-            resizeObserver.observe(column);
-            for (const section of column.children) resizeObserver.observe(section);
+         for (const container of page.children) {
+            resizeObserver.observe(container);
+            for (const section of container.children) resizeObserver.observe(section);
          }
       };
       // Refresh observers when DOM content or styles change.
@@ -76,9 +76,9 @@ export default function useMarginGeometry(pageRef, columnId, sectionId) {
          resizeObserver.disconnect();
          mutationObserver.disconnect();
       };
-   }, [pageRef, columns, columnId, sectionId]);
+   }, [pageRef, containers, containerId, sectionId]);
    // Hide old measurements while a new selection is being measured.
-   return geometry?.columnId === columnId && geometry?.sectionId === sectionId
+   return geometry?.containerId === containerId && geometry?.sectionId === sectionId
       ? geometry
       : null;
 }

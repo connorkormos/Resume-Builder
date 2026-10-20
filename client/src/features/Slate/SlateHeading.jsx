@@ -16,19 +16,19 @@ const SlateHeading = ({ section }) => {
   const resumeStyling = reduxResume?.styling;
   const resumeLayout = reduxResume?.layout;
 
-  const column = useSelector(
-    (state) => state.resume.present.columns.byId[section.columnId],
+  const container = useSelector(
+    (state) => state.resume.present.containers.byId[section.containerId],
   );
   const sectionStyling = section?.styling;
-  const columnStyling = column?.styling;
+  const containerStyling = container?.styling;
   const inheritedFontSize = getCascadedFontSize({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
   });
   const inheritedLineHeight = getCascadedLineHeight({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
   });
 
@@ -47,12 +47,12 @@ const SlateHeading = ({ section }) => {
         <Leaf
           {...props}
           resumeStyling={resumeStyling}
-          columnStyling={columnStyling}
+          containerStyling={containerStyling}
           sectionStyling={sectionStyling}
         />
       );
     },
-    [resumeStyling, columnStyling, sectionStyling],
+    [resumeStyling, containerStyling, sectionStyling],
   );
 
   const renderElement = useCallback((props) => {

@@ -13,19 +13,19 @@ const EndPageMarker = ({ pageRef }) => {
     let animationFrameId = null;
     const observedElements = new Set();
 
-    const getColumns = () => {
-      return Array.from(page.querySelectorAll(`.${styles.columnWrapperDiv}`));
+    const getContainers = () => {
+      return Array.from(page.querySelectorAll(`.${styles.containerWrapperDiv}`));
     };
 
-    const getColumnContentHeight = (column) => {
-      return Array.from(column.children).reduce((totalHeight, childElement) => {
+    const getContainerContentHeight = (container) => {
+      return Array.from(container.children).reduce((totalHeight, childElement) => {
         return totalHeight + childElement.getBoundingClientRect().height;
       }, 0);
     };
 
     const checkPageLength = () => {
-      const pageIsTooLong = getColumns().some((column) => (
-        getColumnContentHeight(column) > column.getBoundingClientRect().height + 1
+      const pageIsTooLong = getContainers().some((container) => (
+        getContainerContentHeight(container) > container.getBoundingClientRect().height + 1
       ));
 
       setShowEndPageMarker((previousValue) => (
@@ -53,15 +53,15 @@ const EndPageMarker = ({ pageRef }) => {
       observedElements.add(element);
     };
 
-    const observeColumnSizes = () => {
-      getColumns().forEach((column) => {
-        observeElementSize(column);
-        Array.from(column.children).forEach(observeElementSize);
+    const observeContainerSizes = () => {
+      getContainers().forEach((container) => {
+        observeElementSize(container);
+        Array.from(container.children).forEach(observeElementSize);
       });
     };
 
     const mutationObserver = new MutationObserver(() => {
-      observeColumnSizes();
+      observeContainerSizes();
       scheduleMeasure();
     });
 
@@ -72,7 +72,7 @@ const EndPageMarker = ({ pageRef }) => {
       subtree: true,
     });
 
-    observeColumnSizes();
+    observeContainerSizes();
     window.addEventListener("resize", scheduleMeasure);
     scheduleMeasure();
 

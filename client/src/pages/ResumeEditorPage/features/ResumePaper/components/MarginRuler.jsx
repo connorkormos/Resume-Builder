@@ -14,9 +14,9 @@ const MarginRuler = ({ pageRef }) => {
    const { preview } = useContext(PaddingPreviewContext);
    const activeSectionId = useSelector(state => state.resume.present.activeSectionIds[0] ?? null);
    const sectionId = preview?.target === 'section' ? preview.id : activeSectionId;
-   const columnId = useSelector(state => state.resume.present.sections.byId[sectionId]?.columnId);
+   const containerId = useSelector(state => state.resume.present.sections.byId[sectionId]?.containerId);
    // Share one measurement and observer set between both rulers.
-   const geometry = useMarginGeometry(pageRef, columnId, sectionId);
+   const geometry = useMarginGeometry(pageRef, containerId, sectionId);
 
    const [visibleMarginLabels, setVisibleMarginLabels] = useState(() => new Set());
    const marginLabelDisplayTimers = useRef(new Map());

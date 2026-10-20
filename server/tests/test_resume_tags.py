@@ -41,7 +41,7 @@ class ResumeTagsTest(unittest.TestCase):
 
     def resume(self, title="Sample", tags=None, text="", owner=1, official=True):
         resume = Resume(title=title, user_id=owner, tags=tags or [], plain_text=text,
-                        is_official_template=official, columns=[Container(position=0)])
+                        is_official_template=official, containers=[Container(position=0)])
         db.session.add(resume)
         db.session.commit()
         return resume
@@ -86,7 +86,7 @@ class ResumeTagsTest(unittest.TestCase):
     def test_save_preserves_omitted_tags_normalizes_updates_and_rejects_bad_tags(self):
         resume = self.resume(tags=['elegant'])
         self.login()
-        payload = {'title': 'Edited', 'columns': {'byId': {str(resume.columns[0].id): {}}}}
+        payload = {'title': 'Edited', 'containers': {'byId': {str(resume.containers[0].id): {}}}}
         endpoint = f'/resumes/{resume.id}'
         self.assertEqual(self.client.put(endpoint, json=payload).json['tags'], ['elegant'])
         response = self.client.put(endpoint, json={**payload, 'tags': [' MODERN ', 'modern', 'human  resources', '']})
@@ -136,9 +136,9 @@ class MigrationTest(unittest.TestCase):
         output = io.StringIO()
         with Operations.context(MigrationContext.configure(dialect_name='postgresql', opts={'as_sql': True, 'output_buffer': output})):
             migration.upgrade()
-        self.assertIn("ADD COLUMN tags JSONB DEFAULT '[]' NOT NULL", output.getvalue())
+        self.assertIn("ADD CONTAINER tags JSONB DEFAULT '[]' NOT NULL", output.getvalue())
 
     def test_tag_validation(self):
-        self.assertEqual(normalize_resume_tags([' Modern ', 'modern', 'two column']), ['modern', 'two column'])
+        self.assertEqual(normalize_resume_tags([' Modern ', 'modern', 'two container']), ['modern', 'two container'])
         with self.assertRaises(InvalidResumeTags):
             normalize_resume_tags([{}])

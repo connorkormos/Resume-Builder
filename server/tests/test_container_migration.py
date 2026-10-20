@@ -112,18 +112,18 @@ class ContainerModelTest(unittest.TestCase):
     def test_existing_relationships_and_api_work_with_new_defaults(self):
         resume = Resume(user_id=1, title="Resume")
         container = Container(resume=resume)
-        section = Section(column=container, label="Experience")
+        section = Section(container=container, label="Experience")
         db.session.add_all([resume, container, section])
         db.session.flush()
         self.assertEqual(container.type, "column")
         self.assertFalse(container.span_full_page)
-        self.assertEqual(section.column_id, container.id)
-        serialized = resume.to_dict()["columns"][0]
+        self.assertEqual(section.container_id, container.id)
+        serialized = resume.to_dict()["containers"][0]
         self.assertEqual(serialized["type"], "column")
         self.assertFalse(serialized["spanFullPage"])
-        self.assertEqual(serialized["sections"][0]["columnId"], container.id)
+        self.assertEqual(serialized["sections"][0]["containerId"], container.id)
         self.assertIn("containers", sa.inspect(db.engine).get_table_names())
-        self.assertNotIn("columns", sa.inspect(db.engine).get_table_names())
+        self.assertNotIn("containers", sa.inspect(db.engine).get_table_names())
 
     def test_copy_preserves_container_type_and_span(self):
         resume = Resume(user_id=1, title="Resume")
@@ -131,6 +131,6 @@ class ContainerModelTest(unittest.TestCase):
         db.session.add_all([resume, container])
         db.session.flush()
         copied = build_resume_copy(resume.id, user_id=1)
-        self.assertNotEqual(copied.columns[0].id, container.id)
-        self.assertEqual(copied.columns[0].type, "row")
-        self.assertTrue(copied.columns[0].span_full_page)
+        self.assertNotEqual(copied.containers[0].id, container.id)
+        self.assertEqual(copied.containers[0].type, "row")
+        self.assertTrue(copied.containers[0].span_full_page)

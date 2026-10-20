@@ -14,7 +14,7 @@ import styles from './TextFormatting.module.css';
 const FontSize = ({
    editor,
    selection,
-   columns,
+   containers,
    context,
    activeSectionId,
    activeSectionIds,
@@ -42,13 +42,13 @@ const FontSize = ({
    const getSectionTotalFontSize = useCallback((sectionData) => {
       if (!sectionData) return getResumeFontSize();
 
-      const columnData = columns.byId[sectionData.columnId];
+      const containerData = containers.byId[sectionData.containerId];
       return getCascadedFontSize({
          resumeStyling: { fontSize: getResumeFontSize() },
-         columnStyling: columnData?.styling,
+         containerStyling: containerData?.styling,
          sectionStyling: sectionData.styling,
       });
-   }, [columns, getResumeFontSize]);
+   }, [containers, getResumeFontSize]);
 
    const [fontSizeInputValue, setFontSizeInputValue] = useState(getResumeFontSize());
 
@@ -104,10 +104,10 @@ const FontSize = ({
             const currentLeafOffset = getActiveMark(editor, 'fontSizeOffset') ?? 0;
             setFontSizeOffset(editor, currentLeafOffset + (newFontSize === 'increment' ? 1 : -1));
          } else {
-            const { columnStyling, sectionStyling, subsectionStyling, fieldStyling } = context.styling;
+            const { containerStyling, sectionStyling, subsectionStyling, fieldStyling } = context.styling;
             // Preserve the existing subtraction order and mark conversion.
             const leafOffset = targetFontSize - getResumeFontSize()
-               - (columnStyling?.fontSizeOffset ?? 0)
+               - (containerStyling?.fontSizeOffset ?? 0)
                - (sectionStyling?.fontSizeOffset ?? 0)
                - (subsectionStyling?.fontSizeOffset ?? 0)
                - (fieldStyling?.fontSizeOffset ?? 0);
@@ -123,9 +123,9 @@ const FontSize = ({
             const sectionData = reduxSections.byId[sectionId];
             if (!sectionData) return;
 
-            const columnData = columns.byId[sectionData.columnId];
+            const containerData = containers.byId[sectionData.containerId];
             const baseFontSize = getResumeFontSize();
-            const columnFontSizeOffset = columnData?.styling?.fontSizeOffset ?? 0;
+            const containerFontSizeOffset = containerData?.styling?.fontSizeOffset ?? 0;
             const currentSectionFontSizeOffset = sectionData?.styling?.fontSizeOffset ?? 0;
             let newSectionFontSizeOffset = currentSectionFontSizeOffset;
 
@@ -134,7 +134,7 @@ const FontSize = ({
             } else if (newFontSize === 'decrement') {
                newSectionFontSizeOffset -= 1;
             } else {
-               newSectionFontSizeOffset = targetFontSize - baseFontSize - columnFontSizeOffset;
+               newSectionFontSizeOffset = targetFontSize - baseFontSize - containerFontSizeOffset;
             }
 
             dispatch(updateSection({

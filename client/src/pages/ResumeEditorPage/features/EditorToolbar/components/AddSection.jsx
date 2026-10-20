@@ -86,7 +86,7 @@ const AddSection = () => {
           isOpen={addSectionDropdownIsOpen}
           setIsOpen={setAddSectionDropdownIsOpen}
           dropdownOptions={sectionOptionsArr}
-          wrapperClassName="flexColumn"
+          wrapperClassName="flexContainer"
         />
       )}
     </div>

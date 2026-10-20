@@ -27,9 +27,9 @@ export function pairProfileSubsections(profileSections, resume) {
 
     // Track the next unused subsection for each section type.
     const nextSubsectionByType = new Map();
-    // Visit resume sections in the order they appear across the columns.
-    const sectionIds = resume.columns.allIds.flatMap(
-        (columnId) => resume.columns.byId[columnId].sectionIds,
+    // Visit resume sections in the order they appear across the containers.
+    const sectionIds = resume.containers.allIds.flatMap(
+        (containerId) => resume.containers.byId[containerId].sectionIds,
     );
 
     for (const sectionId of sectionIds) {

@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 from models import db, Resume, Container, Section, Subsection, Field
 
-from services.builders import build_resume_with_defaults, add_column, add_section, add_subsection, add_field, add_default_fields
+from services.builders import build_resume_with_defaults, add_container, add_section, add_subsection, add_field, add_default_fields
 from services.resume_updater import update_resume_with_form_data
 
 from utils.responses import generate_error, generate_success, print_successful_request, print_pending_request
@@ -24,7 +24,7 @@ def add_subsection_to_resume(section_id):
             message=f'Could not find section of ID {section_id} to add a subsection to.'
          )
       
-      resume = section.column.resume
+      resume = section.container.resume
       error = check_resume_access(session.get("user_id"), resume.id, request.method)
       if error is not None:
           return error
@@ -78,7 +78,7 @@ def delete_subsection_from_resume(subsection_id):
             message=f'Subsection of ID {subsection_id} not found.'
          )
       
-      resume = subsection_to_delete.section.column.resume
+      resume = subsection_to_delete.section.container.resume
       error = check_resume_access(session.get("user_id"), resume.id, request.method)
       if error is not None:
           return error

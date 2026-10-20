@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import normalizeResumeFromApi from '../src/utils/normalizeResumeFromApi.js';
+import normalizeResumeFromApi from '../src/utils/normalizers/normalizeResumeFromApi.js';
 import reducer, { addSection } from '../src/store/resumeSlice.js';
 
 const sections = [
@@ -9,8 +9,8 @@ const sections = [
   { id: 4 },
 ];
 
-test('loading converts legacy layouts, preserves grid columns, and does not mutate input', () => {
-  const input = { columns: [{ id: 1, sections }] };
+test('loading converts legacy layouts, preserves grid containers, and does not mutate input', () => {
+  const input = { containers: [{ id: 1, sections }] };
   const before = structuredClone(input);
   const state = normalizeResumeFromApi(input);
   assert.deepEqual(state.sections.byId[2].layout, {
@@ -23,9 +23,9 @@ test('loading converts legacy layouts, preserves grid columns, and does not muta
 
 test('adding sections applies the same grid defaults', () => {
   let state = reducer(undefined, { type: 'init' });
-  state = { ...state, columns: { byId: { 1: { id: 1, sectionIds: [] } }, allIds: [1] } };
+  state = { ...state, containers: { byId: { 1: { id: 1, sectionIds: [] } }, allIds: [1] } };
   for (const section of sections) {
-    state = reducer(state, addSection({ sectionData: { ...section, columnId: 1 } }));
+    state = reducer(state, addSection({ sectionData: { ...section, containerId: 1 } }));
   }
   assert.equal(state.sections.byId[2].layout.grid.columns, 1);
   assert.equal(state.sections.byId[3].layout.grid.columns, 4);

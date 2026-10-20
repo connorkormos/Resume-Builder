@@ -258,8 +258,7 @@ class Resume(db.Model):
     created_at = created_at_column()
     updated_at = updated_at_column()
 
-    # Keep the current API/editor names during the database-first migration.
-    columns = db.relationship(
+    containers = db.relationship(
         "Container",
         backref="resume",
         cascade="all, delete-orphan",
@@ -283,7 +282,7 @@ class Resume(db.Model):
             "copyCount": self.copy_count,
             "createdAt": serialize_datetime(self.created_at),
             "updatedAt": serialize_datetime(self.updated_at),
-            "columns": [column.to_dict() for column in self.columns],
+            "containers": [container.to_dict() for container in self.containers],
         }
 
     def __repr__(self):
@@ -307,7 +306,7 @@ class Container(db.Model):
 
     sections = db.relationship(
         "Section",
-        backref="column",
+        backref="container",
         cascade="all, delete-orphan",
         lazy=True,
         order_by="Section.position",
@@ -335,7 +334,7 @@ class Section(db.Model):
     __tablename__ = "sections"
 
     id = id_column()
-    column_id = db.Column(db.Integer, db.ForeignKey("containers.id"), nullable=False)
+    container_id = db.Column(db.Integer, db.ForeignKey("containers.id"), nullable=False)
     label = db.Column(db.String, nullable=True)
     type = db.Column(db.String, nullable=False, default="defaultSection")
     value = db.Column(db.JSON, nullable=False, default=list)
@@ -357,7 +356,7 @@ class Section(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
-            "columnId": self.column_id,
+            "containerId": self.container_id,
             "label": self.label,
             "type": self.type,
             "value": self.value,

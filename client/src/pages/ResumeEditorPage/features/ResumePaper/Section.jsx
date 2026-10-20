@@ -41,11 +41,11 @@ const sectionPointerSensor = PointerSensor.configure({
 
 const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 
-const Section = ({ id, section, column, index, hasNextSection }) => {
+const Section = ({ id, section, container, index, hasNextSection }) => {
   const paddingPreview = useContext(PaddingPreviewContext)?.preview;
   const sectionLayout = useMemo(() => previewLayout(section.layout, paddingPreview, 'section', section.id), [section.layout, section.id, paddingPreview]);
-  const columnLayout = useMemo(() => previewLayout(column.layout, paddingPreview, 'column', column.id), [column.layout, column.id, paddingPreview]);
-  const { handleProps } = useSectionPaddingResize(section, column);
+  const containerLayout = useMemo(() => previewLayout(container.layout, paddingPreview, 'container', container.id), [container.layout, container.id, paddingPreview]);
+  const { handleProps } = useSectionPaddingResize(section, container);
   useEffect(() => {
     if (!section) {
       console.error("Section component rendered without a valid section prop.");
@@ -60,15 +60,15 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
     index,
     type: "section",
     accept: "section",
-    group: column.id,
-    data: { columnId: column.id },
+    group: container.id,
+    data: { containerId: container.id },
     sensors: sectionSensors,
   });
 
   const storedResumeLayout = useSelector((state) => state.resume.present.layout);
   const resumeLayout = useMemo(() => previewLayout(storedResumeLayout, paddingPreview, 'resume', null), [storedResumeLayout, paddingPreview]);
   const reduxSections = useSelector((state) => state.resume.present.sections);
-  const columns = useSelector((state) => state.resume.present.columns);
+  const containers = useSelector((state) => state.resume.present.containers);
   const activeSectionIds = useSelector(
     (state) => state.resume.present.activeSectionIds,
   );
@@ -76,19 +76,19 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
 
   // Derive layout during rendering so clearing a drag preview never exposes
   // padding cached from before the Redux update.
-  const isFirstColumn = columns.allIds[0] === column.id;
-  const isLastColumn = columns.allIds.at(-1) === column.id;
-  const isFirstRow = column.sectionIds[0] === section.id;
-  const isLastRow = column.sectionIds.at(-1) === section.id;
+  const isFirstContainer = containers.allIds[0] === container.id;
+  const isLastContainer = containers.allIds.at(-1) === container.id;
+  const isFirstRow = container.sectionIds[0] === section.id;
+  const isLastRow = container.sectionIds.at(-1) === section.id;
   const verticalGap = parseRemValue(resumeLayout?.gap?.vertical);
   const horizontalGap = parseRemValue(resumeLayout?.gap?.horizontal);
   const sectionPadding = {
-    paddingLeft: isFirstColumn
+    paddingLeft: isFirstContainer
       ? resumeLayout.padding.left
-      : `${Math.max(0, parseRemValue(columnLayout?.padding?.left) + horizontalGap)}rem`,
-    paddingRight: isLastColumn
+      : `${Math.max(0, parseRemValue(containerLayout?.padding?.left) + horizontalGap)}rem`,
+    paddingRight: isLastContainer
       ? resumeLayout.padding.right
-      : `${Math.max(0, parseRemValue(columnLayout?.padding?.right) + horizontalGap)}rem`,
+      : `${Math.max(0, parseRemValue(containerLayout?.padding?.right) + horizontalGap)}rem`,
     paddingTop: isFirstRow
       ? resumeLayout.padding.top
       : `${Math.max(0, parseRemValue(sectionLayout?.padding?.top) + verticalGap)}rem`,
@@ -140,10 +140,10 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
       className={`${styles.sectionContainerDiv} ${sectionIsActive && styles.activeSectionContainer}`}
       ref={ref}
       data-id={section.id}
-      data-column-id={section.columnId}
+      data-container-id={section.containerId}
       data-position={section.position}
       data-section-id={section.id}
-      data-section-column-id={section.columnId}
+      data-section-container-id={section.containerId}
       data-section-position={section.position}
       style={{
         ...section.styling,
@@ -204,7 +204,7 @@ const Section = ({ id, section, column, index, hasNextSection }) => {
           section={section}
           isSettingsModalOpen={isSettingsModalOpen}
           setIsSettingsModalOpen={setIsSettingsModalOpen}
-          column={column}
+          container={container}
         />
       )}
       {sectionBorder?.top && (

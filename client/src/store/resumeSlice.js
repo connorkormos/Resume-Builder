@@ -24,53 +24,53 @@ const insertSubsection = (state, subsectionData) => {
    }
 };
 
-const deleteColumnById = (state, columnId) => {
-   const allColumnIds = state.columns.allIds;
+const deleteContainerById = (state, containerId) => {
+   const allContainerIds = state.containers.allIds;
 
-   if (allColumnIds.length === 1) {
-      alert('Cannot delete the only remaining column.');
+   if (allContainerIds.length === 1) {
+      alert('Cannot delete the only remaining container.');
       return;
    }
 
-   const columnToDelete = state.columns.byId[columnId];
+   const containerToDelete = state.containers.byId[containerId];
 
-   if (!columnToDelete) {
-      console.error(`Cannot delete column. Column with ID ${columnId} not found.`);
+   if (!containerToDelete) {
+      console.error(`Cannot delete container. Container with ID ${containerId} not found.`);
       return;
    }
 
-   const lastAvailableColumnId = state.columns.allIds.findLast(
-      (id) => id !== columnId
+   const lastAvailableContainerId = state.containers.allIds.findLast(
+      (id) => id !== containerId
    );
 
-   const lastAvailableColumn = state.columns.byId[lastAvailableColumnId];
+   const lastAvailableContainer = state.containers.byId[lastAvailableContainerId];
 
-   if (!lastAvailableColumn) {
-      console.error('Cannot delete column. No destination column found.');
+   if (!lastAvailableContainer) {
+      console.error('Cannot delete container. No destination container found.');
       return;
    }
 
-   columnToDelete.sectionIds.forEach((sectionId) => {
+   containerToDelete.sectionIds.forEach((sectionId) => {
       const sectionToMove = state.sections.byId[sectionId];
 
       if (!sectionToMove) return;
 
-      lastAvailableColumn.sectionIds.push(sectionId);
-      sectionToMove.columnId = lastAvailableColumnId;
+      lastAvailableContainer.sectionIds.push(sectionId);
+      sectionToMove.containerId = lastAvailableContainerId;
    });
 
-   columnToDelete.sectionIds = [];
+   containerToDelete.sectionIds = [];
 
-   delete state.columns.byId[columnId];
+   delete state.containers.byId[containerId];
 
-   state.columns.allIds = state.columns.allIds.filter((id) => id !== columnId);
+   state.containers.allIds = state.containers.allIds.filter((id) => id !== containerId);
 };
 
 const deleteSectionById = (state, sectionId) => {
    const section = state.sections.byId[sectionId];
-   const column = state.columns.byId[section.columnId];
-   if (column) {
-      column.sectionIds = column.sectionIds.filter((id) => id !== sectionId);
+   const container = state.containers.byId[section.containerId];
+   if (container) {
+      container.sectionIds = container.sectionIds.filter((id) => id !== sectionId);
    }
 
    section.subsectionIds.forEach((subsectionId) => {
@@ -112,25 +112,25 @@ const deleteFieldById = (state, fieldId) => {
    state.fields.allIds = state.fields.allIds.filter(id => id !== field.id);
 };
 
-const updateAutoColumnWidths = (state) => {
-   let remainingColumnWidth = 100;
-   let autoColumnsArr = [];
-   for (let columnId of state.columns.allIds) {
-      const column = state.columns.byId[columnId]
-      if (column.layout.width.auto !== undefined) {
-         if (column.layout.width.auto === true) {
-            autoColumnsArr.push(columnId);
+const updateAutoContainerWidths = (state) => {
+   let remainingContainerWidth = 100;
+   let autoContainersArr = [];
+   for (let containerId of state.containers.allIds) {
+      const container = state.containers.byId[containerId]
+      if (container.layout.width.auto !== undefined) {
+         if (container.layout.width.auto === true) {
+            autoContainersArr.push(containerId);
          } else {
-            // } else if (column.autoWith === false) {
-            const columnWidth = parseFloat(column.layout.width.value.replace('%', ''));
-            remainingColumnWidth -= columnWidth;
+            // } else if (container.autoWith === false) {
+            const containerWidth = parseFloat(container.layout.width.value.replace('%', ''));
+            remainingContainerWidth -= containerWidth;
          }
       }
    }
-   const updatedAutoWidthValue = String(remainingColumnWidth / autoColumnsArr.length) + '%'
-   for (let columnId of autoColumnsArr) {
-      const column = state.columns.byId[columnId];
-      column.layout.width.value = updatedAutoWidthValue;
+   const updatedAutoWidthValue = String(remainingContainerWidth / autoContainersArr.length) + '%'
+   for (let containerId of autoContainersArr) {
+      const container = state.containers.byId[containerId];
+      container.layout.width.value = updatedAutoWidthValue;
    }
 };
 
@@ -144,7 +144,7 @@ export const initialState = {
    userId: null,
    tags: [],
 
-   columns: {
+   containers: {
       byId: {},
       allIds: [],
       totalWidth: 100
@@ -241,7 +241,7 @@ const resumeSlice = createSlice({
             subsectionIds: [],
          };
          state.sections.allIds.push(section.id);
-         state.columns.byId[section.columnId].sectionIds.push(section.id);
+         state.containers.byId[section.containerId].sectionIds.push(section.id);
 
          for (const subsection of sortedSubsections) {
             insertSubsection(state, subsection);
@@ -265,10 +265,10 @@ const resumeSlice = createSlice({
       // * DELETE FROM STATE V
       // * ----------------- V
 
-      deleteColumn(state, action) {
+      deleteContainer(state, action) {
          const id = action.payload;
-         deleteColumnById(state, id);
-         updateAutoColumnWidths(state);
+         deleteContainerById(state, id);
+         updateAutoContainerWidths(state);
       },
 
       deleteSection(state, action) {
@@ -294,46 +294,46 @@ const resumeSlice = createSlice({
          mergeDeep(state, action.payload);
       },
 
-      updateColumn(state, action) {
+      updateContainer(state, action) {
          const { id, ...changes } = action.payload;
-         const column = state.columns.byId[id];
+         const container = state.containers.byId[id];
 
-         if (!column) {
-            console.error(`Column with ID ${id} not found.`);
+         if (!container) {
+            console.error(`Container with ID ${id} not found.`);
             return;
          }
 
-         mergeDeep(column, changes);
+         mergeDeep(container, changes);
 
          if (changes.layout?.width) {
-            updateAutoColumnWidths(state);
+            updateAutoContainerWidths(state);
          }
       },
 
-      resizeColumnPair(state, action) {
-         const { leftColumnId, rightColumnId, leftWidth, rightWidth } = action.payload;
-         const leftColumn = state.columns.byId[leftColumnId];
-         const rightColumn = state.columns.byId[rightColumnId];
+      resizeContainerPair(state, action) {
+         const { leftContainerId, rightContainerId, leftWidth, rightWidth } = action.payload;
+         const leftContainer = state.containers.byId[leftContainerId];
+         const rightContainer = state.containers.byId[rightContainerId];
 
-         if (!leftColumn || !rightColumn) {
-            console.error('Cannot resize columns. One or both columns were not found.');
+         if (!leftContainer || !rightContainer) {
+            console.error('Cannot resize containers. One or both containers were not found.');
             return;
          }
 
-         leftColumn.layout.width = {
-            ...leftColumn.layout.width,
+         leftContainer.layout.width = {
+            ...leftContainer.layout.width,
             auto: false,
             value: `${leftWidth.toFixed(2)}%`,
          };
-         rightColumn.layout.width = {
-            ...rightColumn.layout.width,
+         rightContainer.layout.width = {
+            ...rightContainer.layout.width,
             auto: false,
             value: `${rightWidth.toFixed(2)}%`,
          };
       },
 
       updateSection(state, action) {
-         const { id, columnId, ...changes } = action.payload;
+         const { id, containerId, ...changes } = action.payload;
          const section = state.sections.byId[id];
 
          if (!section) {
@@ -341,21 +341,21 @@ const resumeSlice = createSlice({
             return;
          }
 
-         if (columnId && columnId !== section.columnId) {
-            const oldColumn = state.columns.byId[section.columnId];
-            const newColumn = state.columns.byId[columnId];
+         if (containerId && containerId !== section.containerId) {
+            const oldContainer = state.containers.byId[section.containerId];
+            const newContainer = state.containers.byId[containerId];
 
-            if (oldColumn) {
-               oldColumn.sectionIds = oldColumn.sectionIds.filter(
+            if (oldContainer) {
+               oldContainer.sectionIds = oldContainer.sectionIds.filter(
                   (sectionId) => sectionId !== id
                );
             }
 
-            if (newColumn && !newColumn.sectionIds.includes(id)) {
-               newColumn.sectionIds.push(id);
+            if (newContainer && !newContainer.sectionIds.includes(id)) {
+               newContainer.sectionIds.push(id);
             }
 
-            section.columnId = columnId;
+            section.containerId = containerId;
          }
 
          mergeDeep(section, changes);
@@ -502,16 +502,16 @@ const resumeSlice = createSlice({
       dndReorderSections(state, action) {
          const { dndKitDict } = action.payload;
 
-         const columnIds = Object.keys(dndKitDict);
-         columnIds.forEach(columnId => {
-            const column = state.columns.byId[columnId];
-            if (column) {
-               column.sectionIds = dndKitDict[columnId];
-               column.sectionIds.forEach((sectionId, index) => {
+         const containerIds = Object.keys(dndKitDict);
+         containerIds.forEach(containerId => {
+            const container = state.containers.byId[containerId];
+            if (container) {
+               container.sectionIds = dndKitDict[containerId];
+               container.sectionIds.forEach((sectionId, index) => {
                   const section = state.sections.byId[sectionId];
                   if (section) {
                      section.position = index;
-                     section.columnId = column.id;
+                     section.containerId = container.id;
                   }
                });
             }
@@ -647,26 +647,26 @@ const resumeSlice = createSlice({
             return;
          }
 
-         const fromColumnId = fromSection.columnId;
-         const toColumnId = toSection.columnId;
+         const fromContainerId = fromSection.containerId;
+         const toContainerId = toSection.containerId;
 
-         const fromColumn = state.columns.byId[fromColumnId];
-         const toColumn = state.columns.byId[toColumnId];
+         const fromContainer = state.containers.byId[fromContainerId];
+         const toContainer = state.containers.byId[toContainerId];
 
-         if (!fromColumn || !toColumn) {
-            console.error('Cannot reorder sections. One or both columns were not found.');
+         if (!fromContainer || !toContainer) {
+            console.error('Cannot reorder sections. One or both containers were not found.');
             return;
          }
 
-         if (!fromColumn.sectionIds.includes(fromId) || !toColumn.sectionIds.includes(toId)) {
-            console.error('Cannot reorder sections. One or both section IDs were not found in their columns.');
+         if (!fromContainer.sectionIds.includes(fromId) || !toContainer.sectionIds.includes(toId)) {
+            console.error('Cannot reorder sections. One or both section IDs were not found in their containers.');
             return;
          }
 
-         const fromColumnSectionIds = fromColumn.sectionIds.filter((id) => id !== fromId);
-         const toColumnSectionIds = fromColumn === toColumn
-            ? fromColumnSectionIds
-            : [...toColumn.sectionIds];
+         const fromContainerSectionIds = fromContainer.sectionIds.filter((id) => id !== fromId);
+         const toContainerSectionIds = fromContainer === toContainer
+            ? fromContainerSectionIds
+            : [...toContainer.sectionIds];
 
          const globalFromIndex = sectionIdsArr.indexOf(fromId);
          if (globalFromIndex === -1) {
@@ -683,33 +683,33 @@ const resumeSlice = createSlice({
          const globalInsertIndex = insertAfterTarget ? globalTargetIndex + 1 : globalTargetIndex;
          sectionIdsArr.splice(globalInsertIndex, 0, fromId);
 
-         const targetColumnIndex = toColumnSectionIds.indexOf(toId);
-         if (targetColumnIndex === -1) {
-            console.error(`Cannot reorder sections. toId ${toId} not found in destination column.`);
+         const targetContainerIndex = toContainerSectionIds.indexOf(toId);
+         if (targetContainerIndex === -1) {
+            console.error(`Cannot reorder sections. toId ${toId} not found in destination container.`);
             return;
          }
 
-         const columnInsertIndex = insertAfterTarget ? targetColumnIndex + 1 : targetColumnIndex;
-         toColumnSectionIds.splice(columnInsertIndex, 0, fromId);
+         const containerInsertIndex = insertAfterTarget ? targetContainerIndex + 1 : targetContainerIndex;
+         toContainerSectionIds.splice(containerInsertIndex, 0, fromId);
 
-         fromColumn.sectionIds = fromColumnSectionIds;
+         fromContainer.sectionIds = fromContainerSectionIds;
 
-         if (fromColumn !== toColumn) {
-            toColumn.sectionIds = toColumnSectionIds;
+         if (fromContainer !== toContainer) {
+            toContainer.sectionIds = toContainerSectionIds;
          } else {
-            fromColumn.sectionIds = toColumnSectionIds;
+            fromContainer.sectionIds = toContainerSectionIds;
          }
 
-         if (fromColumn !== toColumn) {
-            fromSection.columnId = toSection.columnId;
+         if (fromContainer !== toContainer) {
+            fromSection.containerId = toSection.containerId;
          }
 
-         const affectedColumns = fromColumn === toColumn
-            ? [fromColumn]
-            : [fromColumn, toColumn];
+         const affectedContainers = fromContainer === toContainer
+            ? [fromContainer]
+            : [fromContainer, toContainer];
 
-         for (const column of affectedColumns) {
-            column.sectionIds.forEach((id, index) => {
+         for (const container of affectedContainers) {
+            container.sectionIds.forEach((id, index) => {
                const candidateSection = state.sections.byId[id];
                if (!candidateSection) return;
 
@@ -748,9 +748,9 @@ export const {
    updateResume,
    setResumePrintRef,
 
-   deleteColumn,
-   updateColumn,
-   resizeColumnPair,
+   deleteContainer,
+   updateContainer,
+   resizeContainerPair,
 
    addSection,
    updateSection,

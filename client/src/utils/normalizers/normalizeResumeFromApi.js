@@ -12,7 +12,7 @@ const normalizeResumeFromApi = (apiResume) => {
     userId: apiResume.userId ?? null,
     tags: [...(apiResume.tags ?? [])],
 
-    columns: {
+    containers: {
       byId: {},
       allIds: [],
     },
@@ -43,25 +43,27 @@ const normalizeResumeFromApi = (apiResume) => {
     activeEditorSelection: null,
   };
 
-  const sortedColumns = [...(apiResume.columns ?? [])].sort(
+  const sortedContainers = [...(apiResume.containers ?? [])].sort(
     (a, b) => a.position - b.position
   );
 
-  sortedColumns.forEach((column) => {    
-    const sortedSections = [...(column.sections ?? [])].sort(
+  sortedContainers.forEach((container) => {    
+    const sortedSections = [...(container.sections ?? [])].sort(
       (a, b) => a.position - b.position
     );
 
-    normalizedResume.columns.byId[column.id] = {
-      id: column.id,
-      resumeId: column.resumeId,
-      styling: column.styling ?? {},
-      layout: column.layout ?? {},
-      position: column.position ?? 0,
+    normalizedResume.containers.byId[container.id] = {
+      id: container.id,
+      resumeId: container.resumeId,
+      type: container.type ?? 'column',
+      spanFullPage: container.spanFullPage ?? false,
+      styling: container.styling ?? {},
+      layout: container.layout ?? {},
+      position: container.position ?? 0,
       sectionIds: sortedSections.map((section) => section.id),
     };
 
-    normalizedResume.columns.allIds.push(column.id);
+    normalizedResume.containers.allIds.push(container.id);
 
     sortedSections.forEach((section) => {
       const sortedSubsections = [...(section.subsections ?? [])].sort(
@@ -70,7 +72,7 @@ const normalizeResumeFromApi = (apiResume) => {
 
       normalizedResume.sections.byId[section.id] = {
         id: section.id,
-        columnId: section.columnId,
+        containerId: section.containerId,
         label: section.label ?? '',
         type: section.type ?? 'defaultSection',
         position: section.position ?? 0,

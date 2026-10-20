@@ -17,7 +17,7 @@ export default function MarginRulerSide({
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
   const section = resume.sections.byId[preview?.target === 'section' ? preview.id : resume.activeSectionIds[0]];
-  const column = resume.columns.byId[section?.columnId];
+  const container = resume.containers.byId[section?.containerId];
   const padding = previewLayout(resume.layout, preview, "resume", null).padding;
   const sectionPadding = previewLayout(
     section?.layout,
@@ -70,7 +70,7 @@ export default function MarginRulerSide({
       className={styles.resumeMarginIndicatorBottom} style={{ marginBottom: padding.bottom }} />
       <span style={{position: 'absolute', bottom: padding.bottom, right: '150%', transform: `translateY(25%)` }}>{parseFloat(padding.bottom).toFixed(2) + 'rem'}</span> */}
 
-      {section && geometry && section.id !== column?.sectionIds[0] && (
+      {section && geometry && section.id !== container?.sectionIds[0] && (
         <>
           <MarginIndicator
             key={`${section.id}-top`}
@@ -99,7 +99,7 @@ export default function MarginRulerSide({
           </span>
         </>
       )}
-      {section && geometry && section.id !== column?.sectionIds.at(-1) && (
+      {section && geometry && section.id !== container?.sectionIds.at(-1) && (
         <>
           <MarginIndicator
             key={`${section.id}-bottom`}

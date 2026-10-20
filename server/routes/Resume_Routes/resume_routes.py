@@ -8,7 +8,7 @@ from services.builders import (
     ResumeNotFoundError,
     build_resume_with_defaults,
     build_resume_copy,
-    add_column,
+    add_container,
     add_section,
     add_subsection,
     add_field,

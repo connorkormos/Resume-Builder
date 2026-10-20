@@ -38,7 +38,7 @@ FROM fields AS f
 JOIN subsections AS ss ON ss.id = f.subsection_id
 JOIN sections AS s ON s.id = ss.section_id
 JOIN section_defaults AS d ON d.section_type = s.type
-JOIN columns AS c ON c.id = s.column_id
+JOIN containers AS c ON c.id = s.container_id
 JOIN resumes AS r ON r.id = c.resume_id
 WHERE f.label IS NULL OR NOT (f.label = ANY(d.allowed_labels))
 ORDER BY

@@ -11,14 +11,14 @@ const Leaf = ({
   children,
   leaf,
   resumeStyling,
-  columnStyling = {},
+  containerStyling = {},
   sectionStyling = {},
   subsectionStyling = {},
   fieldStyling = {},
 }) => {
   const fontSize = getCascadedFontSize({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
     subsectionStyling,
     fieldStyling,
@@ -26,7 +26,7 @@ const Leaf = ({
   });
   const lineHeight = getCascadedLineHeight({
     resumeStyling,
-    columnStyling,
+    containerStyling,
     sectionStyling,
     subsectionStyling,
     fieldStyling,

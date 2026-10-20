@@ -35,7 +35,7 @@ const LineHeight = ({
   const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const reduxSections = useSelector((state) => state.resume.present.sections);
-  const reduxColumns = useSelector((state) => state.resume.present.columns);
+  const reduxContainers = useSelector((state) => state.resume.present.containers);
 
   const getResumeLineHeight = useCallback(
     () => roundToTenth(getNumber(resumeStyling?.lineHeight, 1.2)),
@@ -51,11 +51,11 @@ const LineHeight = ({
     [reduxSections, effectiveSectionId],
   );
 
-  const getColumn = useCallback(() => {
+  const getContainer = useCallback(() => {
     const sectionData = getSection();
     if (!sectionData) return null;
-    return reduxColumns?.byId?.[sectionData.columnId];
-  }, [reduxColumns, getSection]);
+    return reduxContainers?.byId?.[sectionData.containerId];
+  }, [reduxContainers, getSection]);
 
   const [lineHeightInputValue, setLineHeightInputValue] = useState(
     getResumeLineHeight(),
@@ -72,10 +72,10 @@ const LineHeight = ({
 
     if (effectiveSectionId && !editor) {
       const sectionData = getSection();
-      const columnData = getColumn();
+      const containerData = getContainer();
       const totalLineHeight = getCascadedLineHeight({
         resumeStyling,
-        columnStyling: columnData?.styling,
+        containerStyling: containerData?.styling,
         sectionStyling: sectionData?.styling,
       });
       setLineHeightInputValue(totalLineHeight);
@@ -88,11 +88,11 @@ const LineHeight = ({
     selection,
     effectiveSectionId,
     getSection,
-    getColumn,
+    getContainer,
     getResumeLineHeight,
     resumeStyling,
     reduxSections,
-    reduxColumns,
+    reduxContainers,
     context,
     activeEditorId,
     hasEditorAncestry,
@@ -141,7 +141,7 @@ const LineHeight = ({
         const sectionData = reduxSections.byId[sectionId];
         if (!sectionData) return;
 
-        const columnData = reduxColumns.byId[sectionData.columnId];
+        const containerData = reduxContainers.byId[sectionData.containerId];
         const currentSectionLineHeightOffset = getNumber(
           sectionData?.styling?.lineHeightOffset,
           0,
@@ -159,7 +159,7 @@ const LineHeight = ({
         } else {
           const inheritedLineHeight = getCascadedLineHeight({
             resumeStyling,
-            columnStyling: columnData?.styling,
+            containerStyling: containerData?.styling,
           });
           newSectionLineHeightOffset = roundToTenth(
             targetLineHeight - inheritedLineHeight,

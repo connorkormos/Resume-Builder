@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import ColumnSettings from "./ColumnSettings/ColumnSettings";
+import ContainerSettings from "./ContainerSettings/ContainerSettings";
 import SectionSettings from "./SectionSettings/SectionSettings";
 
 import styles from "./SettingsModal.module.css";
@@ -64,7 +64,7 @@ const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
         ref={modalRef}
         style={modalStylingDict}
       >
-        <ColumnSettings />
+        <ContainerSettings />
         <SectionSettings setIsSettingsModalOpen={setIsSettingsModalOpen} />
       </div>
     </>

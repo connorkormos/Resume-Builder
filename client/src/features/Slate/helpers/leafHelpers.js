@@ -18,7 +18,7 @@ export const roundToTenth = (value) => Number(getNumber(value, 0).toFixed(1));
 
 export const getCascadedColor = ({
   resumeStyling,
-  columnStyling,
+  containerStyling,
   sectionStyling,
   subsectionStyling,
   fieldStyling,
@@ -28,38 +28,38 @@ export const getCascadedColor = ({
   fieldStyling?.color ||
   subsectionStyling?.color ||
   sectionStyling?.color ||
-  columnStyling?.color ||
+  containerStyling?.color ||
   resumeStyling?.color
 );
 
 export const getCascadedFontSize = ({
   resumeStyling,
-  columnStyling = {},
+  containerStyling = {},
   sectionStyling = {},
   subsectionStyling = {},
   fieldStyling = {},
   leafStyling = {},
 }) => {
   const resumeFontSize = getPxNumber(resumeStyling?.fontSize);
-  const columnFontSizeOffset = columnStyling?.fontSizeOffset ?? 0;
+  const containerFontSizeOffset = containerStyling?.fontSizeOffset ?? 0;
   const sectionFontSizeOffset = sectionStyling?.fontSizeOffset ?? 0;
   const subsectionFontSizeOffset = subsectionStyling?.fontSizeOffset ?? 0;
   const fieldFontSizeOffset = fieldStyling?.fontSizeOffset ?? 0;
   const leafFontSizeOffset = leafStyling?.fontSizeOffset ?? 0;
 
-  return resumeFontSize + columnFontSizeOffset + sectionFontSizeOffset + subsectionFontSizeOffset + fieldFontSizeOffset + leafFontSizeOffset;
+  return resumeFontSize + containerFontSizeOffset + sectionFontSizeOffset + subsectionFontSizeOffset + fieldFontSizeOffset + leafFontSizeOffset;
 };
 
 export const getCascadedLineHeight = ({
   resumeStyling,
-  columnStyling = {},
+  containerStyling = {},
   sectionStyling = {},
   subsectionStyling = {},
   fieldStyling = {},
   leafStyling = {},
 }) => {
   const resumeLineHeight = getNumber(resumeStyling?.lineHeight, 1.2);
-  const columnLineHeightOffset = getNumber(columnStyling?.lineHeightOffset, 0);
+  const containerLineHeightOffset = getNumber(containerStyling?.lineHeightOffset, 0);
   const sectionLineHeightOffset = getNumber(sectionStyling?.lineHeightOffset, 0);
   const subsectionLineHeightOffset = getNumber(subsectionStyling?.lineHeightOffset, 0);
   const fieldLineHeightOffset = getNumber(fieldStyling?.lineHeightOffset, 0);
@@ -67,7 +67,7 @@ export const getCascadedLineHeight = ({
 
   return roundToTenth(
     resumeLineHeight +
-    columnLineHeightOffset +
+    containerLineHeightOffset +
     sectionLineHeightOffset +
     subsectionLineHeightOffset +
     fieldLineHeightOffset +

@@ -9,8 +9,8 @@ const field = (id, subsectionId, position = 0) => ({
 const initialResume = () => ({
   ...reducer(undefined, { type: 'init' }),
   title: 'Unsaved title',
-  columns: { byId: { 1: { id: 1, sectionIds: [2] } }, allIds: [1] },
-  sections: { byId: { 2: { id: 2, columnId: 1, subsectionIds: [3], value: value('Unsaved heading'), styling: { color: 'red' } } }, allIds: [2] },
+  containers: { byId: { 1: { id: 1, sectionIds: [2] } }, allIds: [1] },
+  sections: { byId: { 2: { id: 2, containerId: 1, subsectionIds: [3], value: value('Unsaved heading'), styling: { color: 'red' } } }, allIds: [2] },
   subsections: { byId: { 3: { id: 3, sectionId: 2, fieldIds: [4] } }, allIds: [3] },
   fields: { byId: { 4: { ...field(4, 3), value: value('Unsaved text') } }, allIds: [4] },
 });
@@ -18,13 +18,13 @@ const initialResume = () => ({
 test('new sections register ordered descendants and preserve existing edits across additions', () => {
   const before = initialResume();
   let state = reducer(before, addSection({ sectionData: {
-    id: 5, columnId: 1, value: value('Projects'), styling: {}, layout: {},
+    id: 5, containerId: 1, value: value('Projects'), styling: {}, layout: {},
     subsections: [
       { id: 8, sectionId: 5, position: 1, fields: [] },
       { id: 6, sectionId: 5, position: 0, fields: [field(9, 6, 1), field(7, 6, 0)] },
     ],
   } }));
-  assert.deepEqual(state.columns.byId[1].sectionIds, [2, 5]);
+  assert.deepEqual(state.containers.byId[1].sectionIds, [2, 5]);
   assert.deepEqual(state.sections.byId[5].subsectionIds, [6, 8]);
   assert.deepEqual(state.subsections.byId[6].fieldIds, [7, 9]);
   assert.deepEqual(state.subsections.byId[8].fieldIds, []);
@@ -32,7 +32,7 @@ test('new sections register ordered descendants and preserve existing edits acro
   assert.equal(state.sections.byId[5].subsections, undefined);
   assert.equal(state.subsections.byId[6].fields, undefined);
   state = reducer(state, updateField({ id: 7, value: value('New project text') }));
-  state = reducer(state, addSection({ sectionData: { id: 10, columnId: 1, subsections: [] } }));
+  state = reducer(state, addSection({ sectionData: { id: 10, containerId: 1, subsections: [] } }));
   const saved = JSON.parse(JSON.stringify(state));
   assert.deepEqual(saved.fields.byId[7].value, value('New project text'));
   assert.deepEqual(saved.sections.byId[2], before.sections.byId[2]);

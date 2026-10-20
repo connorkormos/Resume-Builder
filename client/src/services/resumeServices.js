@@ -137,31 +137,31 @@ export const deleteSectionFromApi = async (sectionId) => {
    }
 }
 
-export const addColumnToApi = async (resumeId) => {
+export const addContainerToApi = async (resumeId) => {
    try {
       const data = await fetchApi({
-         endpoint: `/columns/${resumeId}`,
+         endpoint: `/containers/${resumeId}`,
          options: { method: 'POST' }
       })
       const normalizedResume = normalizeResumeFromApi(data);
       return normalizedResume;
 
    } catch (error) {
-      console.error(`Error adding column to resume of ID ${resumeId}: `, error)
+      console.error(`Error adding container to resume of ID ${resumeId}: `, error)
       alert(
          error?.code && error?.message
             ? error.code + '\n' + error.message
-            : `Error adding column to resume of ID ${resumeId}.`
+            : `Error adding container to resume of ID ${resumeId}.`
       )
 
       return null;
    }
 }
 
-export const deleteLastColumnFromApi = async (resumeId) => {
+export const deleteLastContainerFromApi = async (resumeId) => {
    try {
       const data = await fetchApi({
-         endpoint: `/columns/${resumeId}`,
+         endpoint: `/containers/${resumeId}`,
          options: { method: 'DELETE' }
       })
 
@@ -169,11 +169,11 @@ export const deleteLastColumnFromApi = async (resumeId) => {
       return normalizedResume;
 
    } catch (error) {
-      console.error(`Error deleting last column from resume of ID ${resumeId}: `, error)
+      console.error(`Error deleting last container from resume of ID ${resumeId}: `, error)
       alert(
          error?.code && error?.message
             ? error.code + '\n' + error.message
-            : `Error deleting last column from resume of ID ${resumeId}.`
+            : `Error deleting last container from resume of ID ${resumeId}.`
       )
 
       return false;

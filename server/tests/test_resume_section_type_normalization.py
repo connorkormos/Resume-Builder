@@ -21,7 +21,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.context.push()
         db.create_all()
         user = User(first_name="Owner", email="owner@example.test", password_hash="unused")
-        self.resume = Resume(user=user, title="Test", columns=[Container(position=0)])
+        self.resume = Resume(user=user, title="Test", containers=[Container(position=0)])
         db.session.add(self.resume)
         db.session.commit()
 
@@ -30,9 +30,9 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         db.drop_all()
         self.context.pop()
 
-    def section(self, section_type, label, position=0, column=None):
+    def section(self, section_type, label, position=0, container=None):
         section = Section(
-            column=column or self.resume.columns[0], type=section_type, label=label,
+            container=container or self.resume.containers[0], type=section_type, label=label,
             position=position, styling={"color": "purple"}, layout={"display": "grid"},
             value=[{"type": "heading", "children": [{"text": "Keep heading"}]}],
         )
@@ -50,10 +50,10 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         return section
 
     def payload(self):
-        data = {key: {"byId": {}} for key in ("columns", "sections", "subsections", "fields")}
-        for column in self.resume.columns:
-            data["columns"]["byId"][str(column.id)] = column.to_dict()
-            for section in column.sections:
+        data = {key: {"byId": {}} for key in ("containers", "sections", "subsections", "fields")}
+        for container in self.resume.containers:
+            data["containers"]["byId"][str(container.id)] = container.to_dict()
+            for section in container.sections:
                 data["sections"]["byId"][str(section.id)] = section.to_dict()
                 for subsection in section.subsections:
                     data["subsections"]["byId"][str(subsection.id)] = subsection.to_dict()
@@ -88,12 +88,12 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.assertEqual(Section.query.count(), 3)
         self.assertEqual(Field.query.count(), 6)
 
-    def test_existing_type_in_another_column_blocks_conversion_ignoring_case(self):
+    def test_existing_type_in_another_container_blocks_conversion_ignoring_case(self):
         generic = self.section("custom", "Skills")
-        column = Container(resume=self.resume, position=1)
-        db.session.add(column)
+        container = Container(resume=self.resume, position=1)
+        db.session.add(container)
         db.session.commit()
-        self.section("SKILLS", "Existing", column=column)
+        self.section("SKILLS", "Existing", container=container)
         self.save()
         self.assertEqual(generic.type, "custom")
         self.assertTrue(all(sub.type == "custom" for sub in generic.subsections))
@@ -157,10 +157,10 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
 
     def test_type_used_in_another_resume_does_not_block_conversion(self):
         generic = self.section("defaultSection", "Skills")
-        other_resume = Resume(user_id=self.resume.user_id, title="Other", columns=[Container(position=0)])
+        other_resume = Resume(user_id=self.resume.user_id, title="Other", containers=[Container(position=0)])
         db.session.add(other_resume)
         db.session.commit()
-        self.section("skills", "Skills", column=other_resume.columns[0])
+        self.section("skills", "Skills", container=other_resume.containers[0])
         self.save()
         self.assertEqual(generic.type, "skills")
 
