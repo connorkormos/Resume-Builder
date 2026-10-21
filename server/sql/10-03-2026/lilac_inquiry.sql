@@ -65,9 +65,9 @@ subsection_data AS (
 ),
 new_subsections AS (
     INSERT INTO subsections (
-        section_id, label, type, position, styling, layout, created_at, updated_at
+        section_id, label, position, styling, layout, created_at, updated_at
     )
-    SELECT d.section_id, d.item->>'label', s.item->>'type', d.position,
+    SELECT d.section_id, d.item->>'label', d.position,
         '{"fontSizeOffset":0,"lineHeightOffset":0}'::json, '{}'::json,
         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     FROM subsection_data d

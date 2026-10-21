@@ -19,7 +19,6 @@ SELECT
     s.type AS section_type,
     s.label AS section_label,
     ss.id AS subsection_id,
-    ss.type AS subsection_type,
     ss.position AS subsection_position,
     f.id AS field_id,
     f.position AS field_position,

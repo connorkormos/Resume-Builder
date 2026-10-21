@@ -27,7 +27,6 @@ def normalize_generic_section_types(resume_id):
         .all()
     )
     used_types = Counter(type_key(section.type) for section in sections)
-    converted_types = {}
 
     for section in sections:
         current_type = type_key(section.type)
@@ -44,16 +43,9 @@ def normalize_generic_section_types(resume_id):
             continue
 
         section.type = target_type
-        converted_types[section.id] = target_type
         # Reserve the type immediately if multiple generic sections share this label.
         used_types[current_type] -= 1
         used_types[target_key] += 1
-
-    if converted_types:
-        # Query the final parent IDs, including subsections moved by this save.
-        subsections = Subsection.query.filter(Subsection.section_id.in_(converted_types)).all()
-        for subsection in subsections:
-            subsection.type = converted_types[subsection.section_id]
 
 
 def update_resume_with_form_data(resume_id, data):
@@ -211,9 +203,6 @@ def update_resume_with_form_data(resume_id, data):
         if "label" in subsection_data:
             subsection.label = subsection_data["label"]
 
-        if "type" in subsection_data:
-            subsection.type = subsection_data["type"]
-            
         if "styling" in subsection_data:
             subsection.styling = subsection_data["styling"]
 

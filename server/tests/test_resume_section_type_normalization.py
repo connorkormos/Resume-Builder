@@ -38,7 +38,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         )
         for index in range(2):
             subsection = Subsection(
-                section=section, type=section_type, position=index,
+                section=section, position=index,
                 label=f"Keep subsection {index}", styling={"fontSizeOffset": 2},
             )
             Field(
@@ -81,9 +81,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
                 for attribute in ("id", "label", "value", "styling", "layout", "position"):
                     self.assertEqual(after[attribute], before[attribute])
                 for old, new in zip(before["subsections"], after["subsections"]):
-                    self.assertEqual(new["type"], target_type)
-                    for attribute in ("id", "label", "position", "styling", "layout", "fields"):
-                        self.assertEqual(new[attribute], old[attribute])
+                    self.assertEqual(new, old)
         self.save()
         self.assertEqual(Section.query.count(), 3)
         self.assertEqual(Field.query.count(), 6)
@@ -96,7 +94,6 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.section("SKILLS", "Existing", container=container)
         self.save()
         self.assertEqual(generic.type, "custom")
-        self.assertTrue(all(sub.type == "custom" for sub in generic.subsections))
 
     def test_only_first_generic_section_in_display_order_claims_type(self):
         later = self.section("defaultSection", "Skills", position=1)
@@ -110,7 +107,6 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.section("Work History!", "Existing", position=1)
         self.save()
         self.assertEqual(generic.type, "defaultSection")
-        self.assertTrue(all(sub.type == "defaultSection" for sub in generic.subsections))
 
     def test_conflict_check_uses_incoming_types_and_labels(self):
         generic = self.section("defaultSection", "Notes")
@@ -135,7 +131,7 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         self.assertEqual(generic.type, "skills")
         self.assertEqual(Section.query.count(), 1)
 
-    def test_moved_subsection_uses_final_parent_type(self):
+    def test_moved_subsection_uses_final_parent(self):
         generic = self.section("defaultSection", "Skills")
         other = self.section("custom", "Notes", position=1)
         moved = other.subsections[0]
@@ -143,7 +139,18 @@ class ResumeSectionTypeNormalizationTest(unittest.TestCase):
         data["subsections"]["byId"][str(moved.id)]["sectionId"] = generic.id
         self.save(data)
         self.assertEqual(moved.section_id, generic.id)
-        self.assertEqual(moved.type, "skills")
+        self.assertEqual(moved.section.type, "skills")
+
+    def test_legacy_subsection_type_in_save_payload_is_ignored(self):
+        section = self.section("custom", "Notes")
+        data = self.payload()
+        for subsection in data["subsections"]["byId"].values():
+            subsection["type"] = "defaultSection"
+        self.save(data)
+        for subsection in section.subsections:
+            self.assertFalse(hasattr(subsection, "type"))
+            self.assertNotIn("type", subsection.to_dict())
+            self.assertEqual(subsection.section.type, "custom")
 
     def test_unknown_labels_and_nongeneric_sections_stay_unchanged(self):
         cases = [

@@ -1,5 +1,8 @@
 # Resume template preferences
 
+The insert scripts use the schema without `subsections.type`. Apply migration
+`e3b8c29f714a` before running them against an existing database.
+
 ## Latest collection: October 3, 2026
 
 [100 official templates](10/03/2026/README.md) cover 100 professions in two batches, with design-only titles and individual PostgreSQL insert files.

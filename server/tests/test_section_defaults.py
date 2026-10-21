@@ -53,6 +53,7 @@ class SectionDefaultsTest(unittest.TestCase):
             direct = self.client.post(f'/subsections/{section["id"]}')
             self.assertEqual(direct.status_code, 201)
             for subsection in (section["subsections"][0], added.json["subsection"], direct.json):
+                self.assertNotIn("type", subsection)
                 self.assertEqual(subsection["styling"], {
                     "fontSizeOffset": 0, "lineHeightOffset": 0, "color": "red",
                 })
@@ -69,6 +70,29 @@ class SectionDefaultsTest(unittest.TestCase):
             fields[0].layout["grid"]["fillRow"] = False
             self.assertTrue(fields[1].layout["grid"]["fillRow"])
             self.assertTrue(SECTION_DEFINITIONS["header"]["field"]["layout"]["grid"]["fillRow"])
+
+    def test_copy_preserves_subsections_and_fields_without_subsection_type(self):
+        created = self.client.post("/resumes", json={
+            "title": "Original", "sections": {"workHistory": True},
+        })
+        self.assertEqual(created.status_code, 201)
+        original = created.json["containers"][0]["sections"][0]
+        response = self.client.post(f'/resumes/{created.json["id"]}/copy')
+        self.assertEqual(response.status_code, 200)
+        copied = response.json["containers"][0]["sections"][0]
+        self.assertEqual(copied["type"], "workHistory")
+        self.assertNotEqual(copied["id"], original["id"])
+        source_subsection = original["subsections"][0]
+        copied_subsection = copied["subsections"][0]
+        self.assertNotIn("type", copied_subsection)
+        self.assertNotEqual(copied_subsection["id"], source_subsection["id"])
+        self.assertEqual(copied_subsection["sectionId"], copied["id"])
+        self.assertEqual(len(copied_subsection["fields"]), len(source_subsection["fields"]))
+        for source_field, copied_field in zip(source_subsection["fields"], copied_subsection["fields"]):
+            self.assertNotEqual(copied_field["id"], source_field["id"])
+            self.assertEqual(copied_field["subsectionId"], copied_subsection["id"])
+            for key in ("label", "value", "styling", "layout", "position"):
+                self.assertEqual(copied_field[key], source_field[key])
 
     def test_resolved_definitions_are_independent_and_preserve_unknown_type_fallback(self):
         before = deepcopy(SECTION_DEFAULTS)

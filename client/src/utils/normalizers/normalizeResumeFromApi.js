@@ -95,7 +95,6 @@ const normalizeResumeFromApi = (apiResume) => {
           id: subsection.id,
           sectionId: subsection.sectionId,
           label: subsection.label ?? '',
-          type: subsection.type ?? 'default',
           position: subsection.position ?? 0,
           layout: subsection.layout ?? {},
           styling: subsection.styling ?? {},

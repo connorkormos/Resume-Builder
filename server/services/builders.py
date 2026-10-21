@@ -100,7 +100,6 @@ def add_subsection(section_id, section_type, position=0):
     subsection = Subsection(
         section_id=section_id,
         label=f"{definition['label']} Subsection",
-        type=section_type,
         position=position,
         styling=definition["subsection"]["styling"],
         layout=definition["subsection"]["layout"],

@@ -5,6 +5,10 @@
 /agents/
 /.agents/
 /.codex/
+/codex/
+/codex
+codex
+codex/
 # ----------------------------
 # Frontend (React / Vite / Node)
 # ----------------------------

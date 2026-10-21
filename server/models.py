@@ -379,7 +379,6 @@ class Subsection(db.Model):
     id = id_column()
     section_id = db.Column(db.Integer, db.ForeignKey("sections.id"), nullable=False)
     label = db.Column(db.String, nullable=True)
-    type = db.Column(db.String, nullable=False, default="default")
     styling = db.Column(db.JSON, nullable=False, default=dict, server_default='{}')
     layout = db.Column(db.JSON, nullable=False, default=dict, server_default='{}')
     position = db.Column(db.Integer, nullable=False, default=0)
@@ -400,7 +399,6 @@ class Subsection(db.Model):
             "id": self.id,
             "sectionId": self.section_id,
             "label": self.label,
-            "type": self.type,
             "styling": self.styling,
             "layout": self.layout,
             "position": self.position,
