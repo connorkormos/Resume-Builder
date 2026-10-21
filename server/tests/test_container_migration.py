@@ -112,7 +112,7 @@ class ContainerModelTest(unittest.TestCase):
     def test_existing_relationships_and_api_work_with_new_defaults(self):
         resume = Resume(user_id=1, title="Resume")
         container = Container(resume=resume)
-        section = Section(container=container, label="Experience")
+        section = Section(container=container, label="Experience", type="workHistory")
         db.session.add_all([resume, container, section])
         db.session.flush()
         self.assertEqual(container.type, "column")

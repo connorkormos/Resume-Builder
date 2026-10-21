@@ -171,7 +171,6 @@ if __name__ == "__main__":
 #    #  "summary": "Summary",
 #    #  "projects": "Projects",
 #    #  "custom": "Custom Section",
-#    #  "default": "New Section",
 # def create_demo_resume(user):
 #    resume = build_resume_with_defaults(
 #        title=DEMO_TITLE,

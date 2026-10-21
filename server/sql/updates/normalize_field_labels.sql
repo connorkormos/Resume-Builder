@@ -9,8 +9,7 @@ WITH section_defaults (section_type, allowed_labels) AS (
         ('contact', ARRAY['Email', 'Phone', 'Location', 'Website', 'LinkedIn']::text[]),
         ('summary', ARRAY['Summary']::text[]),
         ('projects', ARRAY['Project Title', 'Company/School', 'Link', 'Dates', 'Description']::text[]),
-        ('custom', ARRAY['Custom Field']::text[]),
-        ('default', ARRAY['Field']::text[])
+        ('custom', ARRAY['Custom Field']::text[])
 ), candidates AS (
     SELECT
         r.id AS resume_id,

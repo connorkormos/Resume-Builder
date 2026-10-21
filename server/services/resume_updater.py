@@ -10,12 +10,12 @@ from services.resume_tags import normalize_resume_tags
 
 
 def normalize_generic_section_types(resume_id):
-    """Resolve default/custom section labels without duplicating a section type."""
+    """Explicitly classify custom sections by label; automatic use on save is disabled."""
     def type_key(value):
         # Compare lowercase ASCII letters only; retain canonical spelling when saving.
         return re.sub(r"[^a-z]", "", (value or "").lower())
 
-    generic_types = {"default", "defaultsection", "custom"}
+    generic_types = {"custom"}
     canonical_types = {
         type_key(definition["type"]): definition["type"]
         for definition in SECTION_DEFINITIONS.values()
@@ -258,8 +258,8 @@ def update_resume_with_form_data(resume_id, data):
             field.subsection_id = field_data["subsectionId"]
 
     db.session.flush()
-    normalize_generic_section_types(resume_id)
-    db.session.flush()
+    # normalize_generic_section_types(resume_id)
+    # db.session.flush()
     resume.plain_text = build_resume_plain_text(resume)
 
     return resume

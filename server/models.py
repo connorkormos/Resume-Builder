@@ -146,7 +146,7 @@ class Profile_Section(db.Model):
 
     id = id_column()
     profile_id = db.Column(db.Integer, db.ForeignKey("profiles.id"), nullable=False)
-    type = db.Column(db.String, nullable=False, default="general")
+    type = db.Column(db.String, nullable=False, default="custom")
     label = db.Column(db.String, nullable=False, default="Untitled Section")
     position = db.Column(db.Integer, nullable=False, default=0, server_default="0")
     created_at = created_at_column()
@@ -336,7 +336,7 @@ class Section(db.Model):
     id = id_column()
     container_id = db.Column(db.Integer, db.ForeignKey("containers.id"), nullable=False)
     label = db.Column(db.String, nullable=True)
-    type = db.Column(db.String, nullable=False, default="defaultSection")
+    type = db.Column(db.String, nullable=False)
     value = db.Column(db.JSON, nullable=False, default=list)
     show_heading = db.Column(db.Boolean, nullable=False, default=True, server_default='1')
     position = db.Column(db.Integer, nullable=False, default=0)

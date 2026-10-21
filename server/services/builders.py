@@ -123,7 +123,7 @@ def add_subsection(section_id, section_type, position=0):
 def add_field(subsection_id, label='New Field', position=0, *, defaults=None):
     if defaults is None:
         subsection = db.session.get(Subsection, subsection_id)
-        section_type = subsection.section.type if subsection else "default"
+        section_type = subsection.section.type if subsection else "custom"
         defaults = get_section_definition(section_type)["field"]
     else:
         defaults = deepcopy(defaults)

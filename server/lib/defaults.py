@@ -112,12 +112,6 @@ SECTION_DEFINITIONS = {
         "heading": "Custom Section",
         "fields": ["Custom Field"],
     },
-    "default": {
-        "type": "default",
-        "label": "Default",
-        "heading": "New Section",
-        "fields": ["Field"],
-    },
 }
 
 
@@ -134,7 +128,7 @@ def get_section_definition(section_type):
     overrides = SECTION_DEFINITIONS.get(section_type)
     if overrides is None:
         overrides = {
-            **SECTION_DEFINITIONS["default"],
+            **SECTION_DEFINITIONS["custom"],
             "label": format_label(section_type),
         }
     merge(definition, overrides)
