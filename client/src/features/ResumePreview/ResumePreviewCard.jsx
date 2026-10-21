@@ -123,7 +123,6 @@ export default function ResumePreviewCard({
             aria-label={`${title}, first page preview`}
             aria-hidden={!resume}
             style={{
-              ...resume?.styling,
               transform: `scale(${paperScale})`,
               visibility: resume && paperScale ? "visible" : "hidden",
             }}

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   dndReorderSubsections,
@@ -9,9 +9,7 @@ import {
 } from "@/store/resumeSlice.js";
 // import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
 
-import { resolveSectionPadding } from "@/utils/sectionSpacing.js";
 
-import { PaddingPreviewContext, previewLayout } from "./helpers/PaddingPreviewContext";
 import useSectionPaddingResize from "./helpers/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
@@ -44,11 +42,9 @@ const sectionPointerSensor = PointerSensor.configure({
 
 const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 
-const Section = ({ section, container, index, hasNextSection, boundaries, orderedSectionIds }) => {
+const Section = ({ section, container, index, presentation, orderedSectionIds }) => {
 
-  const paddingPreview = useContext(PaddingPreviewContext)?.preview;
-  const sectionLayout = useMemo(() => previewLayout(section.layout, paddingPreview, 'section', section.id), [section.layout, section.id, paddingPreview]);
-  const containerLayout = useMemo(() => previewLayout(container.layout, paddingPreview, 'container', container.id), [container.layout, container.id, paddingPreview]);
+  const { hasNextSection } = presentation;
   const { handleProps } = useSectionPaddingResize(section, container, orderedSectionIds);
   const dispatch = useDispatch();
 
@@ -62,14 +58,11 @@ const Section = ({ section, container, index, hasNextSection, boundaries, ordere
     sensors: sectionSensors,
   });
 
-  const storedResumeLayout = useSelector((state) => state.resume.present.layout);
-  const resumeLayout = useMemo(() => previewLayout(storedResumeLayout, paddingPreview, 'resume', null), [storedResumeLayout, paddingPreview]);
   const activeSectionIds = useSelector(
     (state) => state.resume.present.activeSectionIds,
   );
   const subsections = useSelector((state) => state.resume.present.subsections);
 
-  const sectionPadding = resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout });
 
   const renderedSubsections = section.subsectionIds?.map((subId) => {
     const subsection = subsections.byId[subId];
@@ -118,11 +111,7 @@ const Section = ({ section, container, index, hasNextSection, boundaries, ordere
       data-section-container-id={section.containerId}
       data-section-position={section.position}
       style={{
-        ...section.styling,
-        ...sectionPadding,
-        flex: hasNextSection ? "0 0 auto" : "1 0 auto",
-        boxSizing: "border-box",
-        minWidth: 0,
+        ...presentation.style,
         outlineColor: section.styling?.color,
         cursor: "all-scroll",
       }}

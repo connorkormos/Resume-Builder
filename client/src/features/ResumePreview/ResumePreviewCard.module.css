@@ -36,7 +36,7 @@
   left: 0;
   width: var(--width-editor-page, 5.95in);
   height: var(--height-editor-page, 7.7in);
-  display: flex;
+  display: block;
   word-break: break-word;
   transform-origin: top left;
   pointer-events: none;

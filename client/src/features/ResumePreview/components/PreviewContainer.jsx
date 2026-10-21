@@ -1,33 +1,15 @@
-import PreviewSection from "./PreviewSection";
+import PreviewSection from './PreviewSection';
 
-export default function PreviewContainer({ container, resume, isFirstContainer, isLastContainer }) {
-  const sections = container.sectionIds
-    .map((id) => resume.sections.byId[id])
-    .filter(Boolean);
-
+export default function PreviewContainer({ container, resume, presentation, sectionPresentations }) {
   return (
-    <div
-      style={{
-        height: "100%",
-        minWidth: 0,
-        display: "flex",
-        flexDirection: "column",
-        flex:
-          container.layout?.width?.auto || !container.layout?.width?.value
-            ? "1 1 0%"
-            : `0 0 ${container.layout.width.value}`,
-      }}
-    >
-      {sections.map((section, index) => (
+    <div style={presentation.style} data-container-id={container.id}>
+      {presentation.sectionIds.map(id => (
         <PreviewSection
-          key={section.id}
-          section={section}
+          key={id}
+          section={resume.sections.byId[id]}
           container={container}
           resume={resume}
-          isFirstContainer={isFirstContainer}
-          isLastContainer={isLastContainer}
-          isFirstSection={index === 0}
-          isLastSection={index === sections.length - 1}
+          presentation={sectionPresentations[id]}
         />
       ))}
     </div>

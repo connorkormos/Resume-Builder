@@ -84,7 +84,7 @@ Verification: 16 focused layout/resize tests pass; targeted lint and production 
 - [x] Manual width edits: preserve the entered percentage and transfer the difference to the next column (previous column for the rightmost one). Reject values outside the pair's allowed range.
 - [ ] Percentage display: decide whether rounded labels must sum to exactly 100.0%; equal thirds currently display as 33.3% each despite filling the page.
 - [ ] Resize lifecycle: extract a hook, distinguish cancellation from completion, and clean up all pointer listeners; no Escape-to-cancel feature exists yet.
-- [ ] Rendering reuse: one pure presentation resolver for editor and thumbnails, with optional editor-only transient overrides. Preview components remain untouched.
+- [x] Rendering reuse: editor, thumbnails, and enlarged previews consume one pure presentation resolver; editor-only transient changes are optional inputs.
 - [x] Settings role labels: derived centrally; rows without an ordinary column group now display as Row. Sidebar labels use their position relative to the shared row track.
 
 
@@ -112,3 +112,18 @@ Verification: 16 focused layout/resize tests pass; targeted lint and production 
 - Preview components remain untouched.
 
 Validation: 26 focused tests pass (18 layout, 2 container-state, 6 section-padding-resize), targeted lint passes, and the production build passes with the existing bundle-size warning. Headless Chromium fixtures for left, right, and two-sided sidebars confirm no overlap, full page coverage, full-height sidebars, and final-section background fill. These fixtures are geometry checks, not authenticated end-to-end editor tests.
+
+
+## Shared editor and preview presentation
+
+`codex-preview.diff` contains this follow-up only; earlier patches remain snapshots of their stages. This supersedes the earlier preview-deferred notes.
+
+- Added `client/src/utils/resumePresentation.js`. It combines the existing layout and spacing rules into page styles, container placement/styles, section order/boundaries, padding, and section fill/background styles. It has no React or Redux dependency.
+- ResumePaper computes this presentation with temporary width, section-order, and padding overrides. Container and Section consume the result rather than reconstructing placement or spacing.
+- EditorLayoutContext exposes those same section results to the rulers; they no longer independently assemble effective spacing.
+- PreviewPaper resolves the supplied document independently, and PreviewContainer/PreviewSection render its resolved styles. Both cards and enlarged previews use that component. The old flex-column placement and first/last padding formulas are removed.
+- The fixed-size preview wrappers retain scaling and clipping; resume styling now belongs to the inner shared page surface. Section border/typography metadata is kept out of CSS and remains available to the existing content renderers.
+- The padding override helper moved into the pure spacing module; its existing editor import path remains available through a re-export.
+- Existing Slate editing and read-only rich-text rendering remain separate. This change unifies page/container/section presentation; it does not rewrite text, subsection, or field rendering, or implement the other deferred work.
+
+Verification: 31 focused tests pass (5 presentation, 18 layout, 6 section-padding-resize, 2 container-state). Presentation tests include actual preview React markup rendered without Redux, full per-side gaps, independent backgrounds, final-section fill, temporary moves/widths/padding, legacy gaps, and isolation between preview documents. Targeted lint and production build pass, with the existing bundle-size warning. Headless Chromium geometry comparisons between actual preview markup and the shared editor presentation match for ordinary columns, left sidebar plus rows, and two-sided sidebars plus rows. Browser fixtures use empty section content to isolate geometry; they are not authenticated end-to-end editing tests.

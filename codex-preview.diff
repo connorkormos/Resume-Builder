@@ -1,0 +1,762 @@
+diff --git a/CODEX_CHANGES.md b/CODEX_CHANGES.md
+index 059a388..61cdd0c 100644
+--- a/CODEX_CHANGES.md
++++ b/CODEX_CHANGES.md
+@@ -84,7 +84,7 @@ Verification: 16 focused layout/resize tests pass; targeted lint and production
+ - [x] Manual width edits: preserve the entered percentage and transfer the difference to the next column (previous column for the rightmost one). Reject values outside the pair's allowed range.
+ - [ ] Percentage display: decide whether rounded labels must sum to exactly 100.0%; equal thirds currently display as 33.3% each despite filling the page.
+ - [ ] Resize lifecycle: extract a hook, distinguish cancellation from completion, and clean up all pointer listeners; no Escape-to-cancel feature exists yet.
+-- [ ] Rendering reuse: one pure presentation resolver for editor and thumbnails, with optional editor-only transient overrides. Preview components remain untouched.
++- [x] Rendering reuse: editor, thumbnails, and enlarged previews consume one pure presentation resolver; editor-only transient changes are optional inputs.
+ - [x] Settings role labels: derived centrally; rows without an ordinary column group now display as Row. Sidebar labels use their position relative to the shared row track.
+ 
+ 
+@@ -112,3 +112,18 @@ Verification: 16 focused layout/resize tests pass; targeted lint and production
+ - Preview components remain untouched.
+ 
+ Validation: 26 focused tests pass (18 layout, 2 container-state, 6 section-padding-resize), targeted lint passes, and the production build passes with the existing bundle-size warning. Headless Chromium fixtures for left, right, and two-sided sidebars confirm no overlap, full page coverage, full-height sidebars, and final-section background fill. These fixtures are geometry checks, not authenticated end-to-end editor tests.
++
++
++## Shared editor and preview presentation
++
++`codex-preview.diff` contains this follow-up only; earlier patches remain snapshots of their stages. This supersedes the earlier preview-deferred notes.
++
++- Added `client/src/utils/resumePresentation.js`. It combines the existing layout and spacing rules into page styles, container placement/styles, section order/boundaries, padding, and section fill/background styles. It has no React or Redux dependency.
++- ResumePaper computes this presentation with temporary width, section-order, and padding overrides. Container and Section consume the result rather than reconstructing placement or spacing.
++- EditorLayoutContext exposes those same section results to the rulers; they no longer independently assemble effective spacing.
++- PreviewPaper resolves the supplied document independently, and PreviewContainer/PreviewSection render its resolved styles. Both cards and enlarged previews use that component. The old flex-column placement and first/last padding formulas are removed.
++- The fixed-size preview wrappers retain scaling and clipping; resume styling now belongs to the inner shared page surface. Section border/typography metadata is kept out of CSS and remains available to the existing content renderers.
++- The padding override helper moved into the pure spacing module; its existing editor import path remains available through a re-export.
++- Existing Slate editing and read-only rich-text rendering remain separate. This change unifies page/container/section presentation; it does not rewrite text, subsection, or field rendering, or implement the other deferred work.
++
++Verification: 31 focused tests pass (5 presentation, 18 layout, 6 section-padding-resize, 2 container-state). Presentation tests include actual preview React markup rendered without Redux, full per-side gaps, independent backgrounds, final-section fill, temporary moves/widths/padding, legacy gaps, and isolation between preview documents. Targeted lint and production build pass, with the existing bundle-size warning. Headless Chromium geometry comparisons between actual preview markup and the shared editor presentation match for ordinary columns, left sidebar plus rows, and two-sided sidebars plus rows. Browser fixtures use empty section content to isolate geometry; they are not authenticated end-to-end editing tests.
+diff --git a/client/src/features/ResumePreview/ResumePreviewCard.jsx b/client/src/features/ResumePreview/ResumePreviewCard.jsx
+index 986d297..70ee108 100644
+--- a/client/src/features/ResumePreview/ResumePreviewCard.jsx
++++ b/client/src/features/ResumePreview/ResumePreviewCard.jsx
+@@ -123,7 +123,6 @@ export default function ResumePreviewCard({
+             aria-label={`${title}, first page preview`}
+             aria-hidden={!resume}
+             style={{
+-              ...resume?.styling,
+               transform: `scale(${paperScale})`,
+               visibility: resume && paperScale ? "visible" : "hidden",
+             }}
+diff --git a/client/src/features/ResumePreview/ResumePreviewCard.module.css b/client/src/features/ResumePreview/ResumePreviewCard.module.css
+index 2c0dfdc..988fa6a 100644
+--- a/client/src/features/ResumePreview/ResumePreviewCard.module.css
++++ b/client/src/features/ResumePreview/ResumePreviewCard.module.css
+@@ -36,7 +36,7 @@
+   left: 0;
+   width: var(--width-editor-page, 5.95in);
+   height: var(--height-editor-page, 7.7in);
+-  display: flex;
++  display: block;
+   word-break: break-word;
+   transform-origin: top left;
+   pointer-events: none;
+diff --git a/client/src/features/ResumePreview/components/PreviewContainer.jsx b/client/src/features/ResumePreview/components/PreviewContainer.jsx
+index 6429c40..b545979 100644
+--- a/client/src/features/ResumePreview/components/PreviewContainer.jsx
++++ b/client/src/features/ResumePreview/components/PreviewContainer.jsx
+@@ -1,33 +1,15 @@
+-import PreviewSection from "./PreviewSection";
+-
+-export default function PreviewContainer({ container, resume, isFirstContainer, isLastContainer }) {
+-  const sections = container.sectionIds
+-    .map((id) => resume.sections.byId[id])
+-    .filter(Boolean);
++import PreviewSection from './PreviewSection';
+ 
++export default function PreviewContainer({ container, resume, presentation, sectionPresentations }) {
+   return (
+-    <div
+-      style={{
+-        height: "100%",
+-        minWidth: 0,
+-        display: "flex",
+-        flexDirection: "column",
+-        flex:
+-          container.layout?.width?.auto || !container.layout?.width?.value
+-            ? "1 1 0%"
+-            : `0 0 ${container.layout.width.value}`,
+-      }}
+-    >
+-      {sections.map((section, index) => (
++    <div style={presentation.style} data-container-id={container.id}>
++      {presentation.sectionIds.map(id => (
+         <PreviewSection
+-          key={section.id}
+-          section={section}
++          key={id}
++          section={resume.sections.byId[id]}
+           container={container}
+           resume={resume}
+-          isFirstContainer={isFirstContainer}
+-          isLastContainer={isLastContainer}
+-          isFirstSection={index === 0}
+-          isLastSection={index === sections.length - 1}
++          presentation={sectionPresentations[id]}
+         />
+       ))}
+     </div>
+diff --git a/client/src/features/ResumePreview/components/PreviewPaper.jsx b/client/src/features/ResumePreview/components/PreviewPaper.jsx
+index 2135ff9..be5c4cd 100644
+--- a/client/src/features/ResumePreview/components/PreviewPaper.jsx
++++ b/client/src/features/ResumePreview/components/PreviewPaper.jsx
+@@ -1,17 +1,20 @@
+-import PreviewContainer from "./PreviewContainer";
++import { resolveResumePresentation } from '@/utils/resumePresentation.js';
++import PreviewContainer from './PreviewContainer';
+ 
+ export default function PreviewPaper({ resume }) {
+-  const containers = resume.containers.allIds
+-    .map((id) => resume.containers.byId[id])
+-    .filter(Boolean);
+-
+-  return containers.map((container, index) => (
+-    <PreviewContainer
+-      key={container.id}
+-      container={container}
+-      resume={resume}
+-      isFirstContainer={index === 0}
+-      isLastContainer={index === containers.length - 1}
+-    />
+-  ));
++  const presentation = resolveResumePresentation(resume);
++  const normalizedResume = { ...resume, layout: presentation.resumeLayout };
++  return (
++    <div style={presentation.pageStyle}>
++      {presentation.containerIds.map(id => (
++        <PreviewContainer
++          key={id}
++          container={resume.containers.byId[id]}
++          resume={normalizedResume}
++          presentation={presentation.containersById[id]}
++          sectionPresentations={presentation.sectionsById}
++        />
++      ))}
++    </div>
++  );
+ }
+diff --git a/client/src/features/ResumePreview/components/PreviewSection.jsx b/client/src/features/ResumePreview/components/PreviewSection.jsx
+index cec9efd..5dec0d5 100644
+--- a/client/src/features/ResumePreview/components/PreviewSection.jsx
++++ b/client/src/features/ResumePreview/components/PreviewSection.jsx
+@@ -1,4 +1,3 @@
+-import { parseRemValue } from "@/utils/formatters";
+ import SectionBorder from "@/pages/ResumeEditorPage/features/ResumePaper/components/SectionBorder";
+ import RichText from "./RichText";
+ import PreviewSubsection from "./PreviewSubsection";
+@@ -7,20 +6,9 @@ export default function PreviewSection({
+   section,
+   container,
+   resume,
+-  isFirstContainer,
+-  isLastContainer,
+-  isFirstSection,
+-  isLastSection,
++  presentation,
+ }) {
+   const layout = resume.layout;
+-  const padding = layout.padding || {};
+-  const withGap = (value, gap) =>
+-    `${Math.max(0, parseRemValue(value) + parseRemValue(gap))}rem`;
+-  const sectionStyle = { ...section.styling };
+-  // These saved properties describe custom rendering, not CSS declarations.
+-  delete sectionStyle.border;
+-  delete sectionStyle.fontSizeOffset;
+-  delete sectionStyle.lineHeightOffset;
+   const styling = {
+     resumeStyling: resume.styling,
+     containerStyling: container.styling,
+@@ -30,42 +18,7 @@ export default function PreviewSection({
+     .map((id) => resume.subsections.byId[id])
+     .filter(Boolean);
+   return (
+-    <div
+-      style={{
+-        ...sectionStyle,
+-        position: "relative",
+-        height: "min-content",
+-        paddingLeft:
+-          isFirstContainer
+-            ? padding.left
+-            : withGap(
+-                container.layout?.padding?.left,
+-                layout.gap?.horizontal,
+-              ),
+-        paddingRight:
+-          isLastContainer
+-            ? padding.right
+-            : withGap(
+-                container.layout?.padding?.right,
+-                layout.gap?.horizontal,
+-              ),
+-        paddingTop:
+-          isFirstSection
+-            ? padding.top
+-            : withGap(
+-                section.layout?.padding?.top,
+-                layout.gap?.vertical,
+-              ),
+-        paddingBottom:
+-          isLastSection
+-            ? padding.bottom
+-            : withGap(
+-                section.layout?.padding?.bottom,
+-                layout.gap?.vertical,
+-              ),
+-        flex: isLastSection ? "1" : "none",
+-      }}
+-    >
++    <div style={presentation.style} data-section-id={section.id}>
+       {section.showHeading !== false && (
+         <RichText
+           value={section.value}
+@@ -85,7 +38,7 @@ export default function PreviewSection({
+       ))}
+       {["top", "bottom", "left", "right"].map(
+         (side) =>
+-          section.styling.border?.[side] && (
++          section.styling?.border?.[side] && (
+             <SectionBorder
+               key={side}
+               sectionBorder={section.styling.border[side]}
+diff --git a/client/src/features/ResumePreview/components/PreviewZoom.jsx b/client/src/features/ResumePreview/components/PreviewZoom.jsx
+index 8ecc378..ff61651 100644
+--- a/client/src/features/ResumePreview/components/PreviewZoom.jsx
++++ b/client/src/features/ResumePreview/components/PreviewZoom.jsx
+@@ -47,7 +47,6 @@ export default function PreviewZoom({ resume, anchorRef }) {
+       visibility: placement ? "visible" : "hidden",
+     }}>
+       <div ref={paperRef} className={styles.resumePaper} style={{
+-        ...resume.styling,
+         transform: `scale(${placement?.scale ?? 0})`,
+       }}>
+         <PreviewPaper resume={resume} />
+diff --git a/client/src/pages/ResumeEditorPage/features/ResumePaper/Container.jsx b/client/src/pages/ResumeEditorPage/features/ResumePaper/Container.jsx
+index 75f139f..a84404a 100644
+--- a/client/src/pages/ResumeEditorPage/features/ResumePaper/Container.jsx
++++ b/client/src/pages/ResumeEditorPage/features/ResumePaper/Container.jsx
+@@ -1,4 +1,3 @@
+-import { deriveSectionBoundaries } from '@/utils/resumeLayout.js';
+ import React from "react";
+ import { useDroppable } from "@dnd-kit/react";
+ 
+@@ -9,10 +8,9 @@ import { CollisionPriority } from "@dnd-kit/abstract";
+ 
+ const Container = ({
+   container,
+-  sectionIds = [],
++  presentation,
++  sectionPresentations,
+   sectionById,
+-  placement,
+-  boundaries,
+   containerPreviewWidths,
+   rightContainerId,
+   resizeTrackId,
+@@ -26,12 +24,7 @@ const Container = ({
+     collisionPriority: CollisionPriority.High,
+   });
+ 
+-  const containerStyling = {
+-    position: 'relative',
+-    gridRow: `${placement.rowStart} / span ${placement.rowSpan}`,
+-    gridColumn: `${placement.columnStart} / span ${placement.columnSpan}`,
+-  };
+-  const renderedIds = sectionIds.filter(id => sectionById[id]);
++  const renderedIds = presentation.sectionIds;
+ 
+   const renderedSections = renderedIds.map((sectionId, index) => (
+     <Section
+@@ -39,9 +32,8 @@ const Container = ({
+       section={sectionById[sectionId]}
+       container={container}
+       index={index}
+-      hasNextSection={index < renderedIds.length - 1}
++      presentation={sectionPresentations[sectionId]}
+       orderedSectionIds={renderedIds}
+-      boundaries={deriveSectionBoundaries(boundaries, renderedIds, sectionId)}
+     />
+   ));
+ 
+@@ -55,7 +47,7 @@ const Container = ({
+     <div
+       id={container.id}
+       className={styles.containerWrapperDiv}
+-      style={containerStyling}
++      style={presentation.style}
+       ref={ref}
+     >
+       {renderedSections}
+diff --git a/client/src/pages/ResumeEditorPage/features/ResumePaper/ResumePaper.jsx b/client/src/pages/ResumeEditorPage/features/ResumePaper/ResumePaper.jsx
+index 6b0c189..1405f2a 100644
+--- a/client/src/pages/ResumeEditorPage/features/ResumePaper/ResumePaper.jsx
++++ b/client/src/pages/ResumeEditorPage/features/ResumePaper/ResumePaper.jsx
+@@ -1,7 +1,9 @@
+-import { resolveResumeLayout, deriveSectionBoundaries, resizeColumnWidths } from '@/utils/resumeLayout.js';
++import { resolveResumePresentation } from '@/utils/resumePresentation.js';
++import { PaddingPreviewContext } from './helpers/PaddingPreviewContext.js';
++import { resizeColumnWidths } from '@/utils/resumeLayout.js';
+ import { EditorLayoutContext } from './helpers/EditorLayoutContext.js';
+ import { useMediaQuery } from "@/hooks/useMediaQuery";
+-import React, { forwardRef, useEffect, useRef, useState } from "react";
++import React, { forwardRef, useEffect, useRef, useState, useContext } from "react";
+ 
+ import { useDispatch, useSelector } from "react-redux";
+ 
+@@ -24,8 +26,10 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+   const localEditorRef = useRef(null);
+   const editorRef = props.editorPageRef ?? localEditorRef;
+ 
+-  const containers = useSelector((state) => state.resume.present.containers);
+-  const sectionsById = useSelector((state) => state.resume.present.sections.byId);
++  const resume = useSelector(state => state.resume.present);
++  const containers = resume.containers;
++  const sectionsById = resume.sections.byId;
++  const paddingPreview = useContext(PaddingPreviewContext)?.preview;
+ 
+   const [sectionOrderPreview, setSectionOrderPreview] = useState(null);
+   const containerOrder = containers.allIds;
+@@ -35,21 +39,12 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+   const resizeState = useRef(null);
+   const previewWidthsRef = useRef(null);
+ 
+-  const rowContentWidth = useSelector(state => state.resume.present.layout.rowContentWidth);
+-  const resolvedLayout = resolveResumeLayout({
+-    rowContentWidth,
+-    containersById: containers.byId,
+-    orderedContainerIds: containerOrder,
+-    widthOverrides: previewWidths ?? {},
++  const presentation = resolveResumePresentation(resume, {
++    sectionIds: containerSectionIds,
++    widths: previewWidths,
++    padding: paddingPreview,
+   });
+-  const sectionContexts = {};
+-  for (const containerId of containerOrder) {
+-    const ids = (containerSectionIds[containerId] ?? []).filter(id => sectionsById[id]);
+-    for (const id of ids) sectionContexts[id] = {
+-      containerId,
+-      boundaries: deriveSectionBoundaries(resolvedLayout.boundariesByContainerId[containerId], ids, id),
+-    };
+-  }
++  const resolvedLayout = presentation.layout;
+   const getContainerWidth = (containerId) => resolvedLayout.widthsById[containerId] ?? 0;
+ 
+   const finishResize = () => {
+@@ -129,16 +124,6 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+     }));
+   };
+ 
+-  const reduxResumeStyling = useSelector((state) => state.resume.present.styling);
+-  const resumeStyling = {
+-    ...reduxResumeStyling,
+-    display: 'grid',
+-    gridTemplateColumns: resolvedLayout.gridTemplateColumns,
+-    gridTemplateRows: resolvedLayout.gridTemplateRows,
+-    gap: 0,
+-    padding: 0,
+-  };
+-
+   useEffect(() => {
+ 
+     const handleKeyDown = (e) => {
+@@ -160,7 +145,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+     };
+   }, [dispatch]);
+ 
+-  const resumeContainers = containerOrder.map((containerId) => {
++  const resumeContainers = presentation.containerIds.map((containerId) => {
+     const container = containers.byId[containerId];
+ 
+     if (!container) {
+@@ -172,14 +157,13 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+       <Container
+         key={container.id}
+         container={container}
+-        sectionIds={containerSectionIds[container.id] ?? []}
++        presentation={presentation.containersById[containerId]}
++        sectionPresentations={presentation.sectionsById}
+         sectionById={sectionsById}
+         onStartResize={startResize}
+         containerPreviewWidths={previewWidths}
+         rightContainerId={resolvedLayout.resizeNeighborsByContainerId[containerId]}
+         resizeTrackId={resolvedLayout.resizeTrackByContainerId[containerId]}
+-        placement={resolvedLayout.placementsByContainerId[containerId]}
+-        boundaries={resolvedLayout.boundariesByContainerId[containerId]}
+         onResizeWithKeyboard={resizeWithKeyboard}
+       />
+     );
+@@ -187,13 +171,13 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
+ 
+ 
+   return (
+-    <EditorLayoutContext.Provider value={sectionContexts}>
++    <EditorLayoutContext.Provider value={presentation.sectionsById}>
+     <div className={styles.printPageRef} ref={ref}>
+       {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
+       {!isMobile && <MarginRuler pageRef={editorRef} />}
+       <div
+         className={`${props.isPrinting ? styles.printingPageContainer : styles.editingPageContainer}`}
+-        style={resumeStyling}
++        style={presentation.pageStyle}
+         ref={editorRef}
+         id="editorPage"
+       >
+diff --git a/client/src/pages/ResumeEditorPage/features/ResumePaper/Section.jsx b/client/src/pages/ResumeEditorPage/features/ResumePaper/Section.jsx
+index 5c40427..59f53dd 100644
+--- a/client/src/pages/ResumeEditorPage/features/ResumePaper/Section.jsx
++++ b/client/src/pages/ResumeEditorPage/features/ResumePaper/Section.jsx
+@@ -1,4 +1,4 @@
+-import React, { useState, useContext, useMemo } from "react";
++import React, { useState } from "react";
+ import { useDispatch, useSelector } from "react-redux";
+ import {
+   dndReorderSubsections,
+@@ -9,9 +9,7 @@ import {
+ } from "@/store/resumeSlice.js";
+ // import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
+ 
+-import { resolveSectionPadding } from "@/utils/sectionSpacing.js";
+ 
+-import { PaddingPreviewContext, previewLayout } from "./helpers/PaddingPreviewContext";
+ import useSectionPaddingResize from "./helpers/useSectionPaddingResize.js";
+ import { useSortable } from "@dnd-kit/react/sortable";
+ import {
+@@ -44,11 +42,9 @@ const sectionPointerSensor = PointerSensor.configure({
+ 
+ const sectionSensors = [sectionPointerSensor, KeyboardSensor];
+ 
+-const Section = ({ section, container, index, hasNextSection, boundaries, orderedSectionIds }) => {
++const Section = ({ section, container, index, presentation, orderedSectionIds }) => {
+ 
+-  const paddingPreview = useContext(PaddingPreviewContext)?.preview;
+-  const sectionLayout = useMemo(() => previewLayout(section.layout, paddingPreview, 'section', section.id), [section.layout, section.id, paddingPreview]);
+-  const containerLayout = useMemo(() => previewLayout(container.layout, paddingPreview, 'container', container.id), [container.layout, container.id, paddingPreview]);
++  const { hasNextSection } = presentation;
+   const { handleProps } = useSectionPaddingResize(section, container, orderedSectionIds);
+   const dispatch = useDispatch();
+ 
+@@ -62,14 +58,11 @@ const Section = ({ section, container, index, hasNextSection, boundaries, ordere
+     sensors: sectionSensors,
+   });
+ 
+-  const storedResumeLayout = useSelector((state) => state.resume.present.layout);
+-  const resumeLayout = useMemo(() => previewLayout(storedResumeLayout, paddingPreview, 'resume', null), [storedResumeLayout, paddingPreview]);
+   const activeSectionIds = useSelector(
+     (state) => state.resume.present.activeSectionIds,
+   );
+   const subsections = useSelector((state) => state.resume.present.subsections);
+ 
+-  const sectionPadding = resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout });
+ 
+   const renderedSubsections = section.subsectionIds?.map((subId) => {
+     const subsection = subsections.byId[subId];
+@@ -118,11 +111,7 @@ const Section = ({ section, container, index, hasNextSection, boundaries, ordere
+       data-section-container-id={section.containerId}
+       data-section-position={section.position}
+       style={{
+-        ...section.styling,
+-        ...sectionPadding,
+-        flex: hasNextSection ? "0 0 auto" : "1 0 auto",
+-        boxSizing: "border-box",
+-        minWidth: 0,
++        ...presentation.style,
+         outlineColor: section.styling?.color,
+         cursor: "all-scroll",
+       }}
+diff --git a/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/EditorLayoutContext.js b/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/EditorLayoutContext.js
+index b58d7ba..632d3d3 100644
+--- a/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/EditorLayoutContext.js
++++ b/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/EditorLayoutContext.js
+@@ -1,22 +1,9 @@
+ import { createContext, useContext } from 'react';
+-import { useSelector } from 'react-redux';
+-import { PaddingPreviewContext, previewLayout } from './PaddingPreviewContext.js';
+-import { resolveSectionPadding } from '@/utils/sectionSpacing.js';
+ 
+-// Includes temporary section moves, so rulers and sections agree during dragging.
++// The editor supplies the shared presentation, including transient drag changes.
+ export const EditorLayoutContext = createContext({});
++const NO_PADDING = {};
+ 
+ export function useResolvedSectionSpacing(sectionId) {
+-  const contexts = useContext(EditorLayoutContext);
+-  const resume = useSelector(state => state.resume.present);
+-  const preview = useContext(PaddingPreviewContext)?.preview;
+-  const section = resume.sections.byId[sectionId];
+-  const context = contexts[sectionId];
+-  const container = resume.containers.byId[context?.containerId ?? section?.containerId];
+-  return resolveSectionPadding({
+-    boundaries: context?.boundaries,
+-    resumeLayout: previewLayout(resume.layout, preview, 'resume', null),
+-    containerLayout: previewLayout(container?.layout, preview, 'container', container?.id),
+-    sectionLayout: previewLayout(section?.layout, preview, 'section', sectionId),
+-  });
++  return useContext(EditorLayoutContext)[sectionId]?.padding ?? NO_PADDING;
+ }
+diff --git a/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext.js b/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext.js
+index 23d9ced..d6201b1 100644
+--- a/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext.js
++++ b/client/src/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext.js
+@@ -2,10 +2,4 @@ import { createContext } from 'react';
+ 
+ export const PaddingPreviewContext = createContext(null);
+ 
+-export function previewLayout(layout, preview, target, id) {
+-  if (!preview || preview.target !== target || preview.id !== id) return layout;
+-  return {
+-    ...layout,
+-    padding: { ...layout?.padding, [preview.side]: `${preview.value}rem` },
+-  };
+-}
++export { previewLayout } from '@/utils/sectionSpacing.js';
+diff --git a/client/src/utils/resumePresentation.js b/client/src/utils/resumePresentation.js
+new file mode 100644
+index 0000000..d944d5a
+--- /dev/null
++++ b/client/src/utils/resumePresentation.js
+@@ -0,0 +1,78 @@
++import { resolveResumeLayout, deriveSectionBoundaries } from './resumeLayout.js';
++import { normalizeResumeLayout, previewLayout, resolveSectionPadding } from './sectionSpacing.js';
++
++// Stored border/typography metadata is consumed by the content renderers, not CSS.
++function sectionCss(styling = {}) {
++  const css = { ...styling };
++  delete css.border;
++  delete css.fontSizeOffset;
++  delete css.lineHeightOffset;
++  return css;
++}
++
++// Independent of React/Redux. Thumbnails pass their own document; the editor can
++// overlay transient widths, section moves, and padding without mutating it.
++export function resolveResumePresentation(resume, overrides = {}) {
++  const resumeLayout = previewLayout(normalizeResumeLayout(resume.layout), overrides.padding, 'resume', null);
++  const layout = resolveResumeLayout({
++    containersById: resume.containers.byId,
++    orderedContainerIds: resume.containers.allIds,
++    rowContentWidth: resumeLayout.rowContentWidth,
++    widthOverrides: overrides.widths ?? {},
++  });
++  const containersById = {};
++  const sectionsById = {};
++  const containerIds = resume.containers.allIds.filter(id => layout.placementsByContainerId[id]);
++  for (const containerId of containerIds) {
++    const container = resume.containers.byId[containerId];
++    const placement = layout.placementsByContainerId[containerId];
++    const sectionIds = (overrides.sectionIds?.[containerId] ?? container.sectionIds ?? [])
++      .filter(id => resume.sections.byId[id]);
++    containersById[containerId] = {
++      sectionIds,
++      style: {
++        position: 'relative',
++        alignSelf: 'stretch',
++        minWidth: 0,
++        display: 'flex',
++        flexDirection: 'column',
++        gridRow: `${placement.rowStart} / span ${placement.rowSpan}`,
++        gridColumn: `${placement.columnStart} / span ${placement.columnSpan}`,
++      },
++    };
++    const containerLayout = previewLayout(container.layout, overrides.padding, 'container', containerId);
++    sectionIds.forEach((sectionId, index) => {
++      const section = resume.sections.byId[sectionId];
++      const boundaries = deriveSectionBoundaries(layout.boundariesByContainerId[containerId], sectionIds, sectionId);
++      const sectionLayout = previewLayout(section.layout, overrides.padding, 'section', sectionId);
++      const padding = resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout });
++      const hasNextSection = index < sectionIds.length - 1;
++      sectionsById[sectionId] = {
++        containerId, boundaries, padding, hasNextSection,
++        style: {
++          ...sectionCss(section.styling),
++          ...padding,
++          position: 'relative',
++          height: 'min-content',
++          boxSizing: 'border-box',
++          minWidth: 0,
++          flex: hasNextSection ? '0 0 auto' : '1 0 auto',
++        },
++      };
++    });
++  }
++  return {
++    layout, resumeLayout, containerIds, containersById, sectionsById,
++    pageStyle: {
++      ...resume.styling,
++      display: 'grid',
++      gridTemplateColumns: layout.gridTemplateColumns,
++      gridTemplateRows: layout.gridTemplateRows,
++      gap: 0,
++      padding: 0,
++      width: '100%',
++      height: '100%',
++      wordBreak: 'break-word',
++    },
++  };
++}
+diff --git a/client/src/utils/sectionSpacing.js b/client/src/utils/sectionSpacing.js
+index d3b098e..2a637ab 100644
+--- a/client/src/utils/sectionSpacing.js
++++ b/client/src/utils/sectionSpacing.js
+@@ -30,3 +30,11 @@ export function resolveSectionPadding({ boundaries, resumeLayout, containerLayou
+     return [`padding${side[0].toUpperCase()}${side.slice(1)}`, `${value}rem`];
+   }));
+ }
++
++export function previewLayout(layout, preview, target, id) {
++  if (!preview || preview.target !== target || preview.id !== id) return layout;
++  return {
++    ...layout,
++    padding: { ...layout?.padding, [preview.side]: `${preview.value}rem` },
++  };
++}
+diff --git a/client/tests/resume-presentation.test.js b/client/tests/resume-presentation.test.js
+new file mode 100644
+index 0000000..c1203dd
+--- /dev/null
++++ b/client/tests/resume-presentation.test.js
+@@ -0,0 +1,140 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { createRequire } from 'node:module';
++import { build } from 'esbuild';
++import { resolveResumePresentation } from '../src/utils/resumePresentation.js';
++import { ROW_CONTENT_TRACK } from '../src/utils/resumeLayout.js';
++
++const makeResume = () => ({
++  styling: { backgroundColor: '#fff', display: 'flex', fontSize: '12px' },
++  layout: { padding: { top: '2rem', bottom: '3rem', left: '2rem', right: '2rem' }, gap: { horizontal: '1rem', vertical: '0.4rem', section: '0.5rem' } },
++  containers: {
++    allIds: ['side', 'top', 'bottom'],
++    byId: {
++      side: { id: 'side', type: 'column', spanFullPage: true, sectionIds: ['s'], layout: { width: { value: '25%', auto: false }, padding: { right: '-0.25rem' } } },
++      top: { id: 'top', type: 'row', sectionIds: ['a', 'b'], layout: { padding: { left: '0.2rem' } } },
++      bottom: { id: 'bottom', type: 'row', sectionIds: ['c'], layout: {} },
++    },
++  },
++  sections: {
++    byId: Object.fromEntries(['s', 'a', 'b', 'c'].map((id, index) => [id, {
++      id, containerId: ['side', 'top', 'top', 'bottom'][index], subsectionIds: [],
++      value: [{ type: 'paragraph', children: [{ text: id }] }],
++      styling: { backgroundColor: ['#acf', '#fab', '#bfa', '#ffa'][index] },
++      layout: { padding: { bottom: '-0.1rem' } },
++    }])),
++  },
++  subsections: { byId: {} }, fields: { byId: {} },
++});
++
++test('saved presentation covers sidebar/rows, full per-side gaps and independent section backgrounds', () => {
++  const resume = makeResume();
++  const before = structuredClone(resume);
++  const p = resolveResumePresentation(resume);
++  assert.equal(p.pageStyle.display, 'grid');
++  assert.equal(p.pageStyle.padding, 0);
++  assert.equal(p.pageStyle.gap, 0);
++  assert.equal(p.containersById.side.style.gridRow, '1 / span 2');
++  assert.equal(p.containersById.top.style.gridColumn, '2 / span 1');
++  assert.equal(p.sectionsById.s.padding.paddingRight, '0.75rem');
++  assert.equal(p.sectionsById.a.padding.paddingLeft, '1.2rem');
++  assert.equal(p.sectionsById.a.padding.paddingBottom, '0.4rem');
++  assert.equal(p.sectionsById.b.padding.paddingTop, '0.5rem');
++  assert.ok(Math.abs(parseFloat(p.sectionsById.b.padding.paddingBottom) - 0.3) < 1e-10);
++  assert.equal(p.sectionsById.c.padding.paddingBottom, '2.9rem');
++  assert.equal(p.sectionsById.a.style.flex, '0 0 auto');
++  assert.equal(p.sectionsById.b.style.flex, '1 0 auto');
++  assert.equal(p.sectionsById.a.style.backgroundColor, '#fab');
++  assert.equal(p.sectionsById.b.style.backgroundColor, '#bfa');
++  assert.deepEqual(resume, before);
++});
++
++test('editor overlays change presentation without leaking into saved thumbnail data', () => {
++  const resume = makeResume();
++  const saved = resolveResumePresentation(resume);
++  const moved = resolveResumePresentation(resume, {
++    sectionIds: { side: ['s', 'a'], top: ['b'], bottom: ['c'] },
++    widths: { side: 30, [ROW_CONTENT_TRACK]: 70 },
++    padding: { target: 'container', id: 'side', side: 'right', value: 2 },
++  });
++  assert.equal(moved.sectionsById.a.containerId, 'side');
++  assert.equal(moved.sectionsById.a.padding.paddingLeft, '2rem');
++  assert.equal(moved.sectionsById.a.padding.paddingRight, '3rem');
++  assert.equal(moved.sectionsById.s.padding.paddingBottom, '0.4rem');
++  assert.equal(moved.sectionsById.b.padding.paddingTop, '2rem');
++  assert.equal(moved.layout.widthsById.side, 30);
++  assert.deepEqual(resolveResumePresentation(resume), saved);
++  const adjusted = resolveResumePresentation(resume, { padding: { target: 'section', id: 'a', side: 'left', value: -5 } });
++  assert.equal(adjusted.sectionsById.a.padding.paddingLeft, '0rem');
++  const page = resolveResumePresentation(resume, { padding: { target: 'resume', id: null, side: 'top', value: 4 } });
++  assert.equal(page.sectionsById.a.padding.paddingTop, '4rem');
++});
++
++test('legacy gaps, absent entities and section styling metadata resolve consistently', () => {
++  const resume = makeResume();
++  resume.layout.gap = { vertical: '0.7rem' };
++  resume.containers.allIds.push('missing');
++  resume.containers.byId.top.sectionIds.push('missing');
++  resume.sections.byId.a.styling.border = { top: { display: true } };
++  resume.sections.byId.a.styling.fontSizeOffset = 2;
++  const p = resolveResumePresentation(resume);
++  assert.equal(p.resumeLayout.gap.section, '0.7rem');
++  assert.equal(p.resumeLayout.gap.vertical, '0rem');
++  assert.deepEqual(p.containersById.top.sectionIds, ['a', 'b']);
++  assert.equal(p.sectionsById.a.style.border, undefined);
++  assert.equal(p.sectionsById.a.style.fontSizeOffset, undefined);
++  assert.equal(resume.sections.byId.a.styling.fontSizeOffset, 2);
++});
++
++// Render the actual preview without Redux or editor providers. This catches old
++// flex layouts/spacing calculations accidentally reintroduced in its components.
++const bundle = await build({
++  stdin: {
++    contents: `import React from 'react'; import {renderToStaticMarkup} from 'react-dom/server';
++      import PreviewPaper from './src/features/ResumePreview/components/PreviewPaper.jsx';
++      export const render = resume => renderToStaticMarkup(React.createElement(PreviewPaper, {resume}));`,
++    resolveDir: new URL('..', import.meta.url).pathname,
++  },
++  alias: { '@': new URL('../src', import.meta.url).pathname },
++  bundle: true, write: false, format: 'cjs', platform: 'node', jsx: 'automatic',
++  external: ['react', 'react-dom/server', 'react/jsx-runtime'],
++});
++const module = { exports: {} };
++new Function('require', 'module', 'exports', bundle.outputFiles[0].text)(createRequire(import.meta.url), module, module.exports);
++const renderPreview = module.exports.render;
++
++test('actual thumbnail markup uses shared grid, spacing, backgrounds and fill styles', () => {
++  const resume = makeResume();
++  const html = renderPreview(resume);
++  const p = resolveResumePresentation(resume);
++  assert.ok(html.includes(`grid-template-columns:${p.pageStyle.gridTemplateColumns}`));
++  for (const id of p.containerIds) {
++    const tag = html.match(new RegExp(`<div style="([^"]*)" data-container-id="${id}">`));
++    assert.ok(tag, id);
++    assert.ok(tag[1].includes(`grid-row:${p.containersById[id].style.gridRow}`));
++    assert.ok(tag[1].includes(`grid-column:${p.containersById[id].style.gridColumn}`));
++  }
++  for (const [id, section] of Object.entries(p.sectionsById)) {
++    const tag = html.match(new RegExp(`<div style="([^"]*)" data-section-id="${id}">`));
++    assert.ok(tag, id);
++    for (const [key, value] of Object.entries(section.padding)) {
++      const cssKey = key.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`);
++      assert.ok(tag[1].includes(`${cssKey}:${value}`), `${id}:${key}`);
++    }
++    assert.ok(tag[1].includes(`background-color:${section.style.backgroundColor}`));
++    assert.ok(tag[1].includes(`flex:${section.style.flex}`));
++  }
++  assert.ok(!html.includes('Drop a section here'));
++  assert.ok(!html.includes('<button'));
++});
++
++test('independent preview documents cannot inherit each other’s widths or margins', () => {
++  const first = makeResume();
++  const second = makeResume();
++  second.layout.padding.left = '5rem';
++  second.containers.byId.side.layout.width.value = '40%';
++  const firstHtml = renderPreview(first);
++  const secondHtml = renderPreview(second);
++  assert.notEqual(firstHtml, secondHtml);
++  assert.equal(renderPreview(first), firstHtml);
++});

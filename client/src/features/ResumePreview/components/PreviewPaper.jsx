@@ -1,17 +1,20 @@
-import PreviewContainer from "./PreviewContainer";
+import { resolveResumePresentation } from '@/utils/resumePresentation.js';
+import PreviewContainer from './PreviewContainer';
 
 export default function PreviewPaper({ resume }) {
-  const containers = resume.containers.allIds
-    .map((id) => resume.containers.byId[id])
-    .filter(Boolean);
-
-  return containers.map((container, index) => (
-    <PreviewContainer
-      key={container.id}
-      container={container}
-      resume={resume}
-      isFirstContainer={index === 0}
-      isLastContainer={index === containers.length - 1}
-    />
-  ));
+  const presentation = resolveResumePresentation(resume);
+  const normalizedResume = { ...resume, layout: presentation.resumeLayout };
+  return (
+    <div style={presentation.pageStyle}>
+      {presentation.containerIds.map(id => (
+        <PreviewContainer
+          key={id}
+          container={resume.containers.byId[id]}
+          resume={normalizedResume}
+          presentation={presentation.containersById[id]}
+          sectionPresentations={presentation.sectionsById}
+        />
+      ))}
+    </div>
+  );
 }

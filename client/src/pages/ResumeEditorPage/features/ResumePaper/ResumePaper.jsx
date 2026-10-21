@@ -1,7 +1,9 @@
-import { resolveResumeLayout, deriveSectionBoundaries, resizeColumnWidths } from '@/utils/resumeLayout.js';
+import { resolveResumePresentation } from '@/utils/resumePresentation.js';
+import { PaddingPreviewContext } from './helpers/PaddingPreviewContext.js';
+import { resizeColumnWidths } from '@/utils/resumeLayout.js';
 import { EditorLayoutContext } from './helpers/EditorLayoutContext.js';
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState, useContext } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 
@@ -24,8 +26,10 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const localEditorRef = useRef(null);
   const editorRef = props.editorPageRef ?? localEditorRef;
 
-  const containers = useSelector((state) => state.resume.present.containers);
-  const sectionsById = useSelector((state) => state.resume.present.sections.byId);
+  const resume = useSelector(state => state.resume.present);
+  const containers = resume.containers;
+  const sectionsById = resume.sections.byId;
+  const paddingPreview = useContext(PaddingPreviewContext)?.preview;
 
   const [sectionOrderPreview, setSectionOrderPreview] = useState(null);
   const containerOrder = containers.allIds;
@@ -35,21 +39,12 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const resizeState = useRef(null);
   const previewWidthsRef = useRef(null);
 
-  const rowContentWidth = useSelector(state => state.resume.present.layout.rowContentWidth);
-  const resolvedLayout = resolveResumeLayout({
-    rowContentWidth,
-    containersById: containers.byId,
-    orderedContainerIds: containerOrder,
-    widthOverrides: previewWidths ?? {},
+  const presentation = resolveResumePresentation(resume, {
+    sectionIds: containerSectionIds,
+    widths: previewWidths,
+    padding: paddingPreview,
   });
-  const sectionContexts = {};
-  for (const containerId of containerOrder) {
-    const ids = (containerSectionIds[containerId] ?? []).filter(id => sectionsById[id]);
-    for (const id of ids) sectionContexts[id] = {
-      containerId,
-      boundaries: deriveSectionBoundaries(resolvedLayout.boundariesByContainerId[containerId], ids, id),
-    };
-  }
+  const resolvedLayout = presentation.layout;
   const getContainerWidth = (containerId) => resolvedLayout.widthsById[containerId] ?? 0;
 
   const finishResize = () => {
@@ -129,16 +124,6 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     }));
   };
 
-  const reduxResumeStyling = useSelector((state) => state.resume.present.styling);
-  const resumeStyling = {
-    ...reduxResumeStyling,
-    display: 'grid',
-    gridTemplateColumns: resolvedLayout.gridTemplateColumns,
-    gridTemplateRows: resolvedLayout.gridTemplateRows,
-    gap: 0,
-    padding: 0,
-  };
-
   useEffect(() => {
 
     const handleKeyDown = (e) => {
@@ -160,7 +145,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     };
   }, [dispatch]);
 
-  const resumeContainers = containerOrder.map((containerId) => {
+  const resumeContainers = presentation.containerIds.map((containerId) => {
     const container = containers.byId[containerId];
 
     if (!container) {
@@ -172,14 +157,13 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       <Container
         key={container.id}
         container={container}
-        sectionIds={containerSectionIds[container.id] ?? []}
+        presentation={presentation.containersById[containerId]}
+        sectionPresentations={presentation.sectionsById}
         sectionById={sectionsById}
         onStartResize={startResize}
         containerPreviewWidths={previewWidths}
         rightContainerId={resolvedLayout.resizeNeighborsByContainerId[containerId]}
         resizeTrackId={resolvedLayout.resizeTrackByContainerId[containerId]}
-        placement={resolvedLayout.placementsByContainerId[containerId]}
-        boundaries={resolvedLayout.boundariesByContainerId[containerId]}
         onResizeWithKeyboard={resizeWithKeyboard}
       />
     );
@@ -187,13 +171,13 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
 
   return (
-    <EditorLayoutContext.Provider value={sectionContexts}>
+    <EditorLayoutContext.Provider value={presentation.sectionsById}>
     <div className={styles.printPageRef} ref={ref}>
       {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
       {!isMobile && <MarginRuler pageRef={editorRef} />}
       <div
         className={`${props.isPrinting ? styles.printingPageContainer : styles.editingPageContainer}`}
-        style={resumeStyling}
+        style={presentation.pageStyle}
         ref={editorRef}
         id="editorPage"
       >

@@ -1,4 +1,3 @@
-import { deriveSectionBoundaries } from '@/utils/resumeLayout.js';
 import React from "react";
 import { useDroppable } from "@dnd-kit/react";
 
@@ -9,10 +8,9 @@ import { CollisionPriority } from "@dnd-kit/abstract";
 
 const Container = ({
   container,
-  sectionIds = [],
+  presentation,
+  sectionPresentations,
   sectionById,
-  placement,
-  boundaries,
   containerPreviewWidths,
   rightContainerId,
   resizeTrackId,
@@ -26,12 +24,7 @@ const Container = ({
     collisionPriority: CollisionPriority.High,
   });
 
-  const containerStyling = {
-    position: 'relative',
-    gridRow: `${placement.rowStart} / span ${placement.rowSpan}`,
-    gridColumn: `${placement.columnStart} / span ${placement.columnSpan}`,
-  };
-  const renderedIds = sectionIds.filter(id => sectionById[id]);
+  const renderedIds = presentation.sectionIds;
 
   const renderedSections = renderedIds.map((sectionId, index) => (
     <Section
@@ -39,9 +32,8 @@ const Container = ({
       section={sectionById[sectionId]}
       container={container}
       index={index}
-      hasNextSection={index < renderedIds.length - 1}
+      presentation={sectionPresentations[sectionId]}
       orderedSectionIds={renderedIds}
-      boundaries={deriveSectionBoundaries(boundaries, renderedIds, sectionId)}
     />
   ));
 
@@ -55,7 +47,7 @@ const Container = ({
     <div
       id={container.id}
       className={styles.containerWrapperDiv}
-      style={containerStyling}
+      style={presentation.style}
       ref={ref}
     >
       {renderedSections}
