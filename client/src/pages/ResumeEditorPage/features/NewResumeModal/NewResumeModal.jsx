@@ -18,21 +18,7 @@ const NewResumeModal = () => {
   const [resumeInfo, setResumeInfo] = useState({
     userId: user.id,
     title: "",
-    // sections: {}
   });
-  // const [resumeInfo, setResumeInfo] = useState({
-  //   userId: user.id,
-  //   title: "",
-  //   sections: {
-  //     // header: false,
-  //     // contact: false,
-  //     // skills: false,
-  //     // summary: false,
-  //     // workHistory: false,
-  //     // education: false,
-  //     // projects: false
-  //   },
-  // });
 
   const [sectionTypes, setSectionTypes] = useState({});
 

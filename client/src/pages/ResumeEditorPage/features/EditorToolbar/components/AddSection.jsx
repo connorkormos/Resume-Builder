@@ -1,7 +1,7 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useRef } from "react";
 
-import { addSectionToApi } from "@/services/resumeServices";
+import { addSectionToApi, getSectionTypesFromApi } from "@/services/resumeServices";
 import TextFormatDropdown from "../../TextFormatting/shared/TextFormatDropdown";
 import { useDispatch, useSelector } from "react-redux";
 import { addSection, addSubsection } from "@/store/resumeSlice";
@@ -28,18 +28,25 @@ const AddSection = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ! DROPDOWN JAVASCRIPT ! //
+  const [sectionOptions, setSectionOptions] = useState([]);
 
-  const sectionOptions = [
-    { type: "header", label: "Header" },
-    { type: "contact", label: "Contact" },
-    { type: "workHistory", label: "Work History" },
-    { type: "education", label: "Education" },
-    { type: "skills", label: "Skills" },
-    { type: "summary", label: "Summary" },
-    { type: "projects", label: "Projects" },
-    { type: "custom", label: "Custom" },
-  ];
+  useEffect(() => {
+    const fetchSectionTypes = async () => {
+      const sectionTypeData = await getSectionTypesFromApi();
+      if (!sectionTypeData) {
+        return;
+      }
+
+      setSectionOptions(
+        Object.values(sectionTypeData).map(({ type, label }) => ({
+          type,
+          label,
+        }))
+      );
+    };
+
+    fetchSectionTypes();
+  }, []);
 
   const handleAddSection = async (type) => {
     const createdData = await addSectionToApi(resume.id, type);
@@ -56,7 +63,7 @@ const AddSection = () => {
     setAddSectionDropdownIsOpen(false);
   };
 
-  const sectionOptionsArr = sectionOptions.map((option) => (
+  const sectionOptionsArr = sectionOptions.length ? sectionOptions.map((option) => (
     <p
       key={option.type}
       // className={styles.dropdownOption}
@@ -69,7 +76,9 @@ const AddSection = () => {
     >
       {option.label}
     </p>
-  ));
+  )) : [
+    <p key="error">Error loading section options...</p>
+  ];
 
   return (
     <div ref={dropdownRef} data-toolbar-label="Add Section">
