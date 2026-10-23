@@ -104,7 +104,7 @@ class SectionDefaultsTest(unittest.TestCase):
         self.assertEqual(second["fields"], ["Name", "Title"])
         self.assertEqual(SECTION_DEFAULTS, before)
         unknown = get_section_definition("unknownType")
-        self.assertEqual(unknown["label"], "Unknown Type")
+        self.assertEqual(unknown["label"], "unknownType")
         self.assertEqual(unknown["type"], "custom")
         self.assertEqual(unknown["heading"], "Custom Section")
         self.assertEqual(unknown["fields"], ["Custom Field"])

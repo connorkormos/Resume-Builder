@@ -8,7 +8,6 @@ from lib.defaults import (
 )
 from services.updaters import update_container_widths
 from services.plain_text import build_resume_plain_text
-from utils.formatting import format_label
 
 
 class ResumeNotFoundError(Exception):
@@ -129,7 +128,7 @@ def add_field(subsection_id, label='New Field', position=0, *, defaults=None):
         defaults = deepcopy(defaults)
     field = Field(
         subsection_id=subsection_id,
-        label=format_label(label),
+        label=label,
         position=position,
         value=build_empty_slate_value(label),
         styling=defaults["styling"],
@@ -167,6 +166,8 @@ def build_resume_with_defaults(title, user_id, sections_data):
     )
 
     section_position = 0
+    
+    print("Sections data received for new resume:", sections_data)
 
     for section_type, should_create in sections_data.items():
         if not should_create:

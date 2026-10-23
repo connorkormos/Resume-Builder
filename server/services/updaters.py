@@ -1,7 +1,6 @@
 from copy import deepcopy
 from models import Container, Field, Section, Subsection, db, Resume
 
-from utils.formatting import format_label
 
 # ** Helper function to set container widths based on manual and auto width settings **
 def update_container_widths(resume_id):

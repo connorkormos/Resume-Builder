@@ -94,6 +94,27 @@ export const deleteSubsectionFromApi = async (subsectionId) => {
    }
 }
 
+export const getSectionTypesFromApi = async () => {
+   try {
+      const data = await fetchApi({
+         endpoint: `/sections/types`,
+         options: { method: 'GET' }
+      })
+
+      return data?.section_definitions ?? null;
+
+   } catch (error) {
+      console.error(`Error fetching section defaults: `, error)
+      alert(
+         error?.code && error?.message
+            ? error.code + '\n' + error.message
+            : `Error fetching section defaults.`
+      )
+
+      return null;
+   }
+}
+
 export const addSectionToApi = async (resumeId, sectionType) => {
    try {
       const data = await fetchApi({

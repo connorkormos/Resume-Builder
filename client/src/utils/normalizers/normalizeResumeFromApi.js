@@ -74,8 +74,8 @@ const normalizeResumeFromApi = (apiResume) => {
       normalizedResume.sections.byId[section.id] = {
         id: section.id,
         containerId: section.containerId,
-        label: section.label ?? '',
-        type: section.type ?? 'defaultSection',
+        label: section.label,
+        type: section.type,
         position: section.position ?? 0,
         value: normalizeSlateValue(section.value ?? []),
         showHeading: section.showHeading ?? true,

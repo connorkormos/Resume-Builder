@@ -1,6 +1,7 @@
 from utils.authorization import check_resume_access
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, current_app, request, jsonify, session
 from models import db, Resume, Container, Section, Subsection, Field
+from lib.defaults import SECTION_DEFINITIONS
 
 from services.builders import (
     build_resume_with_defaults,
@@ -150,4 +151,25 @@ def delete_section_from_resume(section_id):
             error_type="SERVER_ERROR",
             code="ERROR_DELETING_SECTION",
             message=f"Failed to delete section of ID {section_id}.",
+        )
+
+@section_bp.route("/types")
+def get_section_types():
+    print_pending_request("GET", "/sections/types")
+
+    try:
+        section_definitions = SECTION_DEFINITIONS
+        print_successful_request("Fetched section types", section_definitions)
+        return current_app.response_class(
+            current_app.json.dumps(
+                {"section_definitions": section_definitions}, sort_keys=False
+            ),
+            mimetype="application/json",
+        ), 200
+
+    except Exception as e:
+        return generate_error(
+            error_type="SERVER_ERROR",
+            code="ERROR_FETCHING_SECTION_TYPES",
+            message="Failed to fetch section types.",
         )

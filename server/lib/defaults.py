@@ -2,8 +2,6 @@
 
 from copy import deepcopy
 
-from utils.formatting import format_label
-
 
 RESUME_DEFAULTS = {
     "styling": {
@@ -129,7 +127,8 @@ def get_section_definition(section_type):
     if overrides is None:
         overrides = {
             **SECTION_DEFINITIONS["custom"],
-            "label": format_label(section_type),
+            "label": section_type,
         }
+
     merge(definition, overrides)
     return definition

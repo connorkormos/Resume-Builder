@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { setResumeId } from "@/store/resumeSlice";
 
+import { addResumeToApi, getSectionTypesFromApi } from "@/services/resumeServices";
+
+
 import styles from "./NewResumeModal.module.css";
-import { addResumeToApi } from "@/services/resumeServices";
 
 const NewResumeModal = () => {
   const dispatch = useDispatch();
@@ -16,34 +18,62 @@ const NewResumeModal = () => {
   const [resumeInfo, setResumeInfo] = useState({
     userId: user.id,
     title: "",
-    sections: {
-      header: false,
-      contact: false,
-      skills: false,
-      summary: false,
-      workHistory: false,
-      education: false,
-      projects: false
-    },
+    // sections: {}
   });
+  // const [resumeInfo, setResumeInfo] = useState({
+  //   userId: user.id,
+  //   title: "",
+  //   sections: {
+  //     // header: false,
+  //     // contact: false,
+  //     // skills: false,
+  //     // summary: false,
+  //     // workHistory: false,
+  //     // education: false,
+  //     // projects: false
+  //   },
+  // });
+
+  const [sectionTypes, setSectionTypes] = useState({});
+
+  useEffect(() => {
+    const fetchSectionTypes = async () => {
+      const sectionTypeData = await getSectionTypesFromApi();
+      if (!sectionTypeData) {
+        return;
+      }
+
+      setSectionTypes(sectionTypeData);
+      setResumeInfo((prevInfo) => ({
+        ...prevInfo,
+        sections: Object.fromEntries(
+          Object.keys(sectionTypeData).map((key) => [key, false])
+        ),
+      }));
+    };
+
+    fetchSectionTypes();
+  }, []);
 
   const handleResumeInfoChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { id, value, type, checked } = e.target;
     if (type === "checkbox") {
       setResumeInfo((prevInfo) => ({
         ...prevInfo,
         sections: {
           ...prevInfo.sections,
-          [name]: checked,
+          [id]: checked,
         },
       }));
     } else {
       setResumeInfo((prevInfo) => ({
         ...prevInfo,
-        [name]: value,
+        [id]: value,
       }));
     }
   };
+
+
 
   const handleCreateResume = async () => {
     if (!resumeInfo.title) {
@@ -64,38 +94,56 @@ const NewResumeModal = () => {
     navigate(`/editor/${normalizedResumeData.id}`);
   };
 
-  const resumeOptionsArr = [
-    "header",
-    "contact",
-    "skills",
-    "summary",
-    "workHistory",
-    "education",
-    "projects",
-    "custom"
-  ];
-  const resumeOptions = resumeOptionsArr.map((option, index) => {
-    let splitOption = option.replace(
-      option.match(/[A-Z]/g),
-      " " + option.match(/[A-Z]/g),
-    );
-    let capitalizedOption =
-      splitOption.charAt(0).toUpperCase() + splitOption.slice(1);
-
+  const renderSectionOptions = resumeInfo.sections && Object.keys(resumeInfo.sections).map((key) => {
+    const section = sectionTypes[key];
+    const id = section.type;
     return (
-      <label htmlFor={option} className={styles.checkboxLabel}>
+      <label htmlFor={id} key={id} className={styles.checkboxLabel}>
         <input
           type="checkbox"
           className={styles.sectionCheckbox}
-          checked={resumeInfo.sections[option] || false}
+          checked={resumeInfo.sections[id] || false}
           onChange={(e) => handleResumeInfoChange(e)}
-          id={option}
-          name={option}
+          id={id}
+          name={section.label}
         />
-        {capitalizedOption}
+        {section.label}
       </label>
-    );
-  });
+    )
+  })
+
+  // const resumeOptionsArr = [
+  //   "header",
+  //   "contact",
+  //   "skills",
+  //   "summary",
+  //   "workHistory",
+  //   "education",
+  //   "projects",
+  //   "custom"
+  // ];
+  // const resumeOptions = resumeOptionsArr.map((option, index) => {
+  //   let splitOption = option.replace(
+  //     option.match(/[A-Z]/g),
+  //     " " + option.match(/[A-Z]/g),
+  //   );
+  //   let capitalizedOption =
+  //     splitOption.charAt(0).toUpperCase() + splitOption.slice(1);
+
+  //   return (
+  //     <label htmlFor={option} className={styles.checkboxLabel}>
+  //       <input
+  //         type="checkbox"
+  //         className={styles.sectionCheckbox}
+  //         checked={resumeInfo.sections[option] || false}
+  //         onChange={(e) => handleResumeInfoChange(e)}
+  //         id={option}
+  //         name={option}
+  //       />
+  //       {capitalizedOption}
+  //     </label>
+  //   );
+  // });
 
   return (
     <div className={styles.modalOverlayContainer}>
@@ -121,12 +169,13 @@ const NewResumeModal = () => {
               <span>(You can always change this later)</span>
             </p>
             <div className={styles.checkboxOptionsWrapper}>
-              {resumeOptions}
+              {renderSectionOptions}
             </div>
           </div>
           <button
             className={styles.createResumeButton}
             onClick={handleCreateResume}
+            disabled={Object.keys(sectionTypes).length === 0}
           >
             Create Resume
           </button>
