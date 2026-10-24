@@ -106,7 +106,7 @@ test('role changes are atomic, keep ordering synchronized and redistribute colum
 
 test('moves cannot split the content group; resize pairs use column neighbors across row entries', () => {
   let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('s', 20, true), row('h'), column('a', 40), column('b', 40)]) };
-  assert.deepEqual(reducer(state, moveContainer({ id: 'h', direction: 1 })), state);
+  assert.deepEqual(reducer(state, moveContainer({ id: 'h', direction: 1 })).containers.allIds, ['s', 'a', 'b', 'h']);
   state = reducer(state, resizeContainerPair({ leftContainerId: 's', rightContainerId: 'a', leftWidth: 25, rightWidth: 35 }));
   assert.equal(state.containers.byId.s.layout.width.value, '25.00%');
   assert.deepEqual(reducer(state, resizeContainerPair({ leftContainerId: 's', rightContainerId: 'h', leftWidth: 25, rightWidth: 35 })), state);
@@ -255,5 +255,89 @@ test('converting the last ordinary column to a row preserves sidebar sides', () 
     const back = reducer(state, configureContainer({ id: 'body', role: 'column' }));
     assert.equal(resolveState(back).hasRowContentTrack, false);
     assertTilesPage(resolveState(back));
+  }
+});
+
+
+test('type settings place rows above and columns after the body, preserving sections', () => {
+  let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([row('h'), column('a'), column('b'), row('f')]) };
+  state.containers.byId.a.sectionIds = ['experience'];
+  state = reducer(state, configureContainer({ id: 'a', type: 'row' }));
+  assert.deepEqual(state.containers.allIds, ['h', 'a', 'b', 'f']);
+  assert.equal(state.containers.byId.a.type, 'row');
+  state = reducer(state, configureContainer({ id: 'a', type: 'column' }));
+  assert.deepEqual(state.containers.allIds, ['h', 'b', 'a', 'f']);
+  assert.deepEqual(state.containers.byId.a.sectionIds, ['experience']);
+  assert.equal(state.containers.byId.a.spanFullPage, false);
+  assertTilesPage(resolve(state.containers));
+});
+
+test('sidebar toggle chooses the nearest edge and returns to the same body edge', () => {
+  for (const [id, expected, restored] of [
+    ['b', ['b', 'h', 'a', 'c', 'd', 'f'], ['h', 'b', 'a', 'c', 'd', 'f']],
+    ['c', ['h', 'a', 'b', 'd', 'f', 'c'], ['h', 'a', 'b', 'd', 'c', 'f']],
+  ]) {
+    let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([row('h'), column('a'), column('b'), column('c'), column('d'), row('f')]) };
+    state = reducer(state, configureContainer({ id, type: 'column', spanFullPage: true }));
+    assert.deepEqual(state.containers.allIds, expected);
+    assertTilesPage(resolve(state.containers));
+    state = reducer(state, configureContainer({ id, type: 'column', spanFullPage: false }));
+    assert.deepEqual(state.containers.allIds, restored);
+    assertTilesPage(resolve(state.containers));
+  }
+});
+
+test('directional moves follow visual neighbors and stop at edges', () => {
+  let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('s', 20, true), row('h'), column('a'), column('b'), row('f')]) };
+  state = reducer(state, moveContainer({ id: 'a', direction: 1 }));
+  assert.deepEqual(state.containers.allIds, ['s', 'h', 'b', 'a', 'f']);
+  assert.equal(reducer(state, moveContainer({ id: 'a', direction: 1 })), state);
+  state = reducer(state, moveContainer({ id: 'h', direction: 1 }));
+  assert.deepEqual(state.containers.allIds, ['s', 'b', 'a', 'h', 'f']);
+  state = reducer(state, moveContainer({ id: 'h', direction: 1 }));
+  assert.deepEqual(state.containers.allIds, ['s', 'b', 'a', 'f', 'h']);
+  assert.equal(reducer(state, moveContainer({ id: 'h', direction: 1 })), state);
+  state = reducer(state, moveContainer({ id: 's', direction: 1 }));
+  assert.deepEqual(state.containers.allIds, ['b', 'a', 'f', 'h', 's']);
+  assert.equal(getContainerRole(resolve(state.containers), state.containers.byId.s), 'rightSidebar');
+  state = reducer(state, moveContainer({ id: 's', direction: -1 }));
+  assert.deepEqual(state.containers.allIds, ['s', 'b', 'a', 'f', 'h']);
+  state.containers.allIds.forEach((id, index) => assert.equal(state.containers.byId[id].position, index));
+  assertTilesPage(resolve(state.containers));
+});
+
+test('rows-only and columns-only layouts support movement and type changes', () => {
+  for (const items of [[row('a'), row('b')], [column('a'), column('b')]]) {
+    let state = { ...reducer(undefined, { type: 'init' }), containers: fixture(items) };
+    state = reducer(state, moveContainer({ id: 'a', direction: 1 }));
+    assert.deepEqual(state.containers.allIds, ['b', 'a']);
+    state = reducer(state, configureContainer({ id: 'a', type: 'column', spanFullPage: true }));
+    assertTilesPage(resolve(state.containers));
+    state = reducer(state, configureContainer({ id: 'a', type: 'row' }));
+    assertTilesPage(resolve(state.containers));
+  }
+});
+
+
+test('sidebars move across stacked rows without ordinary columns', () => {
+  let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('s', 25, true), row('a'), row('b')]) };
+  state = reducer(state, moveContainer({ id: 's', direction: 1 }));
+  assert.deepEqual(state.containers.allIds, ['a', 'b', 's']);
+  assert.equal(getContainerRole(resolve(state.containers), state.containers.byId.s), 'rightSidebar');
+  assertTilesPage(resolve(state.containers));
+  state = reducer(state, configureContainer({ id: 's', type: 'column', spanFullPage: false }));
+  assert.equal(state.containers.byId.s.spanFullPage, false);
+  assertTilesPage(resolve(state.containers));
+});
+
+test('a single container can switch types and sidebar behavior without losing its contents', () => {
+  let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('a')]) };
+  for (const settings of [{ type: 'row' }, { type: 'column' }, { type: 'column', spanFullPage: true }, { type: 'column', spanFullPage: false }]) {
+    state = reducer(state, configureContainer({ id: 'a', ...settings }));
+    assert.deepEqual(state.containers.allIds, ['a']);
+    assert.equal(state.containers.byId.a.type, settings.type);
+    assert.equal(reducer(state, moveContainer({ id: 'a', direction: 1 })), state);
+    assert.equal(reducer(state, moveContainer({ id: 'a', direction: -1 })), state);
+    assertTilesPage(resolve(state.containers));
   }
 });

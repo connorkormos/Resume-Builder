@@ -170,6 +170,71 @@ export function planContainerRole(containers, id, role) {
   return { ids, next, errors: resolveResumeLayout({ containersById: byId, orderedContainerIds: ids }).errors };
 }
 
+// Translate the two settings into a valid placement, keeping sections attached.
+export function planContainerSettings(containers, id, { type, spanFullPage }) {
+  const container = containers.byId[id];
+  const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds });
+  const oldRole = getContainerRole(layout, container);
+  let role = type === 'row' ? 'header' : 'column';
+  if (type === 'column' && spanFullPage) {
+    const index = layout.bodyColumnIds.indexOf(id);
+    role = oldRole === 'rightSidebar' || (index >= 0 && index > (layout.bodyColumnIds.length - 1) / 2)
+      ? 'rightSidebar' : 'leftSidebar';
+  }
+  const plan = planContainerRole(containers, id, role);
+  // Place new rows after existing top rows, and new columns at the appropriate edge.
+  if (role === 'header' || role === 'column') {
+    const ids = plan.ids.filter(candidate => candidate !== id);
+    const body = ids.filter(candidate => containers.byId[candidate].type !== 'row' && !containers.byId[candidate].spanFullPage);
+    let index;
+    if (body.length) {
+      index = role === 'header' || oldRole === 'leftSidebar'
+        ? ids.indexOf(body[0]) : ids.indexOf(body.at(-1)) + 1;
+    } else {
+      index = plan.ids.indexOf(id);
+    }
+    ids.splice(index, 0, id);
+    plan.ids = ids;
+  }
+  plan.errors = resolveResumeLayout({
+    containersById: { ...containers.byId, [id]: plan.next },
+    orderedContainerIds: plan.ids,
+  }).errors;
+  return plan;
+}
+
+// Move visual neighbors together: rows cross the whole body; sidebars cross the center.
+// A null result means the container is already at the edge.
+export function planContainerMove(containers, id, direction) {
+  if (!containers.byId[id] || ![-1, 1].includes(direction)) return null;
+  const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds });
+  const container = containers.byId[id];
+  const body = layout.bodyColumnIds;
+  let blocks;
+  if (container.type !== 'row' && !container.spanFullPage) {
+    blocks = body.map(candidate => [candidate]);
+  } else {
+    const center = containers.allIds.filter(candidate =>
+      containers.byId[candidate].type === 'row' || body.includes(candidate));
+    const grouped = container.type === 'row' ? body : center;
+    const candidates = container.type === 'row' ? center : containers.allIds;
+    blocks = [];
+    for (const candidate of candidates) {
+      if (!grouped.includes(candidate)) blocks.push([candidate]);
+      else if (candidate === grouped[0]) blocks.push(grouped);
+    }
+  }
+  const index = blocks.findIndex(block => block.includes(id));
+  const next = index + direction;
+  if (index < 0 || next < 0 || next >= blocks.length) return null;
+  [blocks[index], blocks[next]] = [blocks[next], blocks[index]];
+  const moved = blocks.flat();
+  const affected = new Set(moved);
+  let cursor = 0;
+  const ids = containers.allIds.map(candidate => affected.has(candidate) ? moved[cursor++] : candidate);
+  return resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: ids }).errors.length ? null : ids;
+}
+
 // Both input methods preserve the pair's total and use the same lower bound.
 // Small existing pairs remain resizable instead of requiring 20% combined width.
 export function resizeColumnWidths(leftWidth, rightWidth, delta) {

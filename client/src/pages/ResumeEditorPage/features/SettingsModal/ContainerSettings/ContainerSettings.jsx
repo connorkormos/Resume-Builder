@@ -1,16 +1,8 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateContainer, configureContainer, moveContainer, setColumnWidth } from '@/store/resumeSlice.js';
-import { planContainerRole, resolveResumeLayout, getColumnWidthLimits, getContainerRole, ROW_CONTENT_TRACK } from '@/utils/resumeLayout.js';
+import { planContainerMove, resolveResumeLayout, getColumnWidthLimits, ROW_CONTENT_TRACK } from '@/utils/resumeLayout.js';
 import styles from '../SettingsModal.module.css';
-
-const roles = [
-  ['column', 'Content column'],
-  ['header', 'Row above content'],
-  ['footer', 'Row below content'],
-  ['leftSidebar', 'Full-height left column'],
-  ['rightSidebar', 'Full-height right column'],
-];
 
 export default function ContainerSettings() {
   const dispatch = useDispatch();
@@ -23,32 +15,52 @@ export default function ContainerSettings() {
   const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds, rowContentWidth: resume.layout.rowContentWidth });
   const isRow = container.type === 'row';
   const widthLimits = getColumnWidthLimits(layout, container.id);
-  const role = getContainerRole(layout, container);
-  const availableRoles = layout.bodyColumnIds.length
-    ? roles
-    : roles.filter(([value]) => value !== 'header' && value !== 'footer').concat([['row', 'Row']]);
-  const canMove = direction => {
-    const ids = [...containers.allIds];
-    const index = ids.indexOf(container.id);
-    const next = index + direction;
-    if (next < 0 || next >= ids.length) return false;
-    [ids[index], ids[next]] = [ids[next], ids[index]];
-    return !resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: ids }).errors.length;
+  const canMove = direction => planContainerMove(containers, container.id, direction) !== null;
+  const changeType = type => {
+    setWidthInput(null);
+    dispatch(configureContainer({ id: container.id, type }));
   };
   return (
     <div className={styles.settingsModalWrapper}>
-      <h2>Container {container.position + 1} Settings</h2>
+      <h2>Layout area settings</h2>
       <label>
-        Placement
-        <select style={{ backgroundColor: 'var(--background-main)' }} value={role} onChange={event => dispatch(configureContainer({ id: container.id, role: event.target.value }))}>
-          {availableRoles.map(([value, label]) => <option key={value} value={value} style={{ backgroundColor: 'var(--background-main)' }}
-            disabled={planContainerRole(containers, container.id, value).errors.length > 0}>{label}</option>)}
+        Type
+        <select style={{ backgroundColor: 'var(--background-main)' }} value={container.type} onChange={event => changeType(event.target.value)}>
+          <option value="column">Column</option>
+          <option value="row">Row</option>
         </select>
       </label>
-      <p>Rows span the available width between full-height side columns. Sections stack vertically.</p>
+      <p>{isRow
+        ? 'Rows sit above or below the columns and span the width between sidebars. Sections inside stack vertically.'
+        : 'Columns sit side by side. Sections inside stack vertically.'}</p>
+      {!isRow && <>
+        <label>
+          <input type="checkbox" checked={Boolean(container.spanFullPage)}
+            onChange={event => {
+              setWidthInput(null);
+              dispatch(configureContainer({ id: container.id, type: 'column', spanFullPage: event.target.checked }));
+            }} />
+          Full-height sidebar
+        </label>
+        <p>Extend this column alongside the rows above and below. Use the arrows to choose its side.</p>
+      </>}
       <div className="flexRow">
-        <button type="button" className="buttonMain" disabled={!canMove(-1)} onClick={() => dispatch(moveContainer({ id: container.id, direction: -1 }))}>Move earlier</button>
-        <button type="button" className="buttonMain" disabled={!canMove(1)} onClick={() => dispatch(moveContainer({ id: container.id, direction: 1 }))}>Move later</button>
+        <button
+          type="button"
+          className="buttonMain"
+          disabled={!canMove(-1)}
+          onClick={() => dispatch(moveContainer({ id: container.id, direction: -1 }))}
+        >
+          {isRow ? '↑ Move up' : '← Move left'}
+        </button>
+        <button
+          type="button"
+          className="buttonMain"
+          disabled={!canMove(1)}
+          onClick={() => dispatch(moveContainer({ id: container.id, direction: 1 }))}
+        >
+          {isRow ? '↓ Move down' : 'Move right →'}
+        </button>
       </div>
       {!isRow && <>
         <form className="flexRow" onSubmit={event => {

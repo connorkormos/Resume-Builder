@@ -1,4 +1,4 @@
-import { resolveResumeLayout, planContainerRole, getColumnWidthLimits, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
+import { resolveResumeLayout, planContainerRole, planContainerSettings, planContainerMove, getColumnWidthLimits, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
 import { normalizeResumeLayout } from '../utils/sectionSpacing.js';
 import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
 import { normalizeSectionLayout } from "../utils/normalizers/normalizeSectionLayout.js";
@@ -323,10 +323,13 @@ const resumeSlice = createSlice({
       },
 
       configureContainer(state, action) {
-         const { id, role } = action.payload;
+         const { id, role, type, spanFullPage = false } = action.payload;
          const container = state.containers.byId[id];
-         if (!container || !['column', 'row', 'header', 'footer', 'leftSidebar', 'rightSidebar'].includes(role)) return;
-         const { ids, next, errors } = planContainerRole(state.containers, id, role);
+         if (!container) return;
+         if (role ? !['column', 'row', 'header', 'footer', 'leftSidebar', 'rightSidebar'].includes(role) : !['column', 'row'].includes(type)) return;
+         const { ids, next, errors } = role
+            ? planContainerRole(state.containers, id, role)
+            : planContainerSettings(state.containers, id, { type, spanFullPage });
          if (errors.length) return;
          state.containers.byId[id] = next;
          state.containers.allIds = ids;
@@ -336,12 +339,8 @@ const resumeSlice = createSlice({
 
       moveContainer(state, action) {
          const { id, direction } = action.payload;
-         const ids = [...state.containers.allIds];
-         const index = ids.indexOf(id);
-         const destination = index + direction;
-         if (index < 0 || destination < 0 || destination >= ids.length) return;
-         [ids[index], ids[destination]] = [ids[destination], ids[index]];
-         if (resolveResumeLayout({ containersById: state.containers.byId, orderedContainerIds: ids }).errors.length) return;
+         const ids = planContainerMove(state.containers, id, direction);
+         if (!ids) return;
          state.containers.allIds = ids;
          ids.forEach((candidate, position) => { state.containers.byId[candidate].position = position; });
       },
