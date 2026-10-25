@@ -38,7 +38,8 @@ elif database_url.startswith("postgresql://"):
     )
     
 # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"  # Local DB file
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "my-secret-key")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+# app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "my-secret-key")
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

@@ -50,7 +50,7 @@ def check_session():
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
     form_data = request.get_json()
-    print_pending_request("POST", "/users", "with form_data", form_data)
+    # print_pending_request("POST", "/users", "with form_data", form_data)
 
     try:
         email = (form_data.get("email") or "").strip().lower()
@@ -66,7 +66,7 @@ def signup():
         new_user = User(
             first_name=form_data["firstName"],
             last_name=form_data["lastName"],
-            email=form_data["email"],
+            email=email,
         )
 
         new_user.set_password(form_data["password"])
