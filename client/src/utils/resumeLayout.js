@@ -1,7 +1,19 @@
-// Reserved track identifier; never inserted into the container entities.
+// This file translates a flat, ordered list of saved containers into a page layout.
+// The supported shape is: outer sidebars + one central group of columns, with rows
+// above/below that group. The hierarchy is inferred; containers are not nested.
+// A container's type describes its place on the page, not how its sections flow.
+// Sections inside both row and column containers still stack vertically.
+//
+// The resolver below is read-only. The plan* helpers propose edits to ordering and
+// settings; callers apply those proposals to state and persist them separately.
+
+// A track is a vertical strip of the page grid. When rows have no ordinary body
+// columns underneath them, they need a shared strip of their own between sidebars.
+// This reserved identifier represents that space, never a saved container entity.
 export const ROW_CONTENT_TRACK = '__row_content__';
 
-// Layout is derived from ordered entities; CSS and spacing consume this same result.
+// Resolve relative widths for the supplied tracks. Rows spanning ordinary columns
+// do not get independent widths. Overrides are temporary values from resize previews.
 export function resolveColumnWidths(containersById, columnIds, overrides = {}) {
   const widths = {};
   const automatic = [];
@@ -17,20 +29,26 @@ export function resolveColumnWidths(containersById, columnIds, overrides = {}) {
       fixed += widths[id];
     }
   }
+  // Automatic tracks share the unclaimed width. If manual values already use
+  // 100 or more, give automatic tracks a positive fallback before normalizing.
   const share = fixed < 100
     ? (100 - fixed) / Math.max(1, automatic.length)
     : 100 / Math.max(1, columnIds.length);
   for (const id of automatic) widths[id] = share;
+  // Treat the results as proportions so even inconsistent saved totals fit the page.
   const total = Object.values(widths).reduce((sum, width) => sum + width, 0);
   for (const id of columnIds) widths[id] = widths[id] / total * 100;
   return widths;
 }
 
 function arrangeContainers(containersById, orderedContainerIds) {
+  // Ignore stale IDs and duplicates without modifying the saved ordering.
   const ids = [...new Set(orderedContainerIds)].filter(id => containersById[id]);
   const columnIds = ids.filter(id => containersById[id].type !== 'row');
   const rowIds = ids.filter(id => containersById[id].type === 'row');
   const errors = [];
+  // Peel off full-height columns at both edges. Everything between them belongs
+  // to the single body column group. Multiple sidebars per edge are allowed.
   let first = 0;
   let last = columnIds.length - 1;
   while (first <= last && containersById[columnIds[first]].spanFullPage) first++;
@@ -38,6 +56,8 @@ function arrangeContainers(containersById, orderedContainerIds) {
   const bodyIds = columnIds.slice(first, last + 1);
   const hasRowContentTrack = rowIds.length > 0 && bodyIds.length === 0;
   if (hasRowContentTrack) {
+    // With no body columns, the rows' position in the original list tells us
+    // where to insert their shared track relative to the sidebars.
     const firstRowIndex = ids.indexOf(rowIds[0]);
     const lastRowIndex = ids.indexOf(rowIds.at(-1));
     first = columnIds.filter(id => ids.indexOf(id) < firstRowIndex).length;
@@ -47,6 +67,8 @@ function arrangeContainers(containersById, orderedContainerIds) {
   }
   const trackIds = [...columnIds];
   if (hasRowContentTrack) trackIds.splice(first, 0, ROW_CONTENT_TRACK);
+  // Unsupported arrangements produce warnings but still get a usable placement:
+  // an interior full-height column stays in the body, and intervening rows go below it.
   if (bodyIds.some(id => containersById[id].spanFullPage)) {
     errors.push('Full-height columns must be at the outside edges.');
   }
@@ -57,16 +79,23 @@ function arrangeContainers(containersById, orderedContainerIds) {
   }
   const before = rowIds.filter(id => bodyStart < 0 || ids.indexOf(id) < bodyStart);
   const after = rowIds.filter(id => !before.includes(id));
+  // Each inner array is one horizontal band: a row container alone, or all body
+  // columns side by side. Sidebars are placed separately across every band.
   const rows = [...before.map(id => [id]), ...(bodyIds.length ? [bodyIds] : []), ...after.map(id => [id])];
+  // A page containing only full-height columns still needs one band to occupy.
   if (!rows.length) rows.push([]);
   return {
     ids, columnIds, trackIds, bodyIds, rows, errors, hasRowContentTrack,
     firstBodyColumn: first + 1,
-    fillRowIndex: bodyIds.length ? before.length : rows.length - 1,
+    // fillRowIndex: bodyIds.length ? before.length : rows.length - 1,
+    fillRowIndex: rows.length - 1,
   };
 }
 
 function placeContainers(containersById, arrangement) {
+  // Convert the inferred groups into explicit positions. Grid positions start at
+  // 1; array indexes start at 0. Sidebars span all bands, while rows span the body
+  // columns (or the single synthetic track when there are no body columns).
   const { ids, trackIds, bodyIds, rows, firstBodyColumn } = arrangement;
   const placementsByContainerId = {};
   for (const id of ids) {
@@ -83,6 +112,8 @@ function placeContainers(containersById, arrangement) {
 }
 
 function resolveContainerBoundaries(placements, rowCount, columnCount) {
+  // Spacing depends on what an edge touches: the outside of the page or another
+  // container. These labels let sectionSpacing.js choose margins/gaps later.
   return Object.fromEntries(Object.entries(placements).map(([id, placement]) => {
     const { rowStart, rowSpan, columnStart, columnSpan } = placement;
     return [id, {
@@ -94,6 +125,8 @@ function resolveContainerBoundaries(placements, rowCount, columnCount) {
   }));
 }
 
+// Main rendering entry point: infer groups, place containers, classify their edges,
+// then calculate widths. Return one shared description for CSS, spacing, and resizing.
 export function resolveResumeLayout({ containersById, orderedContainerIds, widthOverrides, rowContentWidth }) {
   const arrangement = arrangeContainers(containersById, orderedContainerIds);
   const { columnIds, trackIds, rows, fillRowIndex, errors, hasRowContentTrack } = arrangement;
@@ -101,13 +134,19 @@ export function resolveResumeLayout({ containersById, orderedContainerIds, width
   const boundariesByContainerId = resolveContainerBoundaries(
     placementsByContainerId, rows.length, Math.max(1, trackIds.length),
   );
+  // Resizing follows neighboring vertical tracks, not neighboring entries in the
+  // saved list (which may have header/footer rows between column entries).
   const resizeNeighborsByContainerId = Object.fromEntries(
     trackIds.map((id, index) => [id, trackIds[index + 1] ?? null]),
   );
+  // The synthetic track's saved width belongs to resume.layout.rowContentWidth.
+  // Supply a temporary container-shaped value so the same width resolver can use it.
   const widthSources = hasRowContentTrack
     ? { ...containersById, [ROW_CONTENT_TRACK]: { layout: { width: rowContentWidth ?? { auto: true } } } }
     : containersById;
   const widthsById = resolveColumnWidths(widthSources, trackIds, widthOverrides);
+  // All rows in this special layout resize the same shared space, rather than
+  // each keeping a width that could disagree with the other rows.
   const resizeTrackByContainerId = Object.fromEntries(arrangement.ids.map(id => [
     id, hasRowContentTrack && containersById[id].type === 'row' ? ROW_CONTENT_TRACK : id,
   ]));
@@ -120,16 +159,20 @@ export function resolveResumeLayout({ containersById, orderedContainerIds, width
     errors, columnIds, trackIds, widthsById, placementsByContainerId, boundariesByContainerId,
     resizeTrackByContainerId, hasRowContentTrack, bodyColumnIds: arrangement.bodyIds,
     resizeNeighborsByContainerId,
+    // Fractional tracks preserve the resolved proportions. A zero minimum lets
+    // narrow columns shrink even when their content would prefer more width.
     gridTemplateColumns: trackIds.length
       ? trackIds.map(id => `minmax(0, ${widthsById[id]}fr)`).join(' ')
       : 'minmax(0, 1fr)',
-    // The body fills remaining height. For rows-only layouts, the last row fills it.
+    // The body fills remaining height via the last band of content expanding to the bottom of the page.
     gridTemplateRows: rows.map((_, index) =>
       index === fillRowIndex ? 'minmax(min-content, 1fr)' : 'auto'
     ).join(' '),
   };
 }
 
+// A first/last section inherits the container's outside edge. Edges between
+// sections use section spacing instead. Other sides keep the container boundary.
 export function deriveSectionBoundaries(containerBoundaries, orderedSectionIds, sectionId, flow = 'vertical') {
   if (!containerBoundaries || !orderedSectionIds.includes(sectionId)) return null;
   const start = flow === 'horizontal' ? 'left' : 'top';
@@ -141,6 +184,9 @@ export function deriveSectionBoundaries(containerBoundaries, orderedSectionIds, 
   };
 }
 
+// Roles such as header or leftSidebar are inferred UI concepts, not stored fields.
+// To change a role, change type/spanFullPage AND move the container to the matching
+// place in the flat list. Its sections stay attached to the same container.
 export function planContainerRole(containers, id, role) {
   const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds });
   const remaining = containers.allIds.filter(candidate => candidate !== id);
@@ -154,6 +200,7 @@ export function planContainerRole(containers, id, role) {
     spanFullPage: role !== 'column',
   };
   if (container.type === 'row' && next.type === 'column') {
+    // A former row did not own a column track; start its new track at automatic width.
     next.layout = { ...container.layout, width: { auto: true } };
   }
   const byId = { ...containers.byId, [id]: next };
@@ -177,6 +224,8 @@ export function planContainerSettings(containers, id, { type, spanFullPage }) {
   const oldRole = getContainerRole(layout, container);
   let role = type === 'row' ? 'header' : 'column';
   if (type === 'column' && spanFullPage) {
+    // Preserve a right sidebar's side, or choose the closest edge based on the
+    // column's position within the body. The midpoint defaults to the left.
     const index = layout.bodyColumnIds.indexOf(id);
     role = oldRole === 'rightSidebar' || (index >= 0 && index > (layout.bodyColumnIds.length - 1) / 2)
       ? 'rightSidebar' : 'leftSidebar';
@@ -204,7 +253,7 @@ export function planContainerSettings(containers, id, { type, spanFullPage }) {
 }
 
 // Move visual neighbors together: rows cross the whole body; sidebars cross the center.
-// A null result means the container is already at the edge.
+// Direction -1 means up/left; +1 means down/right. Null means no valid move.
 export function planContainerMove(containers, id, direction) {
   if (!containers.byId[id] || ![-1, 1].includes(direction)) return null;
   const layout = resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: containers.allIds });
@@ -212,8 +261,12 @@ export function planContainerMove(containers, id, direction) {
   const body = layout.bodyColumnIds;
   let blocks;
   if (container.type !== 'row' && !container.spanFullPage) {
+    // An ordinary column can only swap with another column inside the body.
     blocks = body.map(candidate => [candidate]);
   } else {
+    // A moving row treats all body columns as one neighbor. A moving sidebar
+    // treats the entire center (rows plus body) as one neighbor. This prevents
+    // moves from splitting the groups the renderer requires to stay together.
     const center = containers.allIds.filter(candidate =>
       containers.byId[candidate].type === 'row' || body.includes(candidate));
     const grouped = container.type === 'row' ? body : center;
@@ -231,6 +284,7 @@ export function planContainerMove(containers, id, direction) {
   const moved = blocks.flat();
   const affected = new Set(moved);
   let cursor = 0;
+  // Replace only the participating positions, leaving unrelated containers in place.
   const ids = containers.allIds.map(candidate => affected.has(candidate) ? moved[cursor++] : candidate);
   return resolveResumeLayout({ containersById: containers.byId, orderedContainerIds: ids }).errors.length ? null : ids;
 }
@@ -248,6 +302,7 @@ export function resizeColumnWidths(leftWidth, rightWidth, delta) {
 export function getColumnWidthLimits(layout, id) {
   const index = layout.trackIds.indexOf(id);
   if (index < 0) return null;
+  // Prefer borrowing space from the right; the final track borrows from the left.
   const neighborId = layout.trackIds[index + 1] ?? layout.trackIds[index - 1];
   if (neighborId == null) return { neighborId: null, min: 100, max: 100, total: 100 };
   const total = layout.widthsById[id] + layout.widthsById[neighborId];
@@ -256,6 +311,8 @@ export function getColumnWidthLimits(layout, id) {
 }
 
 
+// Read the visual role back from the resolved placement. Without a body column
+// group, stacked rows have no header/footer distinction, so their role is just row.
 export function getContainerRole(layout, container) {
   if (container.type === 'row' && layout.hasRowContentTrack) return 'row';
   const placement = layout.placementsByContainerId[container.id];

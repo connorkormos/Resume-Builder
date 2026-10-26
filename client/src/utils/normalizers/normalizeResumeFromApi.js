@@ -34,7 +34,12 @@ const normalizeResumeFromApi = (apiResume) => {
     },
 
     styling: apiResume.styling ?? {backgroundColor: 'rgba(255, 255, 255, 1)'},
-    layout: normalizeResumeLayout(apiResume.layout),
+    layout: {
+      ...apiResume.layout,
+      // display: 'grid',
+
+    },
+    // layout: normalizeResumeLayout(apiResume.layout),
 
     createdAt: apiResume.createdAt ?? null,
     updatedAt: apiResume.updatedAt ?? null,
@@ -44,12 +49,17 @@ const normalizeResumeFromApi = (apiResume) => {
     activeEditorSelection: null,
   };
 
-  const sortedContainers = [...(apiResume.containers ?? [])].sort(
+  // normalizedResume.layout = {
+  //   ...normalizedResume.layout,
+  //   display: 'grid'
+  // };
+
+  const orderedContainers = [...(apiResume.containers ?? [])].sort(
     (a, b) => a.position - b.position
   );
 
-  sortedContainers.forEach((container) => {    
-    const sortedSections = [...(container.sections ?? [])].sort(
+  orderedContainers.forEach((container) => {    
+    const orderedSections = [...(container.sections ?? [])].sort(
       (a, b) => a.position - b.position
     );
 
@@ -61,13 +71,13 @@ const normalizeResumeFromApi = (apiResume) => {
       styling: container.styling ?? {},
       layout: container.layout ?? {},
       position: container.position ?? 0,
-      sectionIds: sortedSections.map((section) => section.id),
+      sectionIds: orderedSections.map((section) => section.id),
     };
 
     normalizedResume.containers.allIds.push(container.id);
 
-    sortedSections.forEach((section) => {
-      const sortedSubsections = [...(section.subsections ?? [])].sort(
+    orderedSections.forEach((section) => {
+      const orderedSubsections = [...(section.subsections ?? [])].sort(
         (a, b) => a.position - b.position
       );
 
@@ -81,13 +91,13 @@ const normalizeResumeFromApi = (apiResume) => {
         showHeading: section.showHeading ?? true,
         layout: normalizeSectionLayout(section.layout),
         styling: section.styling ?? {},
-        subsectionIds: sortedSubsections.map((subsection) => subsection.id),
+        subsectionIds: orderedSubsections.map((subsection) => subsection.id),
       };
 
       normalizedResume.sections.allIds.push(section.id);
 
-      sortedSubsections.forEach((subsection) => {
-        const sortedFields = [...(subsection.fields ?? [])].sort(
+      orderedSubsections.forEach((subsection) => {
+        const orderedFields = [...(subsection.fields ?? [])].sort(
           (a, b) => a.position - b.position
         );
 
@@ -98,12 +108,12 @@ const normalizeResumeFromApi = (apiResume) => {
           position: subsection.position ?? 0,
           layout: subsection.layout ?? {},
           styling: subsection.styling ?? {},
-          fieldIds: sortedFields.map((field) => field.id),
+          fieldIds: orderedFields.map((field) => field.id),
         };
 
         normalizedResume.subsections.allIds.push(subsection.id);
 
-        sortedFields.forEach((field) => {
+        orderedFields.forEach((field) => {
           normalizedResume.fields.byId[field.id] = {
             id: field.id,
             subsectionId: field.subsectionId,
