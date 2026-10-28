@@ -15,16 +15,19 @@ export function normalizeResumeLayout(layout) {
   return { ...layout, gap: { ...gap, section: gap.vertical ?? '0.5rem', vertical: '0rem' } };
 }
 
-export function resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout }) {
+// Keep this unclamped: a section offset can cancel a negative container offset.
+export function resolveSectionPaddingBase({ boundary, resumeLayout, containerLayout, side }) {
   const layout = normalizeResumeLayout(resumeLayout);
+  const base = boundary === 'page' ? layout.padding?.[side]
+    : layout.gap?.[GAP_BY_BOUNDARY[boundary]];
+  return parseRemValue(base) + parseRemValue(containerLayout?.padding?.[side]);
+}
+
+export function resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout }) {
   return Object.fromEntries(['top', 'right', 'bottom', 'left'].map(side => {
-    const boundary = boundaries?.[side];
-    const base = boundary === 'page' ? layout.padding?.[side]
-      : layout.gap?.[GAP_BY_BOUNDARY[boundary]];
     const value = Math.max(
       0,
-      parseRemValue(base)
-        + parseRemValue(containerLayout?.padding?.[side])
+      resolveSectionPaddingBase({ boundary: boundaries?.[side], resumeLayout, containerLayout, side })
         + parseRemValue(sectionLayout?.padding?.[side]),
     );
     return [`padding${side[0].toUpperCase()}${side.slice(1)}`, `${value}rem`];

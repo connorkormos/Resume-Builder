@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useMediaQuery } from "@/hooks/useMediaQuery.js";
 import {
   dndReorderSubsections,
   setActiveEditorId,
@@ -44,8 +45,14 @@ const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 
 const Section = ({ section, container, index, presentation, orderedSectionIds }) => {
 
-  const { hasNextSection } = presentation;
-  const { handleProps } = useSectionPaddingResize(section, container, orderedSectionIds);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const bottomResize = useSectionPaddingResize(section, container, orderedSectionIds, {
+    edge: 'bottom', boundaries: presentation.boundaries,
+  });
+  const topResize = useSectionPaddingResize(section, container, orderedSectionIds, {
+    edge: 'top', boundaries: presentation.boundaries,
+  });
   const dispatch = useDispatch();
 
   const { ref } = useSortable({
@@ -62,7 +69,6 @@ const Section = ({ section, container, index, presentation, orderedSectionIds })
     (state) => state.resume.present.activeSectionIds,
   );
   const subsections = useSelector((state) => state.resume.present.subsections);
-
 
   const renderedSubsections = section.subsectionIds?.map((subId) => {
     const subsection = subsections.byId[subId];
@@ -186,15 +192,32 @@ const Section = ({ section, container, index, presentation, orderedSectionIds })
       {sectionBorder?.right && (
         <SectionBorder sectionBorder={sectionBorder.right} borderSide="right" />
       )}
-      {hasNextSection && (
+      {index === 0 && (
         <button
           type="button"
-          className={styles.sectionResizeHandle}
-          aria-label="Adjust section bottom padding"
+          className={`${styles.sectionResizeHandle} ${styles.sectionResizeHandleTop}`}
           data-section-dnd-exclude="true"
-          {...handleProps}
-        />
+          {...topResize.handleProps}
+        >
+          {topResize.paddingLabel && isMobile && (
+            <span className={styles.sectionPaddingValue} aria-hidden="true">
+              {topResize.paddingLabel}
+            </span>
+          )}
+        </button>
       )}
+      <button
+        type="button"
+        className={styles.sectionResizeHandle}
+        data-section-dnd-exclude="true"
+        {...bottomResize.handleProps}
+      >
+        {bottomResize.paddingLabel && isMobile && (
+          <span className={styles.sectionPaddingValue} aria-hidden="true">
+            {bottomResize.paddingLabel}
+          </span>
+        )}
+      </button>
     </div>
   );
 };

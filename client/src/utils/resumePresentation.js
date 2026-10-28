@@ -56,7 +56,8 @@ export function resolveResumePresentation(resume, overrides = {}) {
           height: 'min-content',
           boxSizing: 'border-box',
           minWidth: 0,
-          flex: hasNextSection ? '0 0 auto' : '1 0 auto',
+          // flex: hasNextSection ? '0 0 auto' : '1 0 auto',
+          backgroundColor: section.styling?.backgroundColor ?? resume.styling?.backgroundColor ?? 'transparent'
         },
       };
     });
