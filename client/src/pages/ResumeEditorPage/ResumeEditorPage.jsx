@@ -80,7 +80,6 @@ const ResumeEditorPage = () => {
    const resumeRef = useRef(null);
    const editorPageRef = useRef(null);
 
-   const [isPrinting, setIsPrinting] = useState(false);
    const [paddingPreview, setPaddingPreview] = useState(null);
 
    // const pageStyle = `
@@ -118,18 +117,10 @@ const ResumeEditorPage = () => {
       documentTitle: resume.title,
       contentRef: resumeRef,
       pageStyle: pageStyle,
-      onAfterPrint: () => {
-         setIsPrinting(false);
-      },
    });
 
    const handlePrint = () => {
-
-      setIsPrinting(true);
-
-      setTimeout(async () => {
-         reactToPrint();
-      }, 500);
+      reactToPrint();
    };
 
    const handleBackgroundClick = (event) => {
@@ -144,7 +135,7 @@ const ResumeEditorPage = () => {
          <Toolbar handlePrint={handlePrint} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
-            <ResumePaper ref={resumeRef} editorPageRef={editorPageRef} isPrinting={isPrinting} />
+            <ResumePaper ref={resumeRef} editorPageRef={editorPageRef} />
             {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
          </PaddingPreviewContext.Provider>
          {showNewResumeModal &&

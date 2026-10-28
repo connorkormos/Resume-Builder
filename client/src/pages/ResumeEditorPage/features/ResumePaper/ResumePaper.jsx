@@ -176,7 +176,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
       {!isMobile && <MarginRuler pageRef={editorRef} />}
       <div
-        className={`${props.isPrinting ? styles.printingPageContainer : styles.editingPageContainer}`}
+        className={styles.editingPageContainer}
         style={presentation.pageStyle}
         ref={editorRef}
         id="editorPage"

@@ -12,11 +12,6 @@
 
 
 
-/* .printingPageContainer {
-  position: absolute;
-  scale: calc(11 / 7.7);
-  top: calc(var(--height-toolbar) + 5rem);
-} */
 
 .containerWrapperDiv {
   align-self: stretch;
@@ -160,7 +155,6 @@
     box-sizing: border-box;
   }
 
-  .printPageRef>.printingPageContainer,
   .printPageRef>.editingPageContainer {
     position: absolute;
     inset: auto;
@@ -180,8 +174,7 @@
   }
 }
 
-.editingPageContainer,
-.printingPageContainer {
+.editingPageContainer {
   position: relative;
   height: 100%;
   width: 100%;
@@ -197,16 +190,15 @@
 @media screen and (max-width: 768px) {
   .printPageRef {
     width: 100%;
-    /* height: auto; */
-    /* height: fit-content; */
     --baseline-editor-page-width: 571px;
     --scale-factor: calc(90vw / var(--baseline-editor-page-width));
     --new-editor-page-width: calc(var(--baseline-editor-page-width) * var(--scale-factor));
 
     .editingPageContainer {
-      height: var(--height-editor-page);
       position: absolute;
-      width: var(--width-editor-page);
+      /* without the important flags below, the @print media query would override the inline styles for height and width, causing improper layout for mobile */
+      height: var(--height-editor-page) !important;
+      width: var(--width-editor-page) !important;
       scale: min(var(--scale-factor), 1);
       margin: 0;
       top: 0;
