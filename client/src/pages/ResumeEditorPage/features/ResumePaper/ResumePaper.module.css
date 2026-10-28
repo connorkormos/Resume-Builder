@@ -10,9 +10,6 @@
   /* width: 8.5in; */
 }
 
-
-
-
 .containerWrapperDiv {
   align-self: stretch;
   min-width: 0;
@@ -149,14 +146,20 @@
   .printPageRef {
     position: relative;
     width: 8.5in;
-    height: 11in;
+    /* height: 11in; */
+
+    height: auto;
+    overflow: visible;
+
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
   .printPageRef>.editingPageContainer {
-    position: absolute;
+    /* position: absolute; */
+    position: relative;
+
     inset: auto;
     top: 0;
     left: 0;
@@ -165,12 +168,24 @@
     /* Preserve the editor's layout and line wrapping.
        !important overrides presentation.pageStyle's inline 100%. */
     width: 5.95in !important;
-    height: 7.7in !important;
+    /* height: 7.7in !important; */
+    height: auto !important;
+    min-height: 7.7in;
+    overflow: visible;
 
     transform: none;
     translate: none;
     transform-origin: top left;
-    scale: calc(10 / 7);
+    /* scale: calc(10 / 7); */
+    scale: none;
+    zoom: calc(10 / 7);
+  }
+
+  .containerResizeHandle,
+  .containerPreviewWidthLeft,
+  .containerPreviewWidthRight,
+  .endPageMarker {
+    display: none !important;
   }
 }
 

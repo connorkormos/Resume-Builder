@@ -102,6 +102,8 @@ const ResumeEditorPage = () => {
 
       @media print {
          html, body {
+            height: auto !important;
+            overflow: visible !important;
             margin: 0;
             padding: 0;
          }
