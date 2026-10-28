@@ -10,26 +10,13 @@
   /* width: 8.5in; */
 }
 
-.editingPageContainer,
-.printingPageContainer {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  margin: auto;
-
-  display: flex;
-  word-break: break-word;
-
-  z-index: var(--z-main);
-  top: calc(var(--height-toolbar));
-}
 
 
-.printingPageContainer {
+/* .printingPageContainer {
   position: absolute;
   scale: calc(11 / 7.7);
   top: calc(var(--height-toolbar) + 5rem);
-}
+} */
 
 .containerWrapperDiv {
   align-self: stretch;
@@ -162,18 +149,62 @@
   z-index: 2;
 }
 
-@media (max-width: 768px) {
+
+@media print {
+  .printPageRef {
+    position: relative;
+    width: 8.5in;
+    height: 11in;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .printPageRef>.printingPageContainer,
+  .printPageRef>.editingPageContainer {
+    position: absolute;
+    inset: auto;
+    top: 0;
+    left: 0;
+    margin: 0;
+
+    /* Preserve the editor's layout and line wrapping.
+       !important overrides presentation.pageStyle's inline 100%. */
+    width: 5.95in !important;
+    height: 7.7in !important;
+
+    transform: none;
+    translate: none;
+    transform-origin: top left;
+    scale: calc(10 / 7);
+  }
+}
+
+.editingPageContainer,
+.printingPageContainer {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  margin: auto;
+
+  display: flex;
+  word-break: break-word;
+
+  z-index: var(--z-main);
+  top: calc(var(--height-toolbar));
+}
+
+@media screen and (max-width: 768px) {
   .printPageRef {
     width: 100%;
     /* height: auto; */
     /* height: fit-content; */
     --baseline-editor-page-width: 571px;
     --scale-factor: calc(90vw / var(--baseline-editor-page-width));
-    --new-editor-page-width: calc(
-       var(--baseline-editor-page-width) * var(--scale-factor)
-       );
-       .editingPageContainer {
-       height: var(--height-editor-page);
+    --new-editor-page-width: calc(var(--baseline-editor-page-width) * var(--scale-factor));
+
+    .editingPageContainer {
+      height: var(--height-editor-page);
       position: absolute;
       width: var(--width-editor-page);
       scale: min(var(--scale-factor), 1);

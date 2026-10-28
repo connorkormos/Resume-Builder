@@ -31,7 +31,7 @@ const ResumeEditorPage = () => {
    const resume = useSelector(state => state.resume.present)
 
    const showNewResumeModal = location.pathname === '/editor/new';
-   
+
    const fetchResumeById = useCallback(
       async (resumeId) => {
          const normalizedResumeData = await getResumeFromApi(resumeId);
@@ -83,18 +83,37 @@ const ResumeEditorPage = () => {
    const [isPrinting, setIsPrinting] = useState(false);
    const [paddingPreview, setPaddingPreview] = useState(null);
 
+   // const pageStyle = `
+   //    @page {
+   //       size: auto;
+   //       margin: 20mm;
+   //    }
+
+   //    @media print {
+   //       body {
+   //          -webkit-print-color-adjust: exact;
+   //       }
+   //    }
+   //    `;
    const pageStyle = `
       @page {
-         size: auto;
-         margin: 20mm;
+         size: letter portrait;
+         margin: 0;
       }
 
       @media print {
+         html, body {
+            margin: 0;
+            padding: 0;
+         }
+
          body {
+            print-color-adjust: exact;
             -webkit-print-color-adjust: exact;
          }
       }
-      `;
+   `;
+   
    const reactToPrint = useReactToPrint({
       documentTitle: resume.title,
       contentRef: resumeRef,
