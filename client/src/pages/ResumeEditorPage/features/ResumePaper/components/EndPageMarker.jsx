@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { updateField, updateSubsection, updateSection } from "@/store/resumeSlice.js";
@@ -18,6 +18,12 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
   const reduxSectionsById = reduxResume.sections.byId;
   const reduxSubsectionsById = reduxResume.subsections.byId;
   const reduxFieldsById = reduxResume.fields.byId;
+
+  const latestResumeRef = useRef(reduxResume);
+
+  useLayoutEffect(() => {
+    latestResumeRef.current = reduxResume;
+  }, [reduxResume]);
 
   useEffect(() => {
     const page = pageRef?.current;
@@ -47,19 +53,37 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
 
     const checkPageLength = () => {
       // getFields();
+      const reduxResume = latestResumeRef.current;
+      const reduxContainersById = reduxResume.containers.byId;
+      const reduxSectionsById = reduxResume.sections.byId;
+      const reduxSubsectionsById = reduxResume.subsections.byId;
+      const reduxFieldsById = reduxResume.fields.byId;
+
       const resumePaddingBottom = parseFloat(reduxResume?.layout?.padding?.bottom ?? 0);
       const pageBottom = page.getBoundingClientRect().bottom - resumePaddingBottom * 16;
       let contentHasBeenMoved = false;
       for (const field of getElementsByQuerySelector(`.resumeField`)) {
         if (field.getBoundingClientRect().bottom > pageBottom) {
           const fieldId = field.getAttribute('data-field-id');
-          dispatch(updateField({ id: fieldId, pageNumber: resumePageNumber + 1}));
           const fieldSubsection = reduxSubsectionsById[reduxFieldsById[fieldId].subsectionId];
           const fieldSection = reduxSectionsById[fieldSubsection.sectionId];
-          if (fieldSection.subsectionIds.length === 1) {
+          if (fieldSection.subsectionIds.length > 1) {
+            dispatch(updateSubsection({ id: fieldSubsection.id, pageNumber: resumePageNumber + 1 }));
+            for (const id of fieldSubsection.fieldIds) {
+              dispatch(updateField({ id, pageNumber: resumePageNumber + 1 }));
+            }
+          } else if (fieldSection.subsectionIds.length === 1) {
             dispatch(updateSection({ id: fieldSection.id, pageNumber: resumePageNumber + 1 }));
+            for (const subsectionId of fieldSection.subsectionIds) {
+              dispatch(updateSubsection({ id: subsectionId, pageNumber: resumePageNumber + 1 }));
+              const subsection = reduxSubsectionsById[subsectionId];
+              for (const fieldId of subsection.fieldIds) {
+                dispatch(updateField({ id: fieldId, pageNumber: resumePageNumber + 1 }));
+              }
+            }
+            
           }
-          dispatch(updateSubsection({ id: fieldSubsection.id, pageNumber: resumePageNumber + 1 }));
+          dispatch(updateField({ id: fieldId, pageNumber: resumePageNumber + 1}));
           contentHasBeenMoved = true;
         }
       }
@@ -72,19 +96,27 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
 
             console.log("Section: ", section);
             console.log('Redux section:', reduxSection);
-            const reduxSectionPaddingBottom = reduxSection?.layout?.padding?.bottom ? parseFloat(reduxSection.layout.padding.bottom) : 0;
-            console.log('Redux section padding bottom:', reduxSectionPaddingBottom);
-
+            
             const sectionBottom = section.getBoundingClientRect().bottom;
-            const pageBottom = page.getBoundingClientRect().bottom - resumePaddingBottom * 16;
-            const maxPaddingBottom = sectionBottom - pageBottom;
+            // const pageBottom = page.getBoundingClientRect().bottom - resumePaddingBottom * 16;
+            const pageBottom = page.getBoundingClientRect().bottom;
+            console.log('Section bottom:', sectionBottom);
+            console.log('Page bottom:', pageBottom);
+            if (sectionBottom <= pageBottom) continue;
+            
+            const reduxSectionPaddingBottom = reduxSection?.layout?.padding?.bottom ?? 0;
+            const sectionPaddingBottomOverflow = sectionBottom - pageBottom;
+            console.log('Section padding bottom overflow:', sectionPaddingBottomOverflow);
+
 
             // const paddingBottom = `${Math.max(0, sectionBottom - pageBottom) / 16}rem`;
-            const newSectionPaddingBottom = parseFloat(reduxSectionPaddingBottom ) - maxPaddingBottom / 16 + 'rem';
+            const newSectionPaddingBottom = parseFloat(reduxSectionPaddingBottom) - sectionPaddingBottomOverflow / 16 + 'rem';
             // convert the new padding bottom value to rem
+            const sectionPageNumber = reduxSection?.pageNumber ?? 1;
             dispatch(updateSection(
               {
                 id: sectionId,
+                // pageNumber: sectionPageNumber + 1,
                 layout: {
                   padding: {
                     bottom: newSectionPaddingBottom,
@@ -158,7 +190,7 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
       mutationObserver.disconnect();
       window.removeEventListener("resize", scheduleMeasure);
     };
-  }, [pageRef]);
+  }, [pageRef, resumePageNumber, dispatch]);
 
   if (!showEndPageMarker) return null;
   return null;

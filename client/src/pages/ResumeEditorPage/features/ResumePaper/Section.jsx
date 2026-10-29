@@ -46,7 +46,6 @@ const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 const Section = ({ section, index, presentation, orderedSectionIds, resumePageNumber }) => {
   const container = useSelector((state) => state.resume.present.containers.byId[section.containerId]);
 
-
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const bottomResize = useSectionPaddingResize(section, container, orderedSectionIds, {

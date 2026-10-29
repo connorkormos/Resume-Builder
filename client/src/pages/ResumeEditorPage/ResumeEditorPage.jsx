@@ -78,6 +78,7 @@ const ResumeEditorPage = () => {
    }, [resume]);
 
    const resumeRef = useRef(null);
+   
    const editorPageRef = useRef(null);
 
    const [paddingPreview, setPaddingPreview] = useState(null);
@@ -167,10 +168,12 @@ const ResumeEditorPage = () => {
          <Toolbar handlePrint={handlePrint} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
+            <div ref={resumeRef}>
             {Array.from({ length: resumePageCount }, (_, index) => (
-               <ResumePaper key={index} ref={resumeRef} resumePageNumber={index + 1} editorPageRef={editorPageRef} />
+               <ResumePaper key={index} resumePageNumber={index + 1} editorPageRef={editorPageRef} />
             ))}
             {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
+            </div>
          </PaddingPreviewContext.Provider>
          {showNewResumeModal &&
             <NewResumeModal />
