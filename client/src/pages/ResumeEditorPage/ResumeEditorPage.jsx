@@ -132,12 +132,44 @@ const ResumeEditorPage = () => {
       dispatch(setActiveSectionId(null));
    };
 
+   useEffect(() => {
+      if (editorPageRef.current) {
+         const pageElement = editorPageRef.current;
+         const pageRect = pageElement.getBoundingClientRect();
+         console.log('EDITOR PAGE REF:', pageRect);
+      }
+   }, [resume])
+
+   const [resumePageCount, setResumePageCount] = useState(1);
+   useEffect(() => {
+      let resumePageCount = 1;
+      resumePageCount = Math.max(...Object.values(resume.containers.byId).map(container => {
+         const containerSections = container.sectionIds.map(sectionId => resume.sections.byId[sectionId]);
+         const maxSectionPage = Math.max(...containerSections.map(section => {
+            const sectionSubsections = section.subsectionIds.map(subsectionId => resume.subsections.byId[subsectionId]);
+            const maxSubsectionPage = Math.max(...sectionSubsections.map(subsection => {
+               const subsectionFields = subsection.fieldIds.map(fieldId => resume.fields.byId[fieldId]);
+               const maxFieldPage = Math.max(...subsectionFields.map(field => field.pageNumber));
+               return Math.max(subsection.pageNumber, maxFieldPage);
+            }));
+            return Math.max(section.pageNumber, maxSubsectionPage);
+         }));
+         return maxSectionPage;
+      }));
+
+      setResumePageCount(resumePageCount);
+      // const reduxContainers = resume.containers.byId
+
+   }, [resume]);
+
    return (
       <div className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          <Toolbar handlePrint={handlePrint} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
-            <ResumePaper ref={resumeRef} editorPageRef={editorPageRef} />
+            {Array.from({ length: resumePageCount }, (_, index) => (
+               <ResumePaper key={index} ref={resumeRef} resumePageNumber={index + 1} editorPageRef={editorPageRef} />
+            ))}
             {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
          </PaddingPreviewContext.Provider>
          {showNewResumeModal &&

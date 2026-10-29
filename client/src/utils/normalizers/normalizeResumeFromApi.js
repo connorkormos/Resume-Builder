@@ -72,6 +72,7 @@ const normalizeResumeFromApi = (apiResume) => {
       layout: container.layout ?? {},
       position: container.position ?? 0,
       sectionIds: orderedSections.map((section) => section.id),
+      pageNumber: 1,
     };
 
     normalizedResume.containers.allIds.push(container.id);
@@ -92,6 +93,7 @@ const normalizeResumeFromApi = (apiResume) => {
         layout: normalizeSectionLayout(section.layout),
         styling: section.styling ?? {},
         subsectionIds: orderedSubsections.map((subsection) => subsection.id),
+        pageNumber: 1,
       };
 
       normalizedResume.sections.allIds.push(section.id);
@@ -109,6 +111,7 @@ const normalizeResumeFromApi = (apiResume) => {
           layout: subsection.layout ?? {},
           styling: subsection.styling ?? {},
           fieldIds: orderedFields.map((field) => field.id),
+          pageNumber: 1,
         };
 
         normalizedResume.subsections.allIds.push(subsection.id);
@@ -122,6 +125,7 @@ const normalizeResumeFromApi = (apiResume) => {
             value: normalizeSlateValue(field.value ?? []),
             layout: field.layout ?? {},
             styling: field.styling ?? {},
+            pageNumber: 1,
           };
 
           normalizedResume.fields.allIds.push(field.id);

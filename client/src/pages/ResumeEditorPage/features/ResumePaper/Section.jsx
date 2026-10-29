@@ -21,7 +21,7 @@ import {
 
 import { MdSettings } from "react-icons/md";
 
-import SubsectionRenderer from "./Subsection.jsx";
+import Subsection from "./Subsection.jsx";
 import SlateHeading from "@/features/Slate/SlateHeading.jsx";
 import SettingsModal from "../SettingsModal/SettingsModal.jsx";
 import SectionBorder from "./components/SectionBorder.jsx";
@@ -43,7 +43,9 @@ const sectionPointerSensor = PointerSensor.configure({
 
 const sectionSensors = [sectionPointerSensor, KeyboardSensor];
 
-const Section = ({ section, container, index, presentation, orderedSectionIds }) => {
+const Section = ({ section, index, presentation, orderedSectionIds, resumePageNumber }) => {
+  const container = useSelector((state) => state.resume.present.containers.byId[section.containerId]);
+
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -68,15 +70,27 @@ const Section = ({ section, container, index, presentation, orderedSectionIds })
   const activeSectionIds = useSelector(
     (state) => state.resume.present.activeSectionIds,
   );
-  const subsections = useSelector((state) => state.resume.present.subsections);
+  const reduxSubsectionsById = useSelector((state) => state.resume.present.subsections.byId);
+  const reduxFieldsById = useSelector((state) => state.resume.present.fields.byId);
 
   const renderedSubsections = section.subsectionIds?.map((subId) => {
-    const subsection = subsections.byId[subId];
+    const subsection = reduxSubsectionsById[subId];
     if (!subsection) {
       console.error(`Subsection with ID ${subId} not found.`);
       return null;
     }
-    return <SubsectionRenderer key={subsection.id} subsection={subsection} />;
+
+    let subsectionHasContentOnCurrentResumePage = subsection.pageNumber === resumePageNumber;
+    const subsectionFields = subsection.fieldIds.map(fieldId => reduxFieldsById[fieldId]);
+    for (const field of subsectionFields ?? []) {
+      if (field.pageNumber === resumePageNumber) {
+        subsectionHasContentOnCurrentResumePage = true;
+        break;
+      }
+    }
+    if (!subsectionHasContentOnCurrentResumePage) return null;
+
+    return <Subsection key={subsection.id} subsection={subsection} resumePageNumber={resumePageNumber} />;
   });
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -108,7 +122,7 @@ const Section = ({ section, container, index, presentation, orderedSectionIds })
 
   return (
     <div
-      className={`${styles.sectionContainerDiv} ${sectionIsActive && styles.activeSectionContainer}`}
+      className={`${styles.sectionContainerDiv} ${sectionIsActive && styles.activeSectionContainer} resumeSection`}
       ref={ref}
       data-id={section.id}
       data-container-id={section.containerId}

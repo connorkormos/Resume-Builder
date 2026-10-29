@@ -7,7 +7,7 @@ import { dndReorderFields } from "@/store/resumeSlice";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { MdDragIndicator } from "react-icons/md";
 
-const SubsectionRenderer = ({ subsection }) => {
+export default function Subsection({ subsection, resumePageNumber }) {
   const dispatch = useDispatch();
 
   const reduxResume = useSelector((state) => state.resume.present);
@@ -58,6 +58,8 @@ const SubsectionRenderer = ({ subsection }) => {
 
   return (
     <div
+      className="resumeSubsection"
+      data-subsection-id={subsection.id}
       style={{
         ...parentLayoutDict,
         marginBottom: isLastSubsection ? "0rem" : resumeGap?.subsection || "0rem",
@@ -113,6 +115,9 @@ const SubsectionRenderer = ({ subsection }) => {
       >
         {subsection.fieldIds.map((fieldId, index) => {
           const field = fields.byId[fieldId];
+          // console.log("field page number: ", field.pageNumber);
+          // console.log("resume page number: ", resumePageNumber);
+          if (field.pageNumber !== resumePageNumber) return null;
           // const break = field?.value.label === 'Description' ? 'break' : null;
           if (!field) return null;
           return (
@@ -129,5 +134,3 @@ const SubsectionRenderer = ({ subsection }) => {
     </div>
   );
 };
-
-export default SubsectionRenderer;

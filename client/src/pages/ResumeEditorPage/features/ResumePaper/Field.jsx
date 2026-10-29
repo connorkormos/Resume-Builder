@@ -122,7 +122,7 @@ const Field = ({ index, fieldId, layout, parentLayoutDict }) => {
 
   const fieldWrapperStyling = {};
 
-  if (parentLayoutDict.display === "grid") {
+  if (parentLayoutDict?.display === "grid") {
     fieldWrapperStyling.gridColumnEnd = shouldSpanRemainingColumns
       ? `span ${columnSpanValue}`
       : "auto";
@@ -131,6 +131,8 @@ const Field = ({ index, fieldId, layout, parentLayoutDict }) => {
 
   return (
     <div
+      className="resumeField"
+      data-field-id={fieldId}
       ref={ref}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

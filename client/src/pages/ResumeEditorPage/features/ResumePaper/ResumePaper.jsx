@@ -26,9 +26,16 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const localEditorRef = useRef(null);
   const editorRef = props.editorPageRef ?? localEditorRef;
 
-  const resume = useSelector(state => state.resume.present);
-  const containers = resume.containers;
-  const sectionsById = resume.sections.byId;
+  const resumePageNumber = props.resumePageNumber ?? 1;
+
+  const reduxResume = useSelector(state => state.resume.present);
+  const reduxContainersById = useSelector(state => state.resume.present.containers.byId);
+  const reduxSectionsById = useSelector(state => state.resume.present.sections.byId);
+  const reduxSubsectionsById = useSelector(state => state.resume.present.subsections.byId);
+  const reduxFieldsById = useSelector(state => state.resume.present.fields.byId);
+
+  const containers = reduxResume.containers;
+  const sectionsById = reduxResume.sections.byId;
   const paddingPreview = useContext(PaddingPreviewContext)?.preview;
 
   const [sectionOrderPreview, setSectionOrderPreview] = useState(null);
@@ -39,7 +46,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const resizeState = useRef(null);
   const previewWidthsRef = useRef(null);
 
-  const presentation = resolveResumePresentation(resume, {
+  const presentation = resolveResumePresentation(reduxResume, {
     sectionIds: containerSectionIds,
     widths: previewWidths,
     padding: paddingPreview,
@@ -153,18 +160,49 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       return null;
     }
 
+    let containerHasContentOnCurrentResumePage = false;
+    const containerSections = container.sectionIds.map(sectionId => sectionsById[sectionId]);
+    for (const section of containerSections) {
+      if (section.pageNumber === resumePageNumber) {
+        containerHasContentOnCurrentResumePage = true;
+        break; // No need to check further sections if one is on the current resume page
+      }
+      const sectionSubsections = section.subsectionIds.map(subsectionId => reduxSubsectionsById[subsectionId]);
+      for (const subsection of sectionSubsections) {
+        if (subsection.pageNumber === resumePageNumber) {
+          containerHasContentOnCurrentResumePage = true;
+          break; // No need to check further subsections if one is on the current resume page
+        }
+        const subsectionFields = subsection.fieldIds.map(fieldId => reduxFieldsById[fieldId]);
+        for (const field of subsectionFields) {
+          if (field.pageNumber === resumePageNumber) {
+            containerHasContentOnCurrentResumePage = true;
+            break; // No need to check further fields if one is on the current resume page
+          }
+        }
+      }
+    }
+
+    // console.log('Current Resume Page: ', resumePageNumber);
+    // console.log(`Container ${container.id} has content on current resume page:`, containerHasContentOnCurrentResumePage);
+
+    if (!containerHasContentOnCurrentResumePage) {
+      return null;
+    }
+
     return (
       <Container
         key={container.id}
         container={container}
         presentation={presentation.containersById[containerId]}
         sectionPresentations={presentation.sectionsById}
-        sectionById={sectionsById}
+        sectionsById={sectionsById}
         onStartResize={startResize}
         containerPreviewWidths={previewWidths}
         rightContainerId={resolvedLayout.resizeNeighborsByContainerId[containerId]}
         resizeTrackId={resolvedLayout.resizeTrackByContainerId[containerId]}
         onResizeWithKeyboard={resizeWithKeyboard}
+        resumePageNumber={resumePageNumber}
       />
     );
   });
@@ -172,7 +210,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
   return (
     <EditorLayoutContext.Provider value={presentation.sectionsById}>
-    <div className={styles.printPageRef} ref={ref}>
+    <div className={styles.printPageRef} ref={ref} style={resumePageNumber > 1 ? { marginTop: "2rem" } : {}}>
       {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
       {!isMobile && <MarginRuler pageRef={editorRef} />}
       <div
@@ -207,7 +245,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
         >
           {resumeContainers}
         </DragDropProvider>
-        <EndPageMarker pageRef={editorRef} />
+        <EndPageMarker pageRef={editorRef} resumePageNumber={resumePageNumber} />
       </div>
     </div>
     </EditorLayoutContext.Provider>
