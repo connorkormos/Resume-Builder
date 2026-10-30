@@ -19,6 +19,9 @@ import { PaddingPreviewContext } from '@/pages/ResumeEditorPage/features/ResumeP
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { ActionCreators as UndoActionCreators } from "redux-undo";
 
+import { getPageDimensions } from './features/ResumePaper/helpers/pageDimensions.js';
+import useResumePagination from './features/ResumePaper/helpers/useResumePagination.js';
+
 import styles from './ResumeEditor.module.css';
 
 const ResumeEditorPage = () => {
@@ -28,7 +31,11 @@ const ResumeEditorPage = () => {
    const dispatch = useDispatch();
    const { resumeId } = useParams();
 
-   const resume = useSelector(state => state.resume.present)
+   const reduxResume = useSelector(state => state.resume.present)
+   const reduxContainers = useSelector(state => state.resume.present.containers);
+   const reduxSections = useSelector(state => state.resume.present.sections);
+   const reduxSubsections = useSelector(state => state.resume.present.subsections);
+   const reduxFields = useSelector(state => state.resume.present.fields);
 
    const showNewResumeModal = location.pathname === '/editor/new';
 
@@ -67,7 +74,7 @@ const ResumeEditorPage = () => {
 
          event.preventDefault();
          event.stopPropagation();
-         handleGlobalHotKey(resume, event);
+         handleGlobalHotKey(reduxResume, event);
       };
 
       window.addEventListener('keydown', onGlobalKeyDown);
@@ -75,26 +82,13 @@ const ResumeEditorPage = () => {
       return () => {
          window.removeEventListener('keydown', onGlobalKeyDown);
       };
-   }, [resume]);
+   }, [reduxResume]);
 
-   const resumeRef = useRef(null);
-   
-   const editorPageRef = useRef(null);
+   const fullResumeRef = useRef(null);
+
 
    const [paddingPreview, setPaddingPreview] = useState(null);
 
-   // const pageStyle = `
-   //    @page {
-   //       size: auto;
-   //       margin: 20mm;
-   //    }
-
-   //    @media print {
-   //       body {
-   //          -webkit-print-color-adjust: exact;
-   //       }
-   //    }
-   //    `;
    const pageStyle = `
       @page {
          size: letter portrait;
@@ -115,10 +109,10 @@ const ResumeEditorPage = () => {
          }
       }
    `;
-   
+
    const reactToPrint = useReactToPrint({
-      documentTitle: resume.title,
-      contentRef: resumeRef,
+      documentTitle: reduxResume.title,
+      contentRef: fullResumeRef,
       pageStyle: pageStyle,
    });
 
@@ -133,23 +127,16 @@ const ResumeEditorPage = () => {
       dispatch(setActiveSectionId(null));
    };
 
-   useEffect(() => {
-      if (editorPageRef.current) {
-         const pageElement = editorPageRef.current;
-         const pageRect = pageElement.getBoundingClientRect();
-         console.log('EDITOR PAGE REF:', pageRect);
-      }
-   }, [resume])
-
    const [resumePageCount, setResumePageCount] = useState(1);
+
    useEffect(() => {
       let resumePageCount = 1;
-      resumePageCount = Math.max(...Object.values(resume.containers.byId).map(container => {
-         const containerSections = container.sectionIds.map(sectionId => resume.sections.byId[sectionId]);
+      resumePageCount = Math.max(...Object.values(reduxResume.containers.byId).map(container => {
+         const containerSections = container.sectionIds.map(sectionId => reduxResume.sections.byId[sectionId]);
          const maxSectionPage = Math.max(...containerSections.map(section => {
-            const sectionSubsections = section.subsectionIds.map(subsectionId => resume.subsections.byId[subsectionId]);
+            const sectionSubsections = section.subsectionIds.map(subsectionId => reduxResume.subsections.byId[subsectionId]);
             const maxSubsectionPage = Math.max(...sectionSubsections.map(subsection => {
-               const subsectionFields = subsection.fieldIds.map(fieldId => resume.fields.byId[fieldId]);
+               const subsectionFields = subsection.fieldIds.map(fieldId => reduxResume.fields.byId[fieldId]);
                const maxFieldPage = Math.max(...subsectionFields.map(field => field.pageNumber));
                return Math.max(subsection.pageNumber, maxFieldPage);
             }));
@@ -161,18 +148,27 @@ const ResumeEditorPage = () => {
       setResumePageCount(resumePageCount);
       // const reduxContainers = resume.containers.byId
 
-   }, [resume]);
+   }, [reduxResume]);
+
+   const editorPageRefMap = useRef(new Map());
+
+   useResumePagination(editorPageRefMap);
 
    return (
       <div className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          <Toolbar handlePrint={handlePrint} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
-            <div ref={resumeRef}>
-            {Array.from({ length: resumePageCount }, (_, index) => (
-               <ResumePaper key={index} resumePageNumber={index + 1} editorPageRef={editorPageRef} />
-            ))}
-            {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
+            <div ref={fullResumeRef}>
+               {Array.from({ length: resumePageCount }, (_, index) => {
+                  if (!editorPageRefMap.current.has(index)) {
+                     editorPageRefMap.current.set(index, React.createRef());
+                  } return (
+                     <ResumePaper key={index} resumePageNumber={index + 1} editorPageRef={editorPageRefMap.current.get(index)} />
+                  );
+               }
+               )}
+               {/* {!isMobile && <MarginRuler pageRef={editorPageRef} />} */}
             </div>
          </PaddingPreviewContext.Provider>
          {showNewResumeModal &&

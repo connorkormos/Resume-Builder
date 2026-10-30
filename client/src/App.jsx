@@ -27,7 +27,7 @@ const App = () => {
   useEffect(() => {
     const runSiteLaunch = async () => {
       const apiStatus = await checkApi();
-      console.log("API STATUS: ", apiStatus);
+      // console.log("API STATUS: ", apiStatus);
 
       const sessionData = await checkSession();
       if (sessionData !== null) {

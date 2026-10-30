@@ -72,6 +72,14 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
   const reduxSubsectionsById = useSelector((state) => state.resume.present.subsections.byId);
   const reduxFieldsById = useSelector((state) => state.resume.present.fields.byId);
 
+  const continuesOnLaterPage = section.subsectionIds?.some(subsectionId => {
+    const subsection = reduxSubsectionsById[subsectionId];
+    return subsection && (
+      subsection.pageNumber > resumePageNumber ||
+      subsection.fieldIds.some(fieldId => reduxFieldsById[fieldId]?.pageNumber > resumePageNumber)
+    );
+  });
+
   const renderedSubsections = section.subsectionIds?.map((subId) => {
     const subsection = reduxSubsectionsById[subId];
     if (!subsection) {
@@ -129,8 +137,10 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
       data-section-id={section.id}
       data-section-container-id={section.containerId}
       data-section-position={section.position}
+      data-pagination-padding-bottom={presentation.style.paddingBottom}
       style={{
         ...presentation.style,
+        ...(continuesOnLaterPage ? { paddingBottom: 0 } : {}),
         outlineColor: section.styling?.color,
         cursor: "all-scroll",
       }}

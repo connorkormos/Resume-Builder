@@ -35,15 +35,8 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
 
     const getElementsByQuerySelector = (querySelector) => {
       const elementsByQuerySelector = Array.from(page.querySelectorAll(querySelector));
-      // console.log(elementsByQuerySelector);
       return elementsByQuerySelector;
     };
-
-    // const getFields = () => {
-    //   const fieldsByQuerySelector = Array.from(page.querySelectorAll(`.resumeSlateField`));
-    //   // console.log(fieldsByQuerySelector);
-    //   return fieldsByQuerySelector;
-    // }
 
     const getContainerContentHeight = (container) => {
       return Array.from(container.children).reduce((totalHeight, childElement) => {
@@ -52,7 +45,6 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
     };
 
     const checkPageLength = () => {
-      // getFields();
       const reduxResume = latestResumeRef.current;
       const reduxContainersById = reduxResume.containers.byId;
       const reduxSectionsById = reduxResume.sections.byId;
@@ -94,24 +86,13 @@ const EndPageMarker = ({ pageRef, resumePageNumber }) => {
             const sectionId = section.getAttribute('data-section-id');
             const reduxSection = reduxSectionsById[sectionId];
 
-            console.log("Section: ", section);
-            console.log('Redux section:', reduxSection);
-            
             const sectionBottom = section.getBoundingClientRect().bottom;
-            // const pageBottom = page.getBoundingClientRect().bottom - resumePaddingBottom * 16;
             const pageBottom = page.getBoundingClientRect().bottom;
-            console.log('Section bottom:', sectionBottom);
-            console.log('Page bottom:', pageBottom);
             if (sectionBottom <= pageBottom) continue;
             
             const reduxSectionPaddingBottom = reduxSection?.layout?.padding?.bottom ?? 0;
             const sectionPaddingBottomOverflow = sectionBottom - pageBottom;
-            console.log('Section padding bottom overflow:', sectionPaddingBottomOverflow);
-
-
-            // const paddingBottom = `${Math.max(0, sectionBottom - pageBottom) / 16}rem`;
             const newSectionPaddingBottom = parseFloat(reduxSectionPaddingBottom) - sectionPaddingBottomOverflow / 16 + 'rem';
-            // convert the new padding bottom value to rem
             const sectionPageNumber = reduxSection?.pageNumber ?? 1;
             dispatch(updateSection(
               {

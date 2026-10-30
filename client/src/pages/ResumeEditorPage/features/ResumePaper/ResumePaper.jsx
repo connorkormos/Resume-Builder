@@ -183,9 +183,6 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       }
     }
 
-    // console.log('Current Resume Page: ', resumePageNumber);
-    // console.log(`Container ${container.id} has content on current resume page:`, containerHasContentOnCurrentResumePage);
-
     if (!containerHasContentOnCurrentResumePage) {
       return null;
     }
@@ -245,7 +242,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
         >
           {resumeContainers}
         </DragDropProvider>
-        <EndPageMarker pageRef={editorRef} resumePageNumber={resumePageNumber} />
+        {/* <EndPageMarker pageRef={editorRef} resumePageNumber={resumePageNumber} /> */}
       </div>
     </div>
     </EditorLayoutContext.Provider>
