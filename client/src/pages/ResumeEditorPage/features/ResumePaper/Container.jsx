@@ -27,6 +27,7 @@ const Container = ({
     collisionPriority: CollisionPriority.High,
   });
 
+
   const renderedIds = presentation.sectionIds;
 
   const reduxSubsectionsById = useSelector(state => state.resume.present.subsections.byId);

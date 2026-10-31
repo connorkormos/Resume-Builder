@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateResume } from '@/store/resumeSlice.js';
+import { applyPageTopSpacing } from '@/utils/pageTopSpacing.js';
 
 const SELECTORS = {
   containers: '[data-container-id]:not([data-section-id])',
@@ -23,6 +24,7 @@ function copyElement(source) {
     element.removeAttribute('id');
     element.removeAttribute('contenteditable');
     element.removeAttribute('autofocus');
+    element.removeAttribute('data-pagination-page-top');
     if (element.matches('.resumeSection, .resumeSubsection, .resumeField')) {
       element.style.transform = 'none';
       element.style.translate = 'none';
@@ -116,12 +118,13 @@ function calculateAssignments(resume, sourcePage, templates, host) {
       element.append(container);
     }
     host.append(element);
-    const page = { element, containers, sections: new Map() };
+    const page = { element, containers, sections: new Map(), number };
     pages.set(number, page);
     return page;
   }
 
   function fits(page) {
+    applyPageTopSpacing(page.element, page.number);
     const bottom = page.element.getBoundingClientRect().bottom;
     // Include section padding and margins as well as overflowing descendants.
     // Ignore editor decorations and explicitly accepted oversized sections.
@@ -267,12 +270,20 @@ export default function useResumePagination(pageRefMap) {
     const pages = [...map.entries()].sort(([a], [b]) => a - b)
       .map(([, ref]) => ref?.current).filter(element => element?.isConnected);
     if (!pages.length) return;
+    const updatePageTops = () => {
+      // ResumeEditorPage keys refs by array index, while assignments are 1-based.
+      for (const [index, ref] of map) {
+        if (ref?.current?.isConnected) applyPageTopSpacing(ref.current, index + 1);
+      }
+    };
+    updatePageTops();
     let stopped = false;
     let frame = null;
 
     const measure = () => {
       frame = null;
       if (stopped || !pages[0].offsetWidth || !pages[0].offsetHeight) return;
+      updatePageTops();
       const templates = prepareTemplates(resume, collectTemplates(pages));
       if (!templates) return;
       const host = document.createElement('div');

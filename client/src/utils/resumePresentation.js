@@ -66,6 +66,7 @@ export function resolveResumePresentation(resume, overrides = {}) {
     layout, resumeLayout, containerIds, containersById, sectionsById,
     pageStyle: {
       ...resume.styling,
+      '--resume-page-padding-top': resumeLayout.padding?.top ?? '0rem',
       display: 'grid',
       gridTemplateColumns: layout.gridTemplateColumns,
       gridTemplateRows: layout.gridTemplateRows,
