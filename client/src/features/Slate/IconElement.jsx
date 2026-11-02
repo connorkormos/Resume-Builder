@@ -46,13 +46,9 @@ const IconElement = ({ element, attributes, children, inheritedFontSize, inherit
          onClick={handleClick}
          style={{
             display: 'inline-block',
-            // verticalAlign: 'middle',
             color: element.iconColor ?? 'currentColor',
-            // height: inheritedFontSize,
-            // height: inheritedLineHeight,
             maxHeight: 'auto',
-            fontSize: inheritedFontSize,
-            // fontSize: `${inheritedFontSize + (element.children[0]?.fontSizeOffset ?? 0)}px`,
+            fontSize: `${inheritedFontSize + (Number(element.children[0]?.fontSizeOffset) || 0)}px`,
             lineHeight:  inheritedLineHeight,
          }}
       >
