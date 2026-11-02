@@ -1,7 +1,6 @@
 import { resolveResumeLayout, planContainerRole, planContainerSettings, planContainerMove, getColumnWidthLimits, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
-import { normalizeResumeLayout } from '../utils/sectionSpacing.js';
+import {  } from '../utils/previewLayout.js';
 import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
-import { normalizeSectionLayout } from "../utils/normalizers/normalizeSectionLayout.js";
 import { createSlice } from '@reduxjs/toolkit';
 
 import { mergeDeep } from "./helpers/mergeDeep.js";
@@ -205,7 +204,6 @@ const resumeSlice = createSlice({
          return {
             ...initialState,
             ...action.payload,
-            layout: normalizeResumeLayout(action.payload.layout ?? initialState.layout),
             activeEditorId: null,
             activeEditorSelection: null,
             manualProfileMatches: {},
@@ -216,7 +214,6 @@ const resumeSlice = createSlice({
          return {
             ...initialState,
             ...action.payload,
-            layout: normalizeResumeLayout(action.payload.layout ?? initialState.layout),
             activeEditorId: null,
             activeEditorSelection: null,
             manualProfileMatches: {},
@@ -245,7 +242,14 @@ const resumeSlice = createSlice({
          state.sections.byId[section.id] = {
             ...section,
             value: normalizeSlateValue(section.value),
-            layout: normalizeSectionLayout(section.layout),
+            layout: {
+               ...section.layout,
+               display: 'grid',
+               grid: {
+                  ...section.layout?.grid,
+                  columns: section.layout?.display === 'grid' ? section.layout.grid?.columns ?? 1 : 1,
+               },
+            },
             subsectionIds: [],
          };
          state.sections.allIds.push(section.id);
@@ -362,8 +366,8 @@ const resumeSlice = createSlice({
          const { leftContainerId, rightContainerId, leftWidth, rightWidth } = action.payload;
          const layout = resolveStateLayout(state);
          if (!layout.trackIds.includes(leftContainerId) || !layout.trackIds.includes(rightContainerId) ||
-             layout.resizeNeighborsByContainerId[leftContainerId] !== rightContainerId ||
-             !Number.isFinite(leftWidth) || !Number.isFinite(rightWidth) || leftWidth <= 0 || rightWidth <= 0) {
+            layout.resizeNeighborsByContainerId[leftContainerId] !== rightContainerId ||
+            !Number.isFinite(leftWidth) || !Number.isFinite(rightWidth) || leftWidth <= 0 || rightWidth <= 0) {
             console.error('Cannot resize containers: expected adjacent column tracks and positive finite widths.');
             return;
          }
@@ -436,7 +440,7 @@ const resumeSlice = createSlice({
             console.error(`Cannot update field. Subsection with ID ${field.subsectionId} not found.`);
             return;
          }
-         
+
          // console.log(field, id, changes);
          mergeDeep(field, changes);
       },
@@ -640,7 +644,7 @@ const resumeSlice = createSlice({
          });
       },
 
-      
+
       reorderFields(state, action) {
          const { subsectionId, fromIndex, toIndex } = action.payload;
 

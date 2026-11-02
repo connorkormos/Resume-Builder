@@ -183,7 +183,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
       }
     }
 
-    if (!containerHasContentOnCurrentResumePage) {
+    if (!containerHasContentOnCurrentResumePage && container.sectionIds.length > 0) {
       return null;
     }
 

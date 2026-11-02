@@ -1,10 +1,7 @@
-import { normalizeResumeLayout } from '../sectionSpacing.js';
 // * ------------------------------ V
 // * API TO FRONT END NORMALIZATION V
 // * ------------------------------ V
 import { normalizeSlateValue } from "./normalizeSlateValue.js";
-
-import { normalizeSectionLayout } from "./normalizeSectionLayout.js";
 
 const normalizeResumeFromApi = (apiResume) => {
   let normalizedResume = {
@@ -33,13 +30,10 @@ const normalizeResumeFromApi = (apiResume) => {
       allIds: [],
     },
 
-    styling: apiResume.styling ?? {backgroundColor: 'rgba(255, 255, 255, 1)'},
+    styling: apiResume.styling ?? { backgroundColor: 'rgba(255, 255, 255, 1)' },
     layout: {
       ...apiResume.layout,
-      // display: 'grid',
-
     },
-    // layout: normalizeResumeLayout(apiResume.layout),
 
     createdAt: apiResume.createdAt ?? null,
     updatedAt: apiResume.updatedAt ?? null,
@@ -49,16 +43,11 @@ const normalizeResumeFromApi = (apiResume) => {
     activeEditorSelection: null,
   };
 
-  // normalizedResume.layout = {
-  //   ...normalizedResume.layout,
-  //   display: 'grid'
-  // };
-
   const orderedContainers = [...(apiResume.containers ?? [])].sort(
     (a, b) => a.position - b.position
   );
 
-  orderedContainers.forEach((container) => {    
+  orderedContainers.forEach((container) => {
     const orderedSections = [...(container.sections ?? [])].sort(
       (a, b) => a.position - b.position
     );
@@ -90,7 +79,14 @@ const normalizeResumeFromApi = (apiResume) => {
         position: section.position ?? 0,
         value: normalizeSlateValue(section.value ?? []),
         showHeading: section.showHeading ?? true,
-        layout: normalizeSectionLayout(section.layout),
+        layout: {
+          ...section.layout,
+          display: 'grid',
+          grid: {
+            ...section.layout?.grid,
+            columns: section.layout?.display === 'grid' ? section.layout.grid?.columns ?? 1 : 1,
+          },
+        },
         styling: section.styling ?? {},
         subsectionIds: orderedSubsections.map((subsection) => subsection.id),
         pageNumber: 1,
@@ -133,7 +129,7 @@ const normalizeResumeFromApi = (apiResume) => {
       });
     });
   });
-  
+
   return normalizedResume;
 };
 

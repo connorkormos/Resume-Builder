@@ -4,7 +4,8 @@ import { useSelector } from "react-redux";
 import { PiHouseSimpleFill } from "react-icons/pi";
 import styles from "./MarginRuler.module.css";
 import MarginIndicator from "./MarginIndicator";
-import { PaddingPreviewContext, previewLayout } from "../helpers/PaddingPreviewContext";
+import { PaddingPreviewContext} from "../helpers/PaddingPreviewContext";
+import { previewLayout } from "@/utils/previewLayout.js";
 import { parseRemValue } from "@/utils/formatters";
 
 export default function MarginRulerTop({

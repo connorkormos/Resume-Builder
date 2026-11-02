@@ -83,8 +83,8 @@ const Container = ({
       style={presentation.style}
       ref={ref}
     >
-      {renderedSections}
       {!renderedIds.length && <p>Drop a section here</p>}
+      {renderedSections}
       {rightContainerId && (
         <div>
           {isResizingPair && (

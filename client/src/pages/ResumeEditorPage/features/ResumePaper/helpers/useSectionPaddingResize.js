@@ -1,9 +1,34 @@
-import { resolveSectionPaddingBase } from '@/utils/sectionSpacing.js';
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
 import { PaddingPreviewContext } from "./PaddingPreviewContext";
+
+
+const GAP_BY_BOUNDARY = {
+  containerHorizontal: 'horizontal',
+  containerVertical: 'vertical',
+  section: 'section',
+};
+
+// Keep this unclamped: a section offset can cancel a negative container offset.
+export function resolveSectionPaddingBase({ boundary, resumeLayout, containerLayout, side }) {
+  const base = boundary === 'page' ? resumeLayout.padding?.[side]
+    : resumeLayout.gap?.[GAP_BY_BOUNDARY[boundary]];
+  return parseRemValue(base) + parseRemValue(containerLayout?.padding?.[side]);
+}
+
+export function resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout }) {
+  return Object.fromEntries(['top', 'right', 'bottom', 'left'].map(side => {
+    const value = Math.max(
+      0,
+      resolveSectionPaddingBase({ boundary: boundaries?.[side], resumeLayout, containerLayout, side })
+        + parseRemValue(sectionLayout?.padding?.[side]),
+    );
+    return [`padding${side[0].toUpperCase()}${side.slice(1)}`, `${value}rem`];
+  }));
+}
+
 
 export default function useSectionPaddingResize(
   section, container, orderedSectionIds = container.sectionIds,

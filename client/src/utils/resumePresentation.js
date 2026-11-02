@@ -1,5 +1,6 @@
 import { resolveResumeLayout, deriveSectionBoundaries } from './resumeLayout.js';
-import { normalizeResumeLayout, previewLayout, resolveSectionPadding } from './sectionSpacing.js';
+import { previewLayout } from './previewLayout.js';
+import { resolveSectionPadding } from '@/pages/ResumeEditorPage/features/ResumePaper/helpers/useSectionPaddingResize.js';
 
 // Stored border/typography metadata is consumed by the content renderers, not CSS.
 function sectionCss(styling = {}) {
@@ -13,7 +14,7 @@ function sectionCss(styling = {}) {
 // Independent of React/Redux. Thumbnails pass their own document; the editor can
 // overlay transient widths, section moves, and padding without mutating it.
 export function resolveResumePresentation(resume, overrides = {}) {
-  const resumeLayout = previewLayout(normalizeResumeLayout(resume.layout), overrides.padding, 'resume', null);
+  const resumeLayout = previewLayout(resume.layout, overrides.padding, 'resume', null);
   const layout = resolveResumeLayout({
     containersById: resume.containers.byId,
     orderedContainerIds: resume.containers.allIds,
