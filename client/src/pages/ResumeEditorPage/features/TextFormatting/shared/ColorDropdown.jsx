@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import useClickOutside from '@/hooks/useClickOutside';
 import { useSelector } from 'react-redux';
 
-import { selectUsedResumeColors } from '@/utils/resumeColorSelectors';
+import { selectUsedResumeColors } from '@/pages/ResumeEditorPage/features/TextFormatting/helpers/resumeColorSelectors';
 import { BASE_COLORS } from '@/lib/baseColors';
 
 import styles from "../TextFormatting.module.css";

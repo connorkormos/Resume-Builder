@@ -1,7 +1,7 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { resolveEditorContext } from "@/utils/resumeContext.js";
+import { resolveEditorContext } from "@/features/Slate/helpers/editorContext.js";
 
 import LineHeight from "@/pages/ResumeEditorPage/features/TextFormatting/LineHeight.jsx";
 import FontSize from "@/pages/ResumeEditorPage/features/TextFormatting/FontSize.jsx";

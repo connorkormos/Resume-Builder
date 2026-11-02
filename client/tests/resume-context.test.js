@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveEditorContext } from '../src/utils/resumeContext.js';
+import { resolveEditorContext } from '../src/features/Slate/helpers/editorContext.js';
 import { getCascadedColor, getCascadedFontSize, getCascadedLineHeight } from '../src/features/Slate/helpers/leafHelpers.js';
 
 const fixture = () => ({

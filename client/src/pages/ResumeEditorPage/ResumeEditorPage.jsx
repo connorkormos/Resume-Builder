@@ -15,11 +15,10 @@ import { getResumeFromApi } from '@/services/resumeServices';
 import { useReactToPrint } from 'react-to-print';
 
 import MarginRuler from '@/pages/ResumeEditorPage/features/ResumePaper/components/MarginRuler';
-import { PaddingPreviewContext } from '@/pages/ResumeEditorPage/features/ResumePaper/helpers/PaddingPreviewContext';
+import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { ActionCreators as UndoActionCreators } from "redux-undo";
 
-import { getPageDimensions } from './features/ResumePaper/helpers/pageDimensions.js';
 import useResumePagination from './features/ResumePaper/helpers/useResumePagination.js';
 
 import styles from './ResumeEditor.module.css';

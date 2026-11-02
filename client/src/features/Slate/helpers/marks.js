@@ -1,7 +1,7 @@
 import { Editor, Element, Range, Transforms } from "slate";
 
 import { store } from "../../../store/store.js";
-import { resolveEditorContext } from "../../../utils/resumeContext.js";
+import { resolveEditorContext } from "./editorContext.js";
 import { getCascadedColor } from "./leafHelpers.js";
 
 const getResumeStyling = (style) => {
@@ -19,6 +19,7 @@ const getActiveEditorColor = (editor) => {
 
   const resume = store.getState().resume.present;
   const context = resolveEditorContext(resume, resume.activeEditorId);
+  console.log("CONTEXT: ", context)
   return getCascadedColor(context.styling);
 };
 

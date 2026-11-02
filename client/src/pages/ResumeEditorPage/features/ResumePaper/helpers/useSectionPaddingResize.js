@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
 import { parseRemValue } from "@/utils/formatters.js";
-import { PaddingPreviewContext } from "./PaddingPreviewContext";
+import { PaddingPreviewContext } from "../../../../../context/PaddingPreviewContext";
 
 
 const GAP_BY_BOUNDARY = {

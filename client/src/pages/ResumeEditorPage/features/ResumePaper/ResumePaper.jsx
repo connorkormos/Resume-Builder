@@ -1,7 +1,7 @@
 import { resolveResumePresentation } from '@/utils/resumePresentation.js';
-import { PaddingPreviewContext } from './helpers/PaddingPreviewContext.js';
+import { PaddingPreviewContext } from '../../../../context/PaddingPreviewContext.js';
 import { resizeColumnWidths } from '@/utils/resumeLayout.js';
-import { EditorLayoutContext } from './helpers/EditorLayoutContext.js';
+import { EditorLayoutContext } from '../../../../context/EditorLayoutContext.js';
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { forwardRef, useEffect, useRef, useState, useContext } from "react";
 

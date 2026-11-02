@@ -1,11 +1,11 @@
-import { useResolvedSectionSpacing } from '../helpers/EditorLayoutContext.js';
+import { useResolvedSectionSpacing } from '@/context/EditorLayoutContext.js';
+import { PaddingPreviewContext } from "@/context/PaddingPreviewContext.js";
 import { useContext } from "react";
 import { useSelector } from "react-redux";
 import styles from "./MarginRuler.module.css";
 import MarginIndicator from "./MarginIndicator";
-import { PaddingPreviewContext } from "../helpers/PaddingPreviewContext";
-import { previewLayout } from "@/utils/previewLayout.js";
-import { parseRemValue } from "@/utils/formatters";
+import { previewPadding } from "@/utils/previewPadding.js";
+import { parseRemValue } from "@/utils/formatters.js";
 
 export default function MarginRulerSide({
   renderMarginRuler,
@@ -19,7 +19,7 @@ export default function MarginRulerSide({
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
   const section = resume.sections.byId[preview?.target === 'section' ? preview.id : resume.activeSectionIds[0]];
-  const padding = previewLayout(resume.layout, preview, "resume", null)?.padding;
+  const padding = previewPadding(resume.layout, preview, "resume", null)?.padding;
   const effectivePadding = useResolvedSectionSpacing(section?.id);
   const sectionInset = side => parseRemValue(effectivePadding[`padding${side[0].toUpperCase()}${side.slice(1)}`]);
   const topInset = sectionInset('top');

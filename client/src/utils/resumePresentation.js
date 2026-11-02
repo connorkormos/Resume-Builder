@@ -1,5 +1,5 @@
 import { resolveResumeLayout, deriveSectionBoundaries } from './resumeLayout.js';
-import { previewLayout } from './previewLayout.js';
+import { previewPadding } from './previewPadding.js';
 import { resolveSectionPadding } from '@/pages/ResumeEditorPage/features/ResumePaper/helpers/useSectionPaddingResize.js';
 
 // Stored border/typography metadata is consumed by the content renderers, not CSS.
@@ -14,7 +14,7 @@ function sectionCss(styling = {}) {
 // Independent of React/Redux. Thumbnails pass their own document; the editor can
 // overlay transient widths, section moves, and padding without mutating it.
 export function resolveResumePresentation(resume, overrides = {}) {
-  const resumeLayout = previewLayout(resume.layout, overrides.padding, 'resume', null);
+  const resumeLayout = previewPadding(resume.layout, overrides.padding, 'resume', null);
   const layout = resolveResumeLayout({
     containersById: resume.containers.byId,
     orderedContainerIds: resume.containers.allIds,
@@ -41,11 +41,11 @@ export function resolveResumePresentation(resume, overrides = {}) {
         gridColumn: `${placement.columnStart} / span ${placement.columnSpan}`,
       },
     };
-    const containerLayout = previewLayout(container.layout, overrides.padding, 'container', containerId);
+    const containerLayout = previewPadding(container.layout, overrides.padding, 'container', containerId);
     sectionIds.forEach((sectionId, index) => {
       const section = resume.sections.byId[sectionId];
       const boundaries = deriveSectionBoundaries(layout.boundariesByContainerId[containerId], sectionIds, sectionId);
-      const sectionLayout = previewLayout(section.layout, overrides.padding, 'section', sectionId);
+      const sectionLayout = previewPadding(section.layout, overrides.padding, 'section', sectionId);
       const padding = resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout });
       const hasNextSection = index < sectionIds.length - 1;
       sectionsById[sectionId] = {

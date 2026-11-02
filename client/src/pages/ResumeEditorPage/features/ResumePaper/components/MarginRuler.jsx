@@ -1,10 +1,10 @@
-import { EditorLayoutContext } from '../helpers/EditorLayoutContext.js';
+import { EditorLayoutContext } from '../../../../../context/EditorLayoutContext.js';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import styles from './MarginRuler.module.css';
 import MarginRulerTop from './MarginRulerTop';
 import MarginRulerSide from './MarginRulerSide';
-import { PaddingPreviewContext } from '../helpers/PaddingPreviewContext';
+import { PaddingPreviewContext } from '../../../../../context/PaddingPreviewContext.js';
 import { useDispatch, useSelector } from 'react-redux';
 import useMarginGeometry from '@/hooks/useMarginGeometry';
 import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
