@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { Slate, Editable } from "slate-react";
 import { useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
-import { useResumeSlateEditor } from "./useResumeSlateEditor.js";
+import { useResumeSlateEditor } from "./hooks/useResumeSlateEditor.js";
 
 import Leaf from "@/features/Slate/renderLeaf.jsx";
 import {

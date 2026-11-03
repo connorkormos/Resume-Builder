@@ -1,7 +1,7 @@
 import { Editor, Element, Range, Transforms } from "slate";
 
 import { store } from "../../../store/store.js";
-import { resolveEditorContext } from "./editorContext.js";
+import { resolveEditorAncestryContext } from "./editorAncestryContext.js";
 import { getCascadedColor } from "./leafHelpers.js";
 
 const getResumeStyling = (style) => {
@@ -18,7 +18,7 @@ const getActiveEditorColor = (editor) => {
   }
 
   const resume = store.getState().resume.present;
-  const context = resolveEditorContext(resume, resume.activeEditorId);
+  const context = resolveEditorAncestryContext(resume, resume.activeEditorId);
   console.log("CONTEXT: ", context)
   return getCascadedColor(context.styling);
 };
@@ -92,9 +92,7 @@ export const getActiveMark = (editor, mark) => {
         return 0;
       case ('color'):
         return;
-        // return getResumeStyling('color');
       case ('lineHeight'):
-        // const resumeLineHeight = getResumeStyling('lineHeight');
         return parseFloat(getResumeStyling('lineHeight')).toFixed(1);
       case ('lineHeightOffset'):
         return 0;
@@ -102,7 +100,6 @@ export const getActiveMark = (editor, mark) => {
         return getResumeStyling(mark);
     }
   }
-  // return activeMark;
 };
 
 export const setFontFamily = (editor, fontFamily) => {
@@ -111,9 +108,6 @@ export const setFontFamily = (editor, fontFamily) => {
 };
 
 export const setFontSize = (editor, fontSize) => {
-  // const parsedFontSize = parseInt(fontSize);
-  // Editor.addMark(editor, 'fontSize', parsedFontSize);
-  // console.log(`Font size set to ${parsedFontSize}`);
   Editor.addMark(editor, 'fontSize', `${fontSize}px`);
   console.log(`Font size set to ${fontSize}px`);
 };

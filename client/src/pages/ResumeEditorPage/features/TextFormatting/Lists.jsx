@@ -1,6 +1,7 @@
 import React from "react";
 
-import { isBlockActive, toggleList } from "../../../../features/Slate/helpers/blocks";
+import { isBlockActive } from "@/features/Slate/helpers/blocks";
+import { toggleList } from "@/features/Slate/helpers/listBehavior";
 
 import styles from "./TextFormatting.module.css";
 import { MdFormatListBulleted, MdFormatListNumbered } from "react-icons/md";

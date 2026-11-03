@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Node } from 'slate';
 import { setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
-import { editorRegistry } from '@/features/Slate/helpers/editorRegistry.js';
+import { editorRegistry } from '@/features/Slate/lib/editorRegistry.js';
 import { getNodeString } from '@/features/Slate/helpers/getNodeString';
 
 import styles from "../Toolbar.module.css";

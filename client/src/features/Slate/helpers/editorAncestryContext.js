@@ -1,6 +1,6 @@
 // Resolve a text editor's real ancestry, independently of selected sections.
 // Return existing entities by reference; missing ancestors stay absent.
-export function resolveEditorContext(resume, editorId) {
+export function resolveEditorAncestryContext(resume, editorId) {
   const field = editorId == null ? null : resume.fields?.byId?.[editorId] ?? null;
   const subsection = field
     ? resume.subsections?.byId?.[field.subsectionId] ?? null

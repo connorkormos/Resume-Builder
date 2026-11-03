@@ -1,4 +1,4 @@
-export const withInlineVoidIcons = (editor) => {
+export const withIcons = (editor) => {
   const { isInline, isVoid, markableVoid } = editor;
 
   editor.isInline = (element) => {

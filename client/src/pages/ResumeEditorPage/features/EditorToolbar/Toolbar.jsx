@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-import { editorRegistry } from "@/features/Slate/helpers/editorRegistry.js";
+import { editorRegistry } from "@/features/Slate/lib/editorRegistry.js";
 
 import { FaArrowLeft } from "react-icons/fa6";
 

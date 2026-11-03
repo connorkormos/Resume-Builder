@@ -1,11 +1,3 @@
-export const getPxNumber = (value, fallback = 12) => {
-  if (value === undefined || value === null) return fallback;
-
-  const number = Number(String(value).replace(/[^0-9.]/g, ''));
-
-  return Number.isNaN(number) ? fallback : number;
-};
-
 export const getNumber = (value, fallback) => {
   if (value === undefined || value === null || value === '') return fallback;
 
@@ -31,6 +23,14 @@ export const getCascadedColor = ({
   containerStyling?.color ||
   resumeStyling?.color
 );
+
+export const getPxNumber = (value, fallback = 12) => {
+  if (value === undefined || value === null) return fallback;
+
+  const number = Number(String(value).replace(/[^0-9.]/g, ''));
+
+  return Number.isNaN(number) ? fallback : number;
+};
 
 export const getCascadedFontSize = ({
   resumeStyling,

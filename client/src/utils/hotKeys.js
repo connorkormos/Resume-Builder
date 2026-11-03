@@ -1,7 +1,7 @@
 import { Editor } from "slate";
 
 import { toggleMark } from "@/features/Slate/helpers/marks";
-import { toggleList } from "@/features/Slate/helpers/blocks";
+import { toggleList } from "@/features/Slate/helpers/listBehavior";
 import { outdentList, indentList, addListItem } from "@/features/Slate/helpers/listBehavior";
 import { saveResumeToApi } from "@/services/resumeServices";
 

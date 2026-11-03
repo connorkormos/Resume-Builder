@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { updateResume, updateSection } from "@/store/resumeSlice.js";
 
-import { setAlignment, getActiveAlignment } from "@/features/Slate/helpers/blocks.js";
+import { setAlignment, getEditorAlignment } from "@/features/Slate/helpers/blocks.js";
 
 
 import styles from "./TextFormatting.module.css";
@@ -21,7 +21,7 @@ const TextAlign = ({ editor, selection, activeSectionId, activeSectionIds }) => 
   const dispatch = useDispatch();
   const resumeAlignment = useSelector((state) => state.resume.present?.styling?.textAlign);
   const activeEditorSelection = useSelector((state) => state.resume.present?.activeEditorSelection)
-  const activeEditorAlignment = editor ? getActiveAlignment(editor) : null;
+  const activeEditorAlignment = editor ? getEditorAlignment(editor) : null;
   //   const activeEditorAlignment = activeEditorSelection?.[0]?.textAlign;
   const activeEditorChildren = activeEditorSelection?.[0]?.children;
   const activeSectionAlignment = useSelector((state) => state.resume.present?.sections?.byId[activeSectionId]?.styling?.textAlign)

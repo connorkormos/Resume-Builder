@@ -3,8 +3,8 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { useDispatch } from "react-redux";
 
-import { editorRegistry } from "@/features/Slate/helpers/editorRegistry.js";
-import { withInlineVoidIcons } from "@/features/Slate/helpers/editorSchemaRules.js";
+import { editorRegistry } from "@/features/Slate/lib/editorRegistry.js";
+import { withIcons } from "@/features/Slate/helpers/icons.js";
 import { selectOnEditorEntry } from "@/features/Slate/helpers/selectOnEditorEntry.js";
 import { useSlateHistoryGrouping } from "@/hooks/useSlateHistoryGrouping.js";
 import { handleHotKey } from "@/utils/hotKeys.js";
@@ -17,7 +17,7 @@ import {
 export function useResumeSlateEditor({ editorId, value, createValueAction }) {
   const dispatch = useDispatch();
   const editor = useMemo(
-    () => withReact(withInlineVoidIcons(createEditor())),
+    () => withReact(withIcons(createEditor())),
     [],
   );
   const {

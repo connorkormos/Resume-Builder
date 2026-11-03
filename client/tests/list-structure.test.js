@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Element, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/features/Slate/helpers/editorSchemaRules.js';
-import { toggleList } from '../src/features/Slate/helpers/blocks.js';
+import { withInlineVoidIcons } from '../src/features/Slate/helpers/icons.js';
+import { toggleList } from '../src/features/Slate/helpers/listBehavior.js';
 import { indentList, outdentList, addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const p = text => ({ type: 'paragraph', children: [{ text }] });

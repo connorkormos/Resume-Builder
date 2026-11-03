@@ -1,7 +1,7 @@
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
-import { resolveEditorContext } from "@/features/Slate/helpers/editorContext.js";
+import { resolveEditorAncestryContext } from "@/features/Slate/helpers/editorAncestryContext.js";
 
 import LineHeight from "@/pages/ResumeEditorPage/features/TextFormatting/LineHeight.jsx";
 import FontSize from "@/pages/ResumeEditorPage/features/TextFormatting/FontSize.jsx";
@@ -53,7 +53,7 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
 
   // Keep the context stable during local input edits and unrelated UI updates.
   const editorContext = useMemo(
-    () => resolveEditorContext({
+    () => resolveEditorAncestryContext({
       fields, subsections, sections, containers, styling: resumeStyling,
     }, activeEditorId),
     [fields, subsections, sections, containers, resumeStyling, activeEditorId],
