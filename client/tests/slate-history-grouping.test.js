@@ -5,7 +5,7 @@ import undoable, { ActionCreators, excludeAction } from 'redux-undo';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import reducer, { updateField, updateSection, setActiveEditorSelection } from '../src/store/resumeSlice.js';
 import { createSlateHistoryGrouping, observeHistoryOperations } from '../src/features/Slate/helpers/historyGrouping.js';
-import { withInlineVoidIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/icons.js';
 import { addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
@@ -31,7 +31,7 @@ async function setup(initial = '', { heading = false, nodes = value(initial) } =
   });
   let time = 0;
   const grouping = createSlateHistoryGrouping({ editorId: heading ? 's1' : 'f1', now: () => time });
-  const editor = withInlineVoidIcons(createEditor());
+  const editor = withIcons(createEditor());
   editor.children = structuredClone(nodes);
   observeHistoryOperations(editor, grouping);
   editor.onChange = () => {
@@ -341,7 +341,7 @@ test('group IDs never collide between fields, headings or remounted controllers'
 
 test('switching between a field and a heading preserves global chronological order', async () => {
   const h = await setup();
-  const heading = withInlineVoidIcons(createEditor());
+  const heading = withIcons(createEditor());
   heading.children = value('');
   const grouping = createSlateHistoryGrouping({ editorId: 's1' });
   observeHistoryOperations(heading, grouping);

@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/icons.js';
 import { addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const item = children => ({ type: 'list-item', children });
 const setup = (type, children = [{ text: 'abcdef' }]) => {
-  const editor = withHistory(withInlineVoidIcons(createEditor()));
+  const editor = withHistory(withIcons(createEditor()));
   editor.children = [{ type, children: [item(children)] }];
   return editor;
 };

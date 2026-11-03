@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/icons.js';
 
 const makeEditor = () => {
-  const editor = withHistory(withInlineVoidIcons(createEditor()));
+  const editor = withHistory(withIcons(createEditor()));
   editor.children = [{ type: 'paragraph', children: [
     { text: 'Before ' },
     { type: 'icon', iconId: 'FaPhone', children: [{ text: '' }] },

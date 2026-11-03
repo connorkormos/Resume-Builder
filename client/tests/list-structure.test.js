@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Element, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withInlineVoidIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/icons.js';
 import { toggleList } from '../src/features/Slate/helpers/listBehavior.js';
 import { indentList, outdentList, addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
@@ -10,7 +10,7 @@ const p = text => ({ type: 'paragraph', children: [{ text }] });
 const li = text => ({ type: 'list-item', children: [{ text }] });
 const list = (type, ...children) => ({ type, children });
 const make = children => {
-  const editor = withHistory(withInlineVoidIcons(createEditor()));
+  const editor = withHistory(withIcons(createEditor()));
   editor.children = structuredClone(children);
   return editor;
 };
