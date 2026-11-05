@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { useSelector } from "react-redux";
 import styles from "./MarginRuler.module.css";
 import MarginIndicator from "./MarginIndicator";
-import { previewPadding } from "@/utils/previewPadding.js";
+import { previewPadding } from "@/utils/resumePresentation.js";
 import { parseRemValue } from "@/utils/formatters.js";
 
 export default function MarginRulerSide({

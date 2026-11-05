@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/withIcons.js';
 
 const makeEditor = () => {
   const editor = withHistory(withIcons(createEditor()));

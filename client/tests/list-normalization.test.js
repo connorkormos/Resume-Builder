@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { withReact } from 'slate-react';
-import { withIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/withIcons.js';
 import { withLists } from '../src/features/Slate/helpers/withLists.js';
 import { isList, isListItem } from '../src/features/Slate/helpers/listTransforms.js';
 import { addListItem, indentList, outdentList } from '../src/features/Slate/helpers/listBehavior.js';

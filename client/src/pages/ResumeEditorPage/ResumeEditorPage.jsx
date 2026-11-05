@@ -1,40 +1,31 @@
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useParams } from 'react-router-dom';
+import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
+
+import { handleGlobalHotKey } from '@/utils/hotKeys';
+import { getResumeFromApi } from '@/services/resumeServices';
+import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
+
+import { usePrintResume } from './hooks/usePrintResume.js';
+import useResumePagination from './features/ResumePaper/hooks/useResumePagination.js';
 
 import Toolbar from '@/pages/ResumeEditorPage/features/EditorToolbar/Toolbar.jsx';
 import Outline from '@/pages/ResumeEditorPage/features/EditorOutline/Outline.jsx';
 import NewResumeModal from '@/pages/ResumeEditorPage/features/NewResumeModal/NewResumeModal.jsx';
-
 import ResumePaper from '@/pages/ResumeEditorPage/features/ResumePaper/ResumePaper.jsx';
-import { getResumeFromApi } from '@/services/resumeServices';
-import { useReactToPrint } from 'react-to-print';
-
-import MarginRuler from '@/pages/ResumeEditorPage/features/ResumePaper/components/MarginRuler';
-import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
-import { handleGlobalHotKey } from '@/utils/hotKeys';
-import { ActionCreators as UndoActionCreators } from "redux-undo";
-
-import useResumePagination from './features/ResumePaper/helpers/useResumePagination.js';
 
 import styles from './ResumeEditor.module.css';
 
 const ResumeEditorPage = () => {
 
-   const isMobile = useMediaQuery("(max-width: 768px)");
    const location = useLocation();
    const dispatch = useDispatch();
    const { resumeId } = useParams();
 
    const reduxResume = useSelector(state => state.resume.present)
-   const reduxContainers = useSelector(state => state.resume.present.containers);
-   const reduxSections = useSelector(state => state.resume.present.sections);
-   const reduxSubsections = useSelector(state => state.resume.present.subsections);
-   const reduxFields = useSelector(state => state.resume.present.fields);
 
    const showNewResumeModal = location.pathname === '/editor/new';
 
@@ -88,37 +79,6 @@ const ResumeEditorPage = () => {
 
    const [paddingPreview, setPaddingPreview] = useState(null);
 
-   const pageStyle = `
-      @page {
-         size: letter portrait;
-         margin: 0;
-      }
-
-      @media print {
-         html, body {
-            height: auto !important;
-            overflow: visible !important;
-            margin: 0;
-            padding: 0;
-         }
-
-         body {
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
-         }
-      }
-   `;
-
-   const reactToPrint = useReactToPrint({
-      documentTitle: reduxResume.title,
-      contentRef: fullResumeRef,
-      pageStyle: pageStyle,
-   });
-
-   const handlePrint = () => {
-      reactToPrint();
-   };
-
    const handleBackgroundClick = (event) => {
       if (event.target !== event.currentTarget) return;
 
@@ -145,8 +105,6 @@ const ResumeEditorPage = () => {
       }));
 
       setResumePageCount(resumePageCount);
-      // const reduxContainers = resume.containers.byId
-
    }, [reduxResume]);
 
    const editorPageRefMap = useRef(new Map());
@@ -155,7 +113,7 @@ const ResumeEditorPage = () => {
 
    return (
       <div className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
-         <Toolbar handlePrint={handlePrint} />
+         <Toolbar handlePrint={usePrintResume(reduxResume, fullResumeRef)} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
             <div ref={fullResumeRef}>

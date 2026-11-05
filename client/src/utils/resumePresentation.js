@@ -1,6 +1,5 @@
 import { resolveResumeLayout, deriveSectionBoundaries } from './resumeLayout.js';
-import { previewPadding } from './previewPadding.js';
-import { resolveSectionPadding } from '@/pages/ResumeEditorPage/features/ResumePaper/helpers/useSectionPaddingResize.js';
+import { resolveSectionPadding } from '@/pages/ResumeEditorPage/features/ResumePaper/hooks/useSectionPaddingResize.js';
 
 // Stored border/typography metadata is consumed by the content renderers, not CSS.
 function sectionCss(styling = {}) {
@@ -9,6 +8,16 @@ function sectionCss(styling = {}) {
   delete css.fontSizeOffset;
   delete css.lineHeightOffset;
   return css;
+}
+
+export function previewPadding(layout, preview, target, id) {
+  if (!preview || preview.target !== target || preview.id !== id) return layout;
+  const updatedLayout = {
+    ...layout,
+    padding: { ...layout?.padding, [preview.side]: `${preview.value}rem` },
+  };
+  // console.log("UPDATED PREVIEW LAYOUT", updatedLayout);
+  return updatedLayout;
 }
 
 // Independent of React/Redux. Thumbnails pass their own document; the editor can

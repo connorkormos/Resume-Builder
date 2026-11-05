@@ -5,7 +5,7 @@ import undoable, { ActionCreators, excludeAction } from 'redux-undo';
 import { createEditor, Editor, Node, Transforms } from 'slate';
 import reducer, { updateField, updateSection, setActiveEditorSelection } from '../src/store/resumeSlice.js';
 import { createSlateHistoryGrouping, observeHistoryOperations } from '../src/features/Slate/helpers/historyGrouping.js';
-import { withIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/withIcons.js';
 import { addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];

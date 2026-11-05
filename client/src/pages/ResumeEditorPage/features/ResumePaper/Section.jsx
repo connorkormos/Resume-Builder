@@ -11,7 +11,7 @@ import {
 // import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
 
 
-import useSectionPaddingResize from "./helpers/useSectionPaddingResize.js";
+import useSectionPaddingResize from "./hooks/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
   DragDropProvider,

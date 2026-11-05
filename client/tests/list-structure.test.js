@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createEditor, Editor, Element, Node, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
-import { withIcons } from '../src/features/Slate/helpers/icons.js';
+import { withIcons } from '../src/features/Slate/helpers/withIcons.js';
 import { toggleList } from '../src/features/Slate/helpers/listBehavior.js';
 import { indentList, outdentList, addListItem } from '../src/features/Slate/helpers/listBehavior.js';
 

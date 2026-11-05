@@ -5,7 +5,7 @@ import { PiHouseSimpleFill } from "react-icons/pi";
 import styles from "./MarginRuler.module.css";
 import MarginIndicator from "./MarginIndicator";
 import { PaddingPreviewContext} from "@/context/PaddingPreviewContext.js";
-import { previewPadding } from "@/utils/previewPadding.js";
+import { previewPadding } from "@/utils/resumePresentation.js";
 import { parseRemValue } from "@/utils/formatters";
 
 export default function MarginRulerTop({

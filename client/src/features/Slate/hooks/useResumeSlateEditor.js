@@ -3,8 +3,8 @@ import { createEditor } from "slate";
 import { withReact } from "slate-react";
 import { useDispatch } from "react-redux";
 
-import { editorRegistry } from "@/features/Slate/lib/editorRegistry.js";
-import { withIcons } from "@/features/Slate/helpers/icons.js";
+import { editorRegistry } from "@/lib/editorRegistry.js";
+import { withIcons } from "@/features/Slate/helpers/withIcons.js";
 import { selectOnEditorEntry } from "@/features/Slate/helpers/selectOnEditorEntry.js";
 import { useSlateHistoryGrouping } from "@/hooks/useSlateHistoryGrouping.js";
 import { handleHotKey } from "@/utils/hotKeys.js";

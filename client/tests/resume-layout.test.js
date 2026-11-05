@@ -3,7 +3,7 @@ import normalizeResumeFromApi from '../src/utils/normalizers/normalizeResumeFrom
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveResumeLayout, deriveSectionBoundaries, planContainerRole, resizeColumnWidths, ROW_CONTENT_TRACK, getContainerRole } from '../src/utils/resumeLayout.js';
-import { normalizeResumeLayout, resolveSectionPadding } from '../src/utils/previewPadding.js';
+import { normalizeResumeLayout, resolveSectionPadding } from '../src/utils/resumePresentation.js';
 import reducer, { configureContainer, moveContainer, resizeContainerPair, setResume, setColumnWidth } from '../src/store/resumeSlice.js';
 
 const column = (id, width = 50, spanFullPage = false) => ({ id, type: 'column', spanFullPage, layout: { width: { value: `${width}%`, auto: false } }, sectionIds: [] });
