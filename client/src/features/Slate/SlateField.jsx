@@ -62,7 +62,7 @@ const SlateField = ({ field }) => {
     fieldStyling,
   });
 
-  const { editor, onChange, activate, editableProps } = useResumeSlateEditor({
+  const { editor, onChange, activate, editableProps, initialValue } = useResumeSlateEditor({
     editorId: field.id,
     value: field.value,
     createValueAction: (newValue) => updateField({ id: field.id, value: newValue }),
@@ -120,7 +120,8 @@ const SlateField = ({ field }) => {
     >
       <Slate
         editor={editor}
-        initialValue={field.value ?? null}
+        // initialValue={field.value ?? null}
+        initialValue={initialValue}
         onChange={onChange}
         onMouseDown={editableProps.onMouseDown}
         onClick={activate}

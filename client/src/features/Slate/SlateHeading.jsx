@@ -32,7 +32,7 @@ const SlateHeading = ({ section }) => {
     sectionStyling,
   });
 
-  const { editor, onChange, editableProps } = useResumeSlateEditor({
+  const { editor, initialValue, onChange, editableProps } = useResumeSlateEditor({
     editorId: section.id,
     value: section.value,
     createValueAction: (value) => updateSection({
@@ -73,7 +73,8 @@ const SlateHeading = ({ section }) => {
   return (
     <Slate
       editor={editor}
-      initialValue={section.value ?? null}
+      // initialValue={section.value ?? null}
+      initialValue={initialValue}
       onChange={onChange}
     >
       <Editable

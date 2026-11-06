@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { createEditor } from "slate";
+import { createEditor, Editor } from "slate";
 import { withReact } from "slate-react";
+import { withLists } from "@/features/Slate/helpers/withLists.js";
 import { useDispatch } from "react-redux";
 
 import { editorRegistry } from "@/lib/editorRegistry.js";
@@ -13,13 +14,26 @@ import {
   setActiveEditorSelection,
 } from "@/store/resumeSlice.js";
 
+function normalizeSavedValue(value) {
+  if (value == null) return value;
+
+  const editor = withLists(withIcons(createEditor()));
+  editor.children = structuredClone(value);
+  Editor.normalize(editor, { force: true });
+
+  return editor.children;
+}
+
 // Field and heading wrappers supply their own value action and presentation.
 export function useResumeSlateEditor({ editorId, value, createValueAction }) {
   const dispatch = useDispatch();
   const editor = useMemo(
-    () => withReact(withIcons(createEditor())),
+    () => withReact(withLists(withIcons(createEditor()))),
     [],
   );
+
+  const normalizedValue = useMemo(() => normalizeSavedValue(value), [value]);
+
   const {
     getHistoryGroup,
     endHistoryGroup,
@@ -29,20 +43,20 @@ export function useResumeSlateEditor({ editorId, value, createValueAction }) {
   const isRestoringFromRedux = useRef(false);
 
   useEffect(() => {
-    if (!value || editor.children === value) return;
-    if (JSON.stringify(editor.children) === JSON.stringify(value)) return;
+    if (!normalizedValue || editor.children === normalizedValue) return;
+    if (JSON.stringify(editor.children) === JSON.stringify(normalizedValue)) return;
 
     endHistoryGroup();
     isRestoringFromRedux.current = true;
     try {
       editor.selection = null;
       editor.marks = null;
-      editor.children = structuredClone(value);
+      editor.children = structuredClone(normalizedValue);
       editor.onChange();
     } finally {
       isRestoringFromRedux.current = false;
     }
-  }, [editor, value, endHistoryGroup]);
+  }, [editor, normalizedValue, endHistoryGroup]);
 
   useEffect(() => {
     editorRegistry.set(editorId, editor);
@@ -73,6 +87,7 @@ export function useResumeSlateEditor({ editorId, value, createValueAction }) {
 
   return {
     editor,
+    initialValue: normalizedValue,
     onChange,
     activate,
     editableProps: {
