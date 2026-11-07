@@ -2,7 +2,6 @@
 
 from copy import deepcopy
 
-
 RESUME_DEFAULTS = {
     "styling": {
         "display": "flex",
@@ -62,8 +61,8 @@ SECTION_DEFAULTS = {
 }
 
 # Database updates in need of review/correcting
-    # Work History and Education sections, once I switch "Start/End Dates" to just "Dates"
-    # Projects Section, once I update "Project Title" to "Title", and "Company/School" to "Organization"
+# Work History and Education sections, once I switch "Start/End Dates" to just "Dates"
+# Projects Section, once I update "Project Title" to "Title", and "Company/School" to "Organization"
 
 # Need to ensure Profile Creations and Matching for Resumes still worked after database updates
 
@@ -76,7 +75,7 @@ SECTION_DEFINITIONS = {
         "label": "Header",
         "heading": "Header",
         # "fields": ["Name", "Title"],
-        "fields": ["Name", "Role"], 
+        "fields": ["Name", "Role"],
     },
     "contact": {
         "type": "contact",
@@ -89,13 +88,6 @@ SECTION_DEFINITIONS = {
         "label": "Summary",
         "heading": "Summary",
         "fields": ["Summary"],
-    },
-    "skills": {
-        "type": "skills",
-        "label": "Skills",
-        "heading": "Skills",
-        "fields": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
-        # "fields": ["Category", "Skills"],
     },
     # "workHistory": {
     #     "type": "workHistory",
@@ -110,12 +102,82 @@ SECTION_DEFINITIONS = {
         "heading": "Employment History",
         "fields": ["Role", "Company", "Location", "Dates", "Description"],
     },
+    "volunteering": {
+        "type": "volunteering",
+        "label": "Volunteer Experience",
+        "heading": "Volunteer Experience",
+        "fields": ["Role", "Organization", "Location", "Dates", "Description"],
+    },
     "education": {
         "type": "education",
         "label": "Education",
         "heading": "Education",
         # "fields": ["School", "Degree", "Field of Study", "Location", "Start/End Dates", "Description"],
-        "fields": ["School", "Degree", "Field of Study", "Location", "Dates", "Description"],
+        "fields": [
+            "School",
+            "Degree",
+            "Field of Study",
+            "Location",
+            "Dates",
+            "Description",
+        ],
+    },
+    "credentials": {
+        "type": "credentials",
+        "label": "Credentials",
+        "heading": "Licenses and Certifications",
+        "fields": ["Title", "Organization", "Dates", "Description"],
+    },
+    "awards": {
+        "type": "awards",
+        "label": "Awards and Honors",
+        "heading": "Awards and Honors",
+        "fields": ["Title", "Organization", "Dates", "Description"],
+    },
+    "development": {
+        "type": "development",
+        "label": "Professional Development",
+        "heading": "Professional Development",
+        "fields": ["Title", "Organization", "Dates", "Description"]
+    },
+    "affiliations": {
+        "type": "affiliations",
+        "label": "Affiliations",
+        "heading": "Affiliations",
+        "fields": ["Role", "Organization", "Dates", "Description"],
+    },
+    "leadership": {
+        "type": "leadership",
+        "label": "Leadership and Activities",
+        "heading": "Leadership and Activities",
+        "fields": ["Role", "Organization", "Location", "Dates", "Description"],
+    },
+    "skills": {
+        "type": "skills",
+        "label": "Skills",
+        "heading": "Skills",
+        "fields": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
+        # "fields": ["Category", "Skills"],
+    },
+    "languages": {
+        "type": "languages",
+        "label": "Languages",
+        "heading": "Languages",
+        "fields": ["Language", "Proficiency", "Description"],
+    },
+    "references": {
+        "type": "references",
+        "label": "References",
+        "heading": "References",
+        "fields": [
+            "Name",
+            "Role",
+            "Organization",
+            "Relationship",
+            "Email",
+            "Phone",
+            "Description",
+        ],
     },
     "projects": {
         "type": "projects",
@@ -130,50 +192,12 @@ SECTION_DEFINITIONS = {
         "heading": "Custom Section",
         "fields": ["Custom Field"],
     },
-    
-    # "references": {
-    #     "type": "references",
-    #     "label": "References",
-    #     "heading": "References",
-    #     "fields": ["Name", "Relationship", "Organization", "Email", "Phone", "Title", "Description"],
-    # },
-    # "languages": {
-    #     "type": "languages",
-    #     "label": "Languages",
-    #     "heading": "Languages",
-    #     "fields": ["Language", "Proficiency", "Description"],
-    # },
-    
-    # "volunteering": {
-    #     "type": "volunteering",
-    #     "label": "Volunteer Experience",
-    #     "heading": "Volunteer Experience",
-    #     "fields": ["Role", "Organization", "Location", "Dates", "Description"],
-    # },
-    
-    # "certifications": {
-    #     "type": "certifications",
-    #     "label": "Certifications",
-    #     "heading": "Certifications",
-    #     "fields": ["Certificate", "Organization", "Location", "Dates", "Description"],
-    # },
-    # "licenses": {
-    #     "type": "licenses",
-    #     "label": "Licenses",
-    #     "heading": "Licenses",
-    #     "fields": ["License", "Organization", "Location", "Dates", "Description"],
-    # },
-    # "awards": {
-    #     "type": "awards",
-    #     "label": "Awards and Honors",
-    #     "heading": "Awards and Honors",
-    #     "fields": ["Title", "Organization", "Location", "Dates", "Description"],
-    # }
 }
 
 
 def get_section_definition(section_type):
     """Return independent defaults with nested overrides for the requested type."""
+
     def merge(base, overrides):
         for key, value in overrides.items():
             if isinstance(value, dict) and isinstance(base.get(key), dict):
