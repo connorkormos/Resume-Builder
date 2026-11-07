@@ -61,6 +61,15 @@ SECTION_DEFAULTS = {
     },
 }
 
+# Database updates in need of review/correcting
+    # Work History and Education sections, once I switch "Start/End Dates" to just "Dates"
+    # Projects Section, once I update "Project Title" to "Title", and "Company/School" to "Organization"
+
+# Need to ensure Profile Creations and Matching for Resumes still worked after database updates
+
+# Maybe remove "link" from projects section?
+# Maybe change Skills Fields to ["Category", "Skills"] to make it a little more organized/streamlined?
+
 SECTION_DEFINITIONS = {
     "header": {
         "type": "header",
@@ -73,12 +82,14 @@ SECTION_DEFINITIONS = {
         "label": "Work History",
         "heading": "Work History",
         "fields": ["Job Title", "Company", "Location", "Start/End Dates", "Description"],
+        # "fields": ["Job Title", "Company", "Location", "Dates", "Description"],
     },
     "education": {
         "type": "education",
         "label": "Education",
         "heading": "Education",
         "fields": ["School", "Degree", "Field of Study", "Location", "Start/End Dates", "Description"],
+        # "fields": ["School", "Degree", "Field of Study", "Location", "Dates", "Description"],
     },
     "skills": {
         "type": "skills",
@@ -103,6 +114,7 @@ SECTION_DEFINITIONS = {
         "label": "Projects",
         "heading": "Projects",
         "fields": ["Project Title", "Company/School", "Link", "Dates", "Description"],
+        # "fields": ["Title", "Organization", "Link", "Dates", "Description"],
     },
     "custom": {
         "type": "custom",
@@ -110,6 +122,43 @@ SECTION_DEFINITIONS = {
         "heading": "Custom Section",
         "fields": ["Custom Field"],
     },
+    
+    # "references": {
+    #     "type": "references",
+    #     "label": "References",
+    #     "heading": "References",
+    #     "fields": ["Name", "Relationship", "Email", "Phone", "Title", "Organization", "Description"],
+    # },
+    # "languages": {
+    #     "type": "languages",
+    #     "label": "Languages",
+    #     "heading": "Languages",
+    #     "fields": ["Language", "Proficiency", "Description"],
+    # },
+    # "certifications": {
+    #     "type": "certifications",
+    #     "label": "Certifications",
+    #     "heading": "Certifications",
+    #     "fields": ["Certificate", "Organization", "Location", "Dates", "Description"],
+    # },
+    # "licenses": {
+    #     "type": "licenses",
+    #     "label": "Licenses",
+    #     "heading": "Licenses",
+    #     "fields": ["License", "Organization", "Location", "Dates", "Description"],
+    # },
+    # "volunteerExperience": {
+    #     "type": "volunteerExperience",
+    #     "label": "Volunteer Experience",
+    #     "heading": "Volunteer Experience",
+    #     "fields": ["Role", "Organization", "Location", "Dates", "Description"],
+    # },
+    # "awards": {
+    #     "type": "awards",
+    #     "label": "Awards and Honors",
+    #     "heading": "Awards and Honors",
+    #     "fields": ["Title", "Organization", "Location", "Dates", "Description"],
+    # }
 }
 
 
