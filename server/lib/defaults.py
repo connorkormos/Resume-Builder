@@ -75,27 +75,8 @@ SECTION_DEFINITIONS = {
         "type": "header",
         "label": "Header",
         "heading": "Header",
-        "fields": ["Name", "Title"],
-    },
-    "workHistory": {
-        "type": "workHistory",
-        "label": "Work History",
-        "heading": "Work History",
-        "fields": ["Job Title", "Company", "Location", "Start/End Dates", "Description"],
-        # "fields": ["Job Title", "Company", "Location", "Dates", "Description"],
-    },
-    "education": {
-        "type": "education",
-        "label": "Education",
-        "heading": "Education",
-        "fields": ["School", "Degree", "Field of Study", "Location", "Start/End Dates", "Description"],
-        # "fields": ["School", "Degree", "Field of Study", "Location", "Dates", "Description"],
-    },
-    "skills": {
-        "type": "skills",
-        "label": "Skills",
-        "heading": "Skills",
-        "fields": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
+        # "fields": ["Name", "Title"],
+        "fields": ["Name", "Role"], 
     },
     "contact": {
         "type": "contact",
@@ -109,12 +90,39 @@ SECTION_DEFINITIONS = {
         "heading": "Summary",
         "fields": ["Summary"],
     },
+    "skills": {
+        "type": "skills",
+        "label": "Skills",
+        "heading": "Skills",
+        "fields": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5"],
+        # "fields": ["Category", "Skills"],
+    },
+    # "workHistory": {
+    #     "type": "workHistory",
+    #     "label": "Work History",
+    #     "heading": "Work History",
+    #     # "fields": ["Job Title", "Company", "Location", "Start/End Dates", "Description"],
+    #     "fields": ["Role", "Company", "Location", "Dates", "Description"],
+    # },
+    "employment": {
+        "type": "employment",
+        "label": "Employment History",
+        "heading": "Employment History",
+        "fields": ["Role", "Company", "Location", "Dates", "Description"],
+    },
+    "education": {
+        "type": "education",
+        "label": "Education",
+        "heading": "Education",
+        # "fields": ["School", "Degree", "Field of Study", "Location", "Start/End Dates", "Description"],
+        "fields": ["School", "Degree", "Field of Study", "Location", "Dates", "Description"],
+    },
     "projects": {
         "type": "projects",
         "label": "Projects",
         "heading": "Projects",
-        "fields": ["Project Title", "Company/School", "Link", "Dates", "Description"],
-        # "fields": ["Title", "Organization", "Link", "Dates", "Description"],
+        # "fields": ["Project Title", "Company/School", "Link", "Dates", "Description"],
+        "fields": ["Title", "Organization", "Link", "Dates", "Description"],
     },
     "custom": {
         "type": "custom",
@@ -127,7 +135,7 @@ SECTION_DEFINITIONS = {
     #     "type": "references",
     #     "label": "References",
     #     "heading": "References",
-    #     "fields": ["Name", "Relationship", "Email", "Phone", "Title", "Organization", "Description"],
+    #     "fields": ["Name", "Relationship", "Organization", "Email", "Phone", "Title", "Description"],
     # },
     # "languages": {
     #     "type": "languages",
@@ -135,6 +143,14 @@ SECTION_DEFINITIONS = {
     #     "heading": "Languages",
     #     "fields": ["Language", "Proficiency", "Description"],
     # },
+    
+    # "volunteering": {
+    #     "type": "volunteering",
+    #     "label": "Volunteer Experience",
+    #     "heading": "Volunteer Experience",
+    #     "fields": ["Role", "Organization", "Location", "Dates", "Description"],
+    # },
+    
     # "certifications": {
     #     "type": "certifications",
     #     "label": "Certifications",
@@ -146,12 +162,6 @@ SECTION_DEFINITIONS = {
     #     "label": "Licenses",
     #     "heading": "Licenses",
     #     "fields": ["License", "Organization", "Location", "Dates", "Description"],
-    # },
-    # "volunteerExperience": {
-    #     "type": "volunteerExperience",
-    #     "label": "Volunteer Experience",
-    #     "heading": "Volunteer Experience",
-    #     "fields": ["Role", "Organization", "Location", "Dates", "Description"],
     # },
     # "awards": {
     #     "type": "awards",

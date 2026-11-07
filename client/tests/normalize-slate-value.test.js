@@ -35,11 +35,11 @@ test('loading repairs both headings and fields', () => {
 test('loading omits subsection types for current and legacy API responses', () => {
   for (const obsoleteProperties of [{}, { type: 'defaultSection' }]) {
     const state = normalizeResumeFromApi({ containers: [{ id: 1, sections: [{
-      id: 2, containerId: 1, type: 'workHistory', subsections: [{
+      id: 2, containerId: 1, type: 'employment', subsections: [{
         id: 3, sectionId: 2, ...obsoleteProperties, fields: [],
       }],
     }] }] });
-    assert.equal(state.sections.byId[2].type, 'workHistory');
+    assert.equal(state.sections.byId[2].type, 'employment');
     assert.equal(state.subsections.byId[3].sectionId, 2);
     assert.equal(Object.hasOwn(state.subsections.byId[3], 'type'), false);
   }
