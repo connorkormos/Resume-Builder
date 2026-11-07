@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateResume } from '@/store/resumeSlice.js';
+import { resolveResumeLayout } from '@/utils/resumeLayout.js';
 
 const SELECTORS = {
   containers: '[data-container-id]:not([data-section-id])',
@@ -189,8 +190,14 @@ function calculateAssignments(resume, sourcePage, templates, host) {
     assignments[kind][id] = Math.min(assignments[kind][id] ?? Infinity, page);
   }
 
-  for (const [containerId] of templates.containers) {
-    let number = 1;
+  function paginateContainer(containerId, startPage) {
+    if (!templates.containers.has(containerId)) return startPage;
+    let number = startPage;
+    let lastAcceptedPage = startPage;
+    function acceptSection(sectionId, pageNumber) {
+      assign('sections', sectionId, pageNumber);
+      lastAcceptedPage = Math.max(lastAcceptedPage, pageNumber);
+    }
     for (const sectionId of resume.containers.byId[containerId].sectionIds) {
       const section = resume.sections.byId[sectionId];
       // A heading-only section still occupies space and needs a page assignment.
@@ -207,7 +214,7 @@ function calculateAssignments(resume, sourcePage, templates, host) {
           attempt = append(number, containerId, sectionId, candidate, isLastSubsection);
         }
         if (fits(attempt.page)) {
-          assign('sections', sectionId, number);
+          acceptSection(sectionId, number);
           if (subsectionId !== null) {
             assign('subsections', subsectionId, number);
             for (const id of resume.subsections.byId[subsectionId].fieldIds) assign('fields', id, number);
@@ -221,7 +228,7 @@ function calculateAssignments(resume, sourcePage, templates, host) {
           // An oversized heading/empty subsection cannot be split. Keep it once.
           const accepted = append(number, containerId, sectionId, candidate, isLastSubsection);
           oversized.add(accepted.section);
-          assign('sections', sectionId, number);
+          acceptSection(sectionId, number);
           if (subsectionId !== null) assign('subsections', subsectionId, number);
           number++;
           continue;
@@ -243,7 +250,7 @@ function calculateAssignments(resume, sourcePage, templates, host) {
             fragment.append(field);
             attempt = append(number, containerId, sectionId, fragment, isLastSubsection && index === fieldIds.length - 1);
           }
-          assign('sections', sectionId, number);
+          acceptSection(sectionId, number);
           assign('subsections', subsectionId, number);
           assign('fields', fieldIds[index], number);
           if (!fits(attempt.page)) {
@@ -256,6 +263,27 @@ function calculateAssignments(resume, sourcePage, templates, host) {
         }
       }
     }
+    return lastAcceptedPage;
+  }
+
+  const { paginationGroups, independentContainerIds } = resolveResumeLayout({
+    containersById: resume.containers.byId,
+    orderedContainerIds: resume.containers.allIds,
+    rowContentWidth: resume.layout?.rowContentWidth,
+  });
+  for (const containerId of independentContainerIds) {
+    paginateContainer(containerId, 1);
+  }
+
+  let earliestPage = 1;
+  for (const group of paginationGroups) {
+    const groupStartPage = earliestPage;
+    let groupEndPage = groupStartPage;
+    for (const containerId of group) {
+      groupEndPage = Math.max(groupEndPage, paginateContainer(containerId, groupStartPage));
+    }
+    // The next band can share this page, but cannot precede its final content.
+    earliestPage = groupEndPage;
   }
   return assignments;
 }

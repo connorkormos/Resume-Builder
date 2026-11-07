@@ -10,7 +10,7 @@ import { build } from 'esbuild';
 const browser = process.env.CHROMIUM_PATH;
 const paper = new URL('../src/pages/ResumeEditorPage/features/ResumePaper/', import.meta.url);
 test('page-top spacing agrees with pagination in a browser', { skip: !browser }, async () => {
-  const source = await readFile(new URL('helpers/useResumePagination.js', paper), 'utf8');
+  const source = await readFile(new URL('hooks/useResumePagination.js', paper), 'utf8');
   const css = await readFile(new URL('Section.module.css', paper), 'utf8');
   const checks = String.raw`
     const check = (label, actual, expected) => {
@@ -114,13 +114,90 @@ test('page-top spacing agrees with pagination in a browser', { skip: !browser },
       check('hook leaves first paper unchanged', getComputedStyle(firstPage.querySelector('.resumeSection')).paddingTop, '7px');
       check('hook applies inset to second paper', getComputedStyle(page.querySelector('.resumeSection')).paddingTop, '40px');
       cleanup();
+
+      // Reproduce a trailing row backfilling the gap left by a column spill.
+      const flow = {
+        containers: { allIds: [], byId: {} }, sections: { byId: {} },
+        subsections: { byId: {} }, fields: { byId: {} },
+      };
+      page.replaceChildren();
+      page.style.setProperty('--resume-page-padding-top', '0px');
+      const addContainer = (id, type, heights, spanFullPage = false) => {
+        flow.containers.allIds.push(id);
+        flow.containers.byId[id] = { id, type, spanFullPage, sectionIds: [id] };
+        flow.sections.byId[id] = { subsectionIds: [] };
+        const el = container(id, '1', '1');
+        const content = section(el, id);
+        content.style.padding = '0px';
+        heights.forEach((height, index) => {
+          const subId = id + index;
+          flow.sections.byId[id].subsectionIds.push(subId);
+          flow.subsections.byId[subId] = { fieldIds: [subId] };
+          flow.fields.byId[subId] = {};
+          const sub = document.createElement('div');
+          sub.className = 'resumeSubsection'; sub.dataset.subsectionId = subId;
+          const field = document.createElement('div');
+          field.className = 'resumeField'; field.dataset.fieldId = subId;
+          field.textContent = subId;
+          field.style.lineHeight = height + 'em';
+          sub.append(field); content.append(sub);
+        });
+      };
+      addContainer('sidebar', 'column', [140,140,140,140], true);
+      addContainer('top', 'row', [20]);
+      addContainer('left', 'column', [60]);
+      addContainer('right', 'column', [70,70]);
+      addContainer('bottom', 'row', [50]);
+      addContainer('otherSidebar', 'column', [30], true);
+      const layout = resolveResumeLayout({
+        containersById: flow.containers.byId, orderedContainerIds: flow.containers.allIds,
+      });
+      check('central groups', layout.paginationGroups, [['top'],['left','right'],['bottom']]);
+      check('independent sidebars', layout.independentContainerIds, ['sidebar','otherSidebar']);
+      page.style.gridTemplateRows = layout.gridTemplateRows;
+      page.style.gridTemplateColumns = layout.gridTemplateColumns;
+      for (const [id, placement] of Object.entries(layout.placementsByContainerId)) {
+        const el = page.querySelector('[data-container-id="' + id + '"]');
+        el.style.gridRow = placement.rowStart + ' / span ' + placement.rowSpan;
+        el.style.gridColumn = placement.columnStart + ' / span ' + placement.columnSpan;
+      }
+      const paginate = fontSize => {
+        page.style.fontSize = fontSize + 'px';
+        host.replaceChildren();
+        return calculateAssignments(flow, page, prepareTemplates(flow, collectTemplates([page])), host);
+      };
+      check('row initially overflows', paginate(1).fields.bottom0, 2);
+      const expanded = paginate(1.3);
+      check('longer column spills', [expanded.fields.right0, expanded.fields.right1], [1,2]);
+      check('row follows continuation on same page', expanded.fields.bottom0, 2);
+      check('columns begin together', [expanded.fields.left0, expanded.fields.right0], [1,1]);
+      check('sidebar does not push center forward', expanded.fields.sidebar3, 4);
+      check('center does not push sidebar forward', expanded.fields.otherSidebar0, 1);
+      check('stable repagination', paginate(1.3), expanded);
+      const shrunk = paginate(0.8);
+      check('row can move back after columns', [shrunk.fields.right1, shrunk.fields.bottom0], [1,1]);
+      page.querySelector('[data-field-id="bottom0"]').style.lineHeight = '100em';
+      check('row advances if continuation leaves insufficient space', paginate(1.3).fields.bottom0, 3);
+      page.querySelector('[data-field-id="bottom0"]').style.lineHeight = '50em';
+      // One oversized subsection now splits into fields over two pages.
+      const firstSub = page.querySelector('[data-subsection-id="right0"]');
+      const secondSub = page.querySelector('[data-subsection-id="right1"]');
+      firstSub.append(secondSub.firstElementChild); secondSub.remove();
+      flow.sections.byId.right.subsectionIds = ['right0'];
+      flow.subsections.byId.right0.fieldIds = ['right0','right1'];
+      page.querySelector('[data-field-id="right0"]').style.lineHeight = '100em';
+      page.querySelector('[data-field-id="right1"]').style.lineHeight = '100em';
+      const split = paginate(1.3);
+      check('split parent retains first page', split.sections.right, 2);
+      check('split fields reach following page', [split.fields.right0, split.fields.right1], [2,3]);
+      check('row follows last split field', split.fields.bottom0, 3);
       document.body.innerHTML = '<pre id="result">ok</pre>';
     } catch (error) {
       document.body.innerHTML = '<pre id="result">' + error.message + '</pre>';
     }
   `;
   const bundle = await build({
-    stdin: { contents: source + '\n' + checks, resolveDir: new URL('helpers/', paper).pathname },
+    stdin: { contents: source + '\n' + checks, resolveDir: new URL('hooks/', paper).pathname },
     alias: { '@': new URL('../src', import.meta.url).pathname },
     bundle: true, write: false, format: 'iife', platform: 'browser',
     define: { 'process.env.NODE_ENV': '"production"' },

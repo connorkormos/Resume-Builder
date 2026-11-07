@@ -1,11 +1,10 @@
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useState, useCallback, useRef } from 'react';
-
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { TbMenu2Filled } from "react-icons/tb";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { getResumeFromApi } from '@/services/resumeServices';
 import { getUserResumeIdsFromApi, logUserOutOfApi } from '@/services/userServices';
 import { clearUser } from '@/store/userSlice';
@@ -13,11 +12,11 @@ import { clearUser } from '@/store/userSlice';
 import styles from './Account.module.css';
 
 export default function AccountPage() {
+   
+      const isMobile = useMediaQuery("(max-width: 768px)");
+      const location = useLocation();
 
    const user = useSelector(state => state.user);
-
-   const isMobile = useMediaQuery("(max-width: 768px)");
-   const location = useLocation();
 
    const [resumeData, setResumeData] = useState({
       ids: null, // null means not fetched; [] means the user has no resumes.
@@ -25,6 +24,7 @@ export default function AccountPage() {
       startIndex: 0,
       error: false,
    });
+
    const pendingIds = useRef(null);
    const pendingResumes = useRef(new Map());
 
@@ -95,7 +95,6 @@ export default function AccountPage() {
 
    const [sideBarIsOpen, setSideBarIsOpen] = useState(true);
 
-
    return (
       <div className={styles.accountContainer}>
          <div className={`${sideBarIsOpen ? styles.accountSideBar : styles.hiddenAccountSideBar}`}>
@@ -110,28 +109,22 @@ export default function AccountPage() {
                {(isMobile && sideBarIsOpen && location.pathname !== '/account/' && location.pathname !== '/account') &&
                   <TbMenu2Filled
                      style={{ fontSize: '2.5rem' }}
-                     // className={styles.menuIcon}
-                     // style={{position: 'absolute', right: 0}}
                      onClick={() => setSideBarIsOpen(!sideBarIsOpen)} />
                }
             </div>
-            {/* <div className={styles.sideBarDivider}></div> */}
             <div className={styles.sideBarRow}>
                <Link
-                  // className={styles.accountTabLink}
-                  to='/account/my-resumes'
+                  to='/account/resumes'
                   onClick={() => {
                      isMobile && setSideBarIsOpen(false)
                   }}
                >
-                  {!isMobile && "View "}Resumes
+                  Resumes
                </Link>
             </div>
-            {/* <div className={styles.sideBarDivider}></div> */}
             <div className={styles.sideBarRow}>
                <Link
-                  // className={styles.accountTabLink}
-                  to='/account/profile'
+                  to='/account/profiles'
                   onClick={() => {
                      isMobile && setSideBarIsOpen(false)
                   }}
@@ -141,7 +134,6 @@ export default function AccountPage() {
             </div>
             <div className={styles.sideBarRow}>
                <Link
-                  // className={styles.accountTabLink}
                   to='/account/settings'
                   onClick={() => {
                      isMobile && setSideBarIsOpen(false)
@@ -152,7 +144,6 @@ export default function AccountPage() {
             </div>
             <div className={styles.sideBarRow}>
                <Link
-                  // className={styles.accountTabLink}
                   onClick={handleLogUserOut}
                >
                   Logout

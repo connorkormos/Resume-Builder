@@ -52,10 +52,6 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
     await fetchUserResumeIds(true);
   };
 
-  const handleViewResumeDetails = () => {
-    navigate(`/account/profile`, { state: { resume } });
-  };
-
   if (!resume) {
     return null;
   }
@@ -85,13 +81,6 @@ export default function ResumeRow({ resumeId, resume, fetchResume, fetchUserResu
             </div>
           </div>
           <div className={styles.userResumeRowButtons}>
-            <button
-              className={styles.editResumeButton}
-              onClick={handleViewResumeDetails}
-
-            >
-              View Details
-            </button>
             <button
               className={styles.editResumeButton}
               onClick={handleEditResume}

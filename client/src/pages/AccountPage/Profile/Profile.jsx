@@ -83,7 +83,7 @@ export default function Profile() {
     return (
         <div className={styles.profilePageContainer}>
             {/* <h1 className={styles.profilePageTitle}>Profile Page</h1> */}
-            {location.pathname === '/account/profile' && (
+            {location.pathname === '/account/profiles' && (
                 <>
                     <div className={styles.profileRowsContainer}>
                         <h2 className={styles.profileHeading}>Your Profiles</h2>

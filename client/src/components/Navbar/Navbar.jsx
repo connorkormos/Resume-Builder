@@ -42,7 +42,7 @@ const Navbar = () => {
                 <Link to="/browse" className={styles.navbarLink}>
                   Browse
                 </Link>
-                <Link to="/account" className={styles.navbarLink}>
+                <Link to="/account/resumes" className={styles.navbarLink}>
                   Account
                 </Link>
               </div>
@@ -54,7 +54,7 @@ const Navbar = () => {
                   </Link>
                 )}
                 {!isAccountPage && (
-                  <Link to="/account" className={styles.navbarLink}>
+                  <Link to="/account/resumes" className={styles.navbarLink}>
                     Account
                   </Link>
                 )}
@@ -84,7 +84,7 @@ const Navbar = () => {
               </Link>
             )}
             {!isAccountPage && (
-              <Link to="/account" className={styles.navbarLink}>
+              <Link to="/account/resumes" className={styles.navbarLink}>
                 Account
               </Link>
             )}

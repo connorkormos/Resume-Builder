@@ -50,9 +50,9 @@ const App = () => {
 
         <Route path="/account" element={<AccountPage />}>
           {/* <Route index element={<Navigate to="my-resumes" replace />} /> */}
-          <Route path="my-resumes" element={<Resumes />} />
+          <Route path="resumes" element={<Resumes />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />}>
+          <Route path="profiles" element={<Profile />}>
             <Route path="create" element={<CreateProfileForm />} />
             <Route path="edit" element={<EditProfile />} />
           </Route>

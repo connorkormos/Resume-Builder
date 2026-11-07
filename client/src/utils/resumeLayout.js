@@ -159,6 +159,10 @@ export function resolveResumeLayout({ containersById, orderedContainerIds, width
     errors, columnIds, trackIds, widthsById, placementsByContainerId, boundariesByContainerId,
     resizeTrackByContainerId, hasRowContentTrack, bodyColumnIds: arrangement.bodyIds,
     resizeNeighborsByContainerId,
+    // Central bands flow in order; full-height sidebars paginate independently.
+    paginationGroups: rows.filter(group => group.length > 0),
+    independentContainerIds: arrangement.ids.filter(id =>
+      containersById[id].type !== 'row' && !arrangement.bodyIds.includes(id)),
     // Fractional tracks preserve the resolved proportions. A zero minimum lets
     // narrow columns shrink even when their content would prefer more width.
     gridTemplateColumns: trackIds.length
