@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import Field from "./Field";
+import Field from "./components/Field";
 
 export default function OverFlowResumePaper() {
     const fieldsById = useSelector((state) => state.resume.present.fields.byId);

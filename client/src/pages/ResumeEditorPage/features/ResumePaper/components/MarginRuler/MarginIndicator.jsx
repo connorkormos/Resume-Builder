@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateResume, updateContainer, updateSection } from "@/store/resumeSlice";
-import { PaddingPreviewContext } from "../../../../../context/PaddingPreviewContext";
+import { PaddingPreviewContext } from "@/context/PaddingPreviewContext";
 import { parseRemValue } from "@/utils/formatters";
 
 export default function MarginIndicator({

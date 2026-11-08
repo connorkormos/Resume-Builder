@@ -1,23 +1,21 @@
-import { resolveResumePresentation } from '@/utils/resumePresentation.js';
-import { PaddingPreviewContext } from '../../../../context/PaddingPreviewContext.js';
-import { resizeColumnWidths } from '@/utils/resumeLayout.js';
-import { EditorLayoutContext } from '../../../../context/EditorLayoutContext.js';
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { forwardRef, useEffect, useRef, useState, useContext } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
-
+import { ActionCreators as UndoActionCreators } from "redux-undo";
 import { DragDropProvider } from "@dnd-kit/react";
 import { move } from "@dnd-kit/helpers";
 
-import Container from "./Container.jsx";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { resolveResumePresentation } from '@/utils/resumePresentation.js';
+import { resizeColumnWidths } from '@/utils/resumeLayout.js';
+import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
+import { EditorLayoutContext } from '@/context/EditorLayoutContext.js';
+import { dndReorderSections, resizeContainerPair } from "@/store/resumeSlice.js";
+
+import Container from "./components/Container.jsx";
 import EndPageMarker from "./components/EndPageMarker.jsx";
-import MarginRuler from "./components/MarginRuler.jsx";
+import MarginRuler from "./components/MarginRuler/MarginRuler.jsx";
 
 import styles from "./ResumePaper.module.css";
-import { dndReorderSections, resizeContainerPair } from "@/store/resumeSlice.js";
-import { ActionCreators as UndoActionCreators } from "redux-undo";
-
 
 const ResumePaper = forwardRef(function ResumePaper(props, ref) {
 
@@ -209,7 +207,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     <EditorLayoutContext.Provider value={presentation.sectionsById}>
     <div className={styles.printPageRef} ref={ref} style={resumePageNumber > 1 ? { marginTop: "2rem" } : {}}>
       {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
-      {!isMobile && <MarginRuler pageRef={editorRef} />}
+      {!isMobile && <MarginRuler pageRef={editorRef} resumePageNumber={resumePageNumber} />}
       <div
         className={styles.editingPageContainer}
         style={presentation.pageStyle}

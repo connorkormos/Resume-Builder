@@ -6,7 +6,7 @@ import Section from "./Section.jsx";
 
 import { CollisionPriority } from "@dnd-kit/abstract";
 
-import styles from "./ResumePaper.module.css";
+import styles from "../ResumePaper.module.css";
 
 const Container = ({
   container,

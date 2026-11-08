@@ -11,7 +11,7 @@ import {
 // import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
 
 
-import useSectionPaddingResize from "./hooks/useSectionPaddingResize.js";
+import useSectionPaddingResize from "../hooks/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
   DragDropProvider,
@@ -23,8 +23,8 @@ import { MdSettings } from "react-icons/md";
 
 import Subsection from "./Subsection.jsx";
 import SlateHeading from "@/features/Slate/SlateHeading.jsx";
-import SettingsModal from "../SettingsModal/SettingsModal.jsx";
-import SectionBorder from "./components/SectionBorder.jsx";
+import SettingsModal from "../../SettingsModal/SettingsModal.jsx";
+import SectionBorder from "./SectionBorder.jsx";
 
 import styles from "./Section.module.css";
 

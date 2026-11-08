@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-import Field from "./Field";
 import { DragDropProvider } from "@dnd-kit/react";
-import { dndReorderFields } from "@/store/resumeSlice";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { MdDragIndicator } from "react-icons/md";
+
+import { dndReorderFields } from "@/store/resumeSlice";
+
+import Field from "./Field";
 
 export default function Subsection({ subsection, resumePageNumber }) {
   const dispatch = useDispatch();
