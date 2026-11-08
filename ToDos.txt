@@ -1,6 +1,13 @@
-LEFT OFF WORKING ON ALLOWING SECTIONS/SUBSECTION/FIELDS TO MOVE BACK TO PRIOR PAGE WHEN SPACE BECOMES AVAILABLE
-CURRENTLY ONCE MOVED TO THE NEXT PAGE THEY ARE STUCK THERE
--ALSO NEED TO FIGURE OUT MARGIN RULERS
+!-------------------!
+   THINGS TO CHECK
+!-------------------!
+
+-Check on Profile Field Imports after recent section defaults revamp
+   -Likely need to create additional resume templates with new standards
+
+-Check in on Lagginess of Side Margin Indicator Dragging
+   -Felt slow on localhost after removing duplicate margin indicators
+
 
 !--------!
    BUGS
@@ -8,13 +15,6 @@ CURRENTLY ONCE MOVED TO THE NEXT PAGE THEY ARE STUCK THERE
 
 MAJOR BUGS:
 
--Labels and Types for Sections/Subsections/Fields needs major standardizing
-   -Otherwise Profile Imports will continue to be messy and inconsistent
-
--Margin Rulers and Padding application is inconsistent now that there are multiple pages
-
--Multi page resumes with both rows and columns start breaking things
-   -A row may move to page two, but move BACK to page one when a column extends to page two, only to move BACK below the column on page two with further expansion
 
 MEDIUM BUGS:
 
@@ -29,9 +29,6 @@ MEDIUM BUGS:
 
 -Undo/Redo functionality is buggy when adding/deleting primary content (fields, subsections, sections, and columns)
 
--Reset Selection via clicking outside resume page is broken
-   -Currently Editing Button Click still works though
-   
 SMALL BUGS:
 
 -Indenting bullets can only go to a second level
@@ -45,6 +42,7 @@ OTHER BUGS:
 
 -Session Cookie storage in incognito sites doesn't works 
    -Considered "Third Party" since the front end is making requests to a different URL with the API, needs configuration
+
 
 !------------!
    FEATURES

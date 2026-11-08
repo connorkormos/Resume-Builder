@@ -80,7 +80,8 @@ const ResumeEditorPage = () => {
    const [paddingPreview, setPaddingPreview] = useState(null);
 
    const handleBackgroundClick = (event) => {
-      if (event.target !== event.currentTarget) return;
+      // The multi-page wrapper also covers empty space beside and between papers.
+      if (event.target !== event.currentTarget && event.target !== fullResumeRef.current) return;
 
       dispatch(setActiveEditorId(null));
       dispatch(setActiveSectionId(null));
