@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateResume, updateContainer, updateSection } from "@/store/resumeSlice";
 import { PaddingPreviewContext } from "@/context/PaddingPreviewContext";
-import { parseRemValue } from "@/utils/formatters";
+import { parseRemValue, roundMathMax } from "@/utils/formatters";
 
 export default function MarginIndicator({
   target,
@@ -28,8 +28,10 @@ export default function MarginIndicator({
   // Section bottom handles grow the section down; page bottom moves inward.
   const direction =
     side === "right" || (side === "bottom" && target === "resume") ? -1 : 1;
-  const commit = (next) => {
-    const padding = { [side]: `${next}rem` };
+  const commit = (next, startValue = parseRemValue(value)) => {
+    const rounded = roundMathMax(minimumPadding, next);
+    if (rounded === roundMathMax(minimumPadding, startValue)) return false;
+    const padding = { [side]: `${rounded}rem` };
     dispatch(
       target === "resume"
         ? updateResume({
@@ -40,6 +42,7 @@ export default function MarginIndicator({
           layout: { padding }
         }),
     );
+    return true;
   };
   useEffect(
     () => () => {
@@ -52,7 +55,7 @@ export default function MarginIndicator({
   );
 
   const nextValue = (event) =>
-    Math.max(
+    roundMathMax(
       minimumPadding,
       drag.current.startValue +
       (direction *
@@ -62,8 +65,7 @@ export default function MarginIndicator({
   const finish = (event, canceled = false) => {
     if (!drag.current || event.pointerId !== drag.current.pointerId) return;
     if (!canceled) {
-      const next = nextValue(event);
-      if (next !== drag.current.startValue) commit(next);
+      commit(nextValue(event), drag.current.startValue);
     }
     drag.current = null;
     if (!hovered.current) onLabelHide?.();
@@ -129,17 +131,8 @@ export default function MarginIndicator({
         event.stopPropagation();
         if (drag.current) return;
         const current = parseRemValue(value);
-
-
-
-        const next = Math.max(
-              minimumPadding,
-          Math.round(
-            (current + direction * (event.key === keys[1] ? 0.1 : -0.1)) * 1000,
-          ) / 1000,
-        );
-        if (next !== current) {
-          commit(next);
+        const next = current + direction * (event.key === keys[1] ? 0.1 : -0.1);
+        if (commit(next)) {
           if (hovered.current) onLabelShow?.();
           else onLabelFlash?.();
         }

@@ -1,5 +1,6 @@
 import { resolveResumeLayout, deriveSectionBoundaries } from './resumeLayout.js';
 import { resolveSectionPadding } from '@/pages/ResumeEditorPage/features/ResumePaper/hooks/useSectionPaddingResize.js';
+import { roundMathMax } from '@/utils/formatters.js';
 
 // Stored border/typography metadata is consumed by the content renderers, not CSS.
 function sectionCss(styling = {}) {
@@ -14,7 +15,7 @@ export function previewPadding(layout, preview, target, id) {
   if (!preview || preview.target !== target || preview.id !== id) return layout;
   const updatedLayout = {
     ...layout,
-    padding: { ...layout?.padding, [preview.side]: `${preview.value}rem` },
+    padding: { ...layout?.padding, [preview.side]: `${roundMathMax(preview.value)}rem` },
   };
   // console.log("UPDATED PREVIEW LAYOUT", updatedLayout);
   return updatedLayout;

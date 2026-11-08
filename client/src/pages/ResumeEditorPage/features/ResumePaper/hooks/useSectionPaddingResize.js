@@ -1,8 +1,8 @@
 import { useContext, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateSection } from "@/store/resumeSlice.js";
-import { parseRemValue } from "@/utils/formatters.js";
-import { PaddingPreviewContext } from "../../../../../context/PaddingPreviewContext";
+import { parseRemValue, roundMathMax } from "@/utils/formatters.js";
+import { PaddingPreviewContext } from "@/context/PaddingPreviewContext";
 
 
 const GAP_BY_BOUNDARY = {
@@ -20,7 +20,7 @@ export function resolveSectionPaddingBase({ boundary, resumeLayout, containerLay
 
 export function resolveSectionPadding({ boundaries, resumeLayout, containerLayout, sectionLayout }) {
   return Object.fromEntries(['top', 'right', 'bottom', 'left'].map(side => {
-    const value = Math.max(
+    const value = roundMathMax(
       0,
       resolveSectionPaddingBase({ boundary: boundaries?.[side], resumeLayout, containerLayout, side })
         + parseRemValue(sectionLayout?.padding?.[side]),
@@ -59,7 +59,11 @@ export default function useSectionPaddingResize(
   // Capture selection and effective padding once, before the drag starts.
   const startValues = () => {
     const side = lowerIsSelected ? 'top' : edge;
-    const minimumPadding = -paddingBase(side, lowerIsSelected);
+    const minimum = -paddingBase(side, lowerIsSelected);
+    const roundedMinimum = roundMathMax(minimum);
+    // Round fractional legacy bounds upward, ignoring floating-point sum noise.
+    const minimumPadding = roundedMinimum < minimum - 1e-10
+      ? roundMathMax(roundedMinimum + 0.01) : roundedMinimum;
     return {
       id: lowerIsSelected ? nextId : section.id,
       side,
@@ -70,19 +74,20 @@ export default function useSectionPaddingResize(
       minimumPadding,
     };
   };
-  const valueAtDelta = (delta, drag) => Math.max(
+  const valueAtDelta = (delta, drag) => roundMathMax(
     drag.minimumPadding, drag.startValue + drag.direction * delta,
   );
   const valueAtPointer = (event, drag) => valueAtDelta(
     (event.clientY - drag.startY) / drag.pixelsPerRem, drag,
   );
   const commit = (value, drag) => {
-    if (value === drag.startValue) return;
+    const rounded = roundMathMax(drag.minimumPadding, value);
+    if (rounded === roundMathMax(drag.minimumPadding, drag.startValue)) return;
     dispatch(updateSection({
       id: drag.id,
       layout: {
         padding: {
-          [drag.side]: `${value}rem`
+          [drag.side]: `${rounded}rem`
         }
       },
     }));
@@ -105,9 +110,9 @@ export default function useSectionPaddingResize(
     || (edge === 'bottom' && preview.id === nextId && preview.side === 'top')
   );
   const paddingLabel = showsPreview
-    ? `${preview.side === 'top' ? 'Top' : 'Bottom'} padding: ${Number(Math.max(
+    ? `${preview.side === 'top' ? 'Top' : 'Bottom'} padding: ${roundMathMax(
       0, paddingBase(preview.side, preview.id === nextId) + preview.value,
-    ).toFixed(2))}rem`
+    )}rem`
     : null;
   const side = lowerIsSelected ? 'top' : edge;
 
@@ -134,7 +139,7 @@ export default function useSectionPaddingResize(
         };
         event.currentTarget.setPointerCapture(event.pointerId);
         const drag = dragRef.current;
-        setPreview({ target: 'section', id: drag.id, side: drag.side, value: drag.startValue });
+        setPreview({ target: 'section', id: drag.id, side: drag.side, value: valueAtDelta(0, drag) });
       },
       onPointerMove: (event) => {
         const drag = dragRef.current;
@@ -153,7 +158,7 @@ export default function useSectionPaddingResize(
         if (dragRef.current) return;
         const drag = startValues();
         const delta = event.key === "ArrowDown" ? 0.1 : -0.1;
-        commit(Math.max(drag.minimumPadding, Math.round(valueAtDelta(delta, drag) * 1000) / 1000), drag);
+        commit(valueAtDelta(delta, drag), drag);
       },
     },
   };

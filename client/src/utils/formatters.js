@@ -52,3 +52,8 @@ export const parseRemValue = (value) => {
       const parsedValue = parseFloat(String(value ?? '0rem').replace('rem', ''));
       return Number.isNaN(parsedValue) ? 0 : parsedValue;
    };
+
+export const roundMathMax = (...values) => {
+  const max = Math.max(...values);
+  return Number(max.toFixed(2));
+};
