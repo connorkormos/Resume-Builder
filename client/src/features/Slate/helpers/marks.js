@@ -4,6 +4,8 @@ import { store } from "../../../store/store.js";
 import { resolveEditorAncestryContext } from "./editorAncestryContext.js";
 import { getCascadedColor } from "./leafHelpers.js";
 
+import { roundParseFloat } from "@/utils/formatters.js";
+
 const getResumeStyling = (style) => {
   const state = store.getState();
   const resumeStyling = state.resume.present.styling;
@@ -65,16 +67,16 @@ export const getActiveMark = (editor, mark) => {
       case ('fontFamily'):
         return activeMark ?? console.error("No active font family found.");
       case ('fontSize'):
-        parsedMark = parseInt(activeMark)
+        parsedMark = roundParseFloat(activeMark)
         return parsedMark ?? console.error("No active font size found.");
       case ('fontSizeOffset'):
-        parsedMark = parseInt(activeMark)
+        parsedMark = roundParseFloat(activeMark)
         return parsedMark ?? console.error("No active font size offset found.");
       case ('lineHeight'):
-        parsedMark = parseFloat(activeMark).toFixed(1);
+        parsedMark = roundParseFloat(activeMark);
         return parsedMark ?? console.error("No active line height found.");
       case ('lineHeightOffset'):
-        parsedMark = parseFloat(activeMark).toFixed(1)
+        parsedMark = roundParseFloat(activeMark)
         return parsedMark ?? console.error("No active line height offset found.");
       case ('color'):
         return activeMark ?? console.error("No active font color found.");
@@ -87,13 +89,13 @@ export const getActiveMark = (editor, mark) => {
       case ('fontFamily'):
         return getResumeStyling('fontFamily');
       case ('fontSize'):
-        return parseInt(getResumeStyling('fontSize'));
+        return roundParseFloat(getResumeStyling('fontSize'));
       case('fontSizeOffset'):
         return 0;
       case ('color'):
         return;
       case ('lineHeight'):
-        return parseFloat(getResumeStyling('lineHeight')).toFixed(1);
+        return roundParseFloat(getResumeStyling('lineHeight'));
       case ('lineHeightOffset'):
         return 0;
       default:
@@ -108,24 +110,25 @@ export const setFontFamily = (editor, fontFamily) => {
 };
 
 export const setFontSize = (editor, fontSize) => {
-  Editor.addMark(editor, 'fontSize', `${fontSize}px`);
-  console.log(`Font size set to ${fontSize}px`);
+  const parsedFontSize = roundParseFloat(fontSize);
+  Editor.addMark(editor, 'fontSize', `${parsedFontSize}px`);
+  console.log(`Font size set to ${parsedFontSize}px`);
 };
 
 export const setFontSizeOffset = (editor, fontSizeOffset) => {
-  const parsedFontSizeOffset = parseInt(fontSizeOffset);
+  const parsedFontSizeOffset = roundParseFloat(fontSizeOffset);
   Editor.addMark(editor, 'fontSizeOffset', parsedFontSizeOffset);
   console.log(`Font size offset set to ${parsedFontSizeOffset}`);
 };
 
 export const setLineHeight = (editor, lineHeight) => {
-  const parsedLineHeight = parseFloat(lineHeight).toFixed(1);
+  const parsedLineHeight = roundParseFloat(lineHeight);
   Editor.addMark(editor, 'lineHeight', parsedLineHeight);
   console.log(`Line height set to ${parsedLineHeight}`);
 }
 
 export const setLineHeightOffset = (editor, lineHeightOffset) => {
-  const parsedLineHeightOffset = parseFloat(lineHeightOffset).toFixed(1);
+  const parsedLineHeightOffset = roundParseFloat(lineHeightOffset);
   Editor.addMark(editor, 'lineHeightOffset', parsedLineHeightOffset);
   console.log(`Line height offset set to ${parsedLineHeightOffset}`);
 }
