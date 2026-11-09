@@ -2,6 +2,8 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { roundParseFloat } from "@/utils/formatters.js";
+
 import { updateResume, updateSection } from '@/store/resumeSlice.js';
 import { getActiveMark, setFontSizeOffset } from "@/features/Slate/helpers/marks.js";
 
@@ -95,6 +97,7 @@ const FontSize = ({
       }
 
       if (targetFontSize <= 0) return;
+      targetFontSize = roundParseFloat(targetFontSize);
 
       const sectionIdToUse = effectiveSectionId;
 
@@ -137,6 +140,8 @@ const FontSize = ({
                newSectionFontSizeOffset = targetFontSize - baseFontSize - containerFontSizeOffset;
             }
 
+            newSectionFontSizeOffset = roundParseFloat(newSectionFontSizeOffset);
+
             dispatch(updateSection({
                id: sectionId,
                styling: {
@@ -171,7 +176,7 @@ const FontSize = ({
             value={fontSizeInputValue}
             onChange={(e) => setFontSizeInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && setNewFontSize(fontSizeInputValue)}
-            style={!isMobile ? { width: '3rem' } : undefined}
+            style={!isMobile ? { width: '4rem' } : undefined}
          />
          <button data-toolbar-label="Increase Font Size" className='buttonMain' onClick={() => setNewFontSize('increment')}>+</button>
       </div>

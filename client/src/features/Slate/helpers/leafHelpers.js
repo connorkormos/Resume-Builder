@@ -1,12 +1,4 @@
-export const getNumber = (value, fallback) => {
-  if (value === undefined || value === null || value === '') return fallback;
-
-  const number = Number(value);
-
-  return Number.isNaN(number) ? fallback : number;
-};
-
-export const roundToTenth = (value) => Number(getNumber(value, 0).toFixed(1));
+import { roundParseFloat } from "@/utils/formatters.js";
 
 export const getCascadedColor = ({
   resumeStyling,
@@ -47,7 +39,8 @@ export const getCascadedFontSize = ({
   const fieldFontSizeOffset = fieldStyling?.fontSizeOffset ?? 0;
   const leafFontSizeOffset = leafStyling?.fontSizeOffset ?? 0;
 
-  return resumeFontSize + containerFontSizeOffset + sectionFontSizeOffset + subsectionFontSizeOffset + fieldFontSizeOffset + leafFontSizeOffset;
+  const cascadedFontSize = resumeFontSize + containerFontSizeOffset + sectionFontSizeOffset + subsectionFontSizeOffset + fieldFontSizeOffset + leafFontSizeOffset;
+  return +Number.parseFloat(cascadedFontSize).toFixed(2);
 };
 
 export const getCascadedLineHeight = ({
@@ -58,14 +51,14 @@ export const getCascadedLineHeight = ({
   fieldStyling = {},
   leafStyling = {},
 }) => {
-  const resumeLineHeight = getNumber(resumeStyling?.lineHeight, 1.2);
-  const containerLineHeightOffset = getNumber(containerStyling?.lineHeightOffset, 0);
-  const sectionLineHeightOffset = getNumber(sectionStyling?.lineHeightOffset, 0);
-  const subsectionLineHeightOffset = getNumber(subsectionStyling?.lineHeightOffset, 0);
-  const fieldLineHeightOffset = getNumber(fieldStyling?.lineHeightOffset, 0);
-  const leafLineHeightOffset = getNumber(leafStyling?.lineHeightOffset, 0);
+  const resumeLineHeight = roundParseFloat(resumeStyling?.lineHeight ?? 1.2);
+  const containerLineHeightOffset = roundParseFloat(containerStyling?.lineHeightOffset ?? 0);
+  const sectionLineHeightOffset = roundParseFloat(sectionStyling?.lineHeightOffset ?? 0);
+  const subsectionLineHeightOffset = roundParseFloat(subsectionStyling?.lineHeightOffset ?? 0);
+  const fieldLineHeightOffset = roundParseFloat(fieldStyling?.lineHeightOffset ?? 0);
+  const leafLineHeightOffset = roundParseFloat(leafStyling?.lineHeightOffset ?? 0);
 
-  return roundToTenth(
+  let total = (
     resumeLineHeight +
     containerLineHeightOffset +
     sectionLineHeightOffset +
@@ -73,4 +66,5 @@ export const getCascadedLineHeight = ({
     fieldLineHeightOffset +
     leafLineHeightOffset
   );
+  return +Number.parseFloat(total).toFixed(2);
 };

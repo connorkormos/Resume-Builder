@@ -7,9 +7,9 @@ import { updateResume, updateSection } from "@/store/resumeSlice.js";
 import { getActiveMark, setLineHeightOffset } from "@/features/Slate/helpers/marks.js";
 import {
   getCascadedLineHeight,
-  getNumber,
-  roundToTenth,
 } from "@/features/Slate/helpers/leafHelpers.js";
+
+import { roundParseFloat } from "@/utils/formatters.js";
 
 import { MdFormatLineSpacing } from "react-icons/md";
 
@@ -19,10 +19,7 @@ import styles from "./TextFormatting.module.css";
 
 const LINE_HEIGHT_STEP = 0.1;
 
-const parseLineHeight = (value, fallback = null) => {
-  const parsed = Number(String(value).replace(/[^0-9.-]/g, ""));
-  return Number.isNaN(parsed) ? fallback : parsed;
-};
+
 
 const LineHeight = ({
   editor,
@@ -38,7 +35,7 @@ const LineHeight = ({
   const reduxContainers = useSelector((state) => state.resume.present.containers);
 
   const getResumeLineHeight = useCallback(
-    () => roundToTenth(getNumber(resumeStyling?.lineHeight, 1.2)),
+    () => roundParseFloat(resumeStyling?.lineHeight, 1.2),
     [resumeStyling],
   );
 
@@ -99,20 +96,20 @@ const LineHeight = ({
   ]);
 
   const getTargetLineHeight = (newLineHeight) => {
-    const currentValue = parseLineHeight(
+    const currentValue = roundParseFloat(
       lineHeightInputValue,
       getResumeLineHeight(),
     );
 
     if (newLineHeight === "increment") {
-      return roundToTenth(currentValue + LINE_HEIGHT_STEP);
+      return roundParseFloat(currentValue + LINE_HEIGHT_STEP);
     }
 
     if (newLineHeight === "decrement") {
-      return roundToTenth(currentValue - LINE_HEIGHT_STEP);
+      return roundParseFloat(currentValue - LINE_HEIGHT_STEP);
     }
 
-    return roundToTenth(parseLineHeight(newLineHeight, currentValue));
+    return roundParseFloat(newLineHeight, currentValue);
   };
 
   const setNewLineHeight = (newLineHeight = lineHeightInputValue) => {
@@ -125,11 +122,11 @@ const LineHeight = ({
     if (editor && activeEditorId && hasEditorAncestry) {
       const inheritedLineHeight = getCascadedLineHeight(context.styling);
       if (newLineHeight === "increment" || newLineHeight === "decrement") {
-        const currentLeafOffset = getNumber(getActiveMark(editor, "lineHeightOffset"), 0);
+        const currentLeafOffset = roundParseFloat(getActiveMark(editor, "lineHeightOffset"), 0);
         const offsetChange = newLineHeight === "increment" ? LINE_HEIGHT_STEP : -LINE_HEIGHT_STEP;
-        setLineHeightOffset(editor, roundToTenth(currentLeafOffset + offsetChange));
+        setLineHeightOffset(editor, roundParseFloat(currentLeafOffset + offsetChange));
       } else {
-        setLineHeightOffset(editor, roundToTenth(targetLineHeight - inheritedLineHeight));
+        setLineHeightOffset(editor, roundParseFloat(targetLineHeight - inheritedLineHeight));
       }
       setLineHeightInputValue(targetLineHeight);
       return;
@@ -142,18 +139,18 @@ const LineHeight = ({
         if (!sectionData) return;
 
         const containerData = reduxContainers.byId[sectionData.containerId];
-        const currentSectionLineHeightOffset = getNumber(
+        const currentSectionLineHeightOffset = roundParseFloat(
           sectionData?.styling?.lineHeightOffset,
           0,
         );
         let newSectionLineHeightOffset = currentSectionLineHeightOffset;
 
         if (newLineHeight === "increment") {
-          newSectionLineHeightOffset = roundToTenth(
+          newSectionLineHeightOffset = roundParseFloat(
             currentSectionLineHeightOffset + LINE_HEIGHT_STEP,
           );
         } else if (newLineHeight === "decrement") {
-          newSectionLineHeightOffset = roundToTenth(
+          newSectionLineHeightOffset = roundParseFloat(
             currentSectionLineHeightOffset - LINE_HEIGHT_STEP,
           );
         } else {
@@ -161,7 +158,7 @@ const LineHeight = ({
             resumeStyling,
             containerStyling: containerData?.styling,
           });
-          newSectionLineHeightOffset = roundToTenth(
+          newSectionLineHeightOffset = roundParseFloat(
             targetLineHeight - inheritedLineHeight,
           );
         }

@@ -49,11 +49,16 @@ export const formatCompactDateTime = (dateTimeValue) => {
 };
 
 export const parseRemValue = (value) => {
-      const parsedValue = parseFloat(String(value ?? '0rem').replace('rem', ''));
-      return Number.isNaN(parsedValue) ? 0 : parsedValue;
-   };
+  const parsedValue = parseFloat(String(value ?? '0rem').replace('rem', ''));
+  return Number.isNaN(parsedValue) ? 0 : parsedValue;
+};
+
+export const roundParseFloat = (value, fallback = 0) => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? +parsed.toFixed(2) : fallback;
+};
 
 export const roundMathMax = (...values) => {
   const max = Math.max(...values);
-  return Number(max.toFixed(2));
+  return +Number(max.toFixed(2));
 };

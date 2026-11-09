@@ -1,3 +1,7 @@
+!--------------------!
+   WHERE I LEFT OFF
+!--------------------!
+
 !-------------------!
    THINGS TO CHECK
 !-------------------!
@@ -33,10 +37,6 @@ SMALL BUGS:
 -Indenting bullets can only go to a second level
    -Should continue, at least 3 levels deep
 
--FontSizeOffset Appears to be restricted to round numbers (i.e. it can't be 1.5 as the offset)
-
--Font Size can include a decimal wth no following number
-
 OTHER BUGS:
 
 -Session Cookie storage in incognito sites doesn't works 
@@ -49,11 +49,13 @@ OTHER BUGS:
 
 STRETCH FEATURES:
 
--Sharing Resumes Publicly
+-Explicity placement of items
+   -Full Canva style
+
 
 MAIN FEATURES:
 
--Multi Page Resume
+-Sharing Resumes Publicly
 
 -Autosave Functionality
 

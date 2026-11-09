@@ -3,6 +3,57 @@
 // * ------------------------------ V
 import { normalizeSlateValue } from "./normalizeSlateValue.js";
 
+import { roundParseFloat } from '../formatters.js';
+
+import { normalizeNumbers } from './normalizeNumbers.js';
+
+// // Only these formatting properties represent independently rounded settings.
+// const roundedFormattingKeys = new Set([
+//   'fontSize', 'fontSizeOffset', 'lineHeight', 'lineHeightOffset',
+//   'marginLeft', 'top', 'right', 'bottom', 'left',
+//   'horizontal', 'vertical', 'section', 'subsection', 'field', 'header',
+//   'width', 'height',
+// ]);
+
+// // Match a complete decimal value, optionally followed by a supported CSS unit.
+// const numericFormattingValue = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))(rem|px|%)?$/;
+
+// const normalizeFormattingValue = (key, value) => {
+//   if (!roundedFormattingKeys.has(key)) return value;
+
+//   if (typeof value === 'number') {
+//     return Number.isFinite(value) ? roundParseFloat(value) : value;
+//   }
+
+//   if (typeof value !== 'string') return value;
+
+//   const match = value.trim().match(numericFormattingValue);
+//   if (!match || !Number.isFinite(Number(match[1]))) return value;
+
+//   const rounded = roundParseFloat(match[1]);
+//   return match[2] ? `${rounded}${match[2]}` : rounded;
+// };
+
+const deepNormalize = (object, skippedKeys = []) => {
+  if (!object || typeof object !== 'object') return {};
+
+  if (Array.isArray(object)) {
+    return object.map(value => value && typeof value === 'object'
+      ? deepNormalize(value) : value);
+  }
+
+  return Object.fromEntries(Object.entries(object).map(([key, value]) => {
+    if (skippedKeys.includes(key)) return [key, value];
+
+    return [key, value && typeof value === 'object'
+      ? deepNormalize(value)
+      : normalizeNumbers(key, value)];
+  }));
+};
+
+// Width allocation needs coordinated rounding; grid settings need integer rules.
+const normalizeLayout = layout => deepNormalize(layout, ['width', 'rowContentWidth', 'grid']);
+
 const normalizeResumeFromApi = (apiResume) => {
   let normalizedResume = {
     id: apiResume.id ?? null,
@@ -30,9 +81,9 @@ const normalizeResumeFromApi = (apiResume) => {
       allIds: [],
     },
 
-    styling: apiResume.styling ?? { backgroundColor: 'rgba(255, 255, 255, 1)' },
+    styling: deepNormalize(apiResume.styling ?? { backgroundColor: 'rgba(255, 255, 255, 1)' }),
     layout: {
-      ...apiResume.layout,
+      ...normalizeLayout(apiResume.layout),
     },
 
     createdAt: apiResume.createdAt ?? null,
@@ -57,8 +108,8 @@ const normalizeResumeFromApi = (apiResume) => {
       resumeId: container.resumeId,
       type: container.type ?? 'column',
       spanFullPage: container.spanFullPage ?? false,
-      styling: container.styling ?? {},
-      layout: container.layout ?? {},
+      styling: deepNormalize(container.styling),
+      layout: normalizeLayout(container.layout),
       position: container.position ?? 0,
       sectionIds: orderedSections.map((section) => section.id),
       pageNumber: 1,
@@ -67,6 +118,7 @@ const normalizeResumeFromApi = (apiResume) => {
     normalizedResume.containers.allIds.push(container.id);
 
     orderedSections.forEach((section) => {
+      const sectionLayout = normalizeLayout(section.layout);
       const orderedSubsections = [...(section.subsections ?? [])].sort(
         (a, b) => a.position - b.position
       );
@@ -80,14 +132,14 @@ const normalizeResumeFromApi = (apiResume) => {
         value: normalizeSlateValue(section.value ?? []),
         showHeading: section.showHeading ?? true,
         layout: {
-          ...section.layout,
+          ...sectionLayout,
           display: 'grid',
           grid: {
-            ...section.layout?.grid,
-            columns: section.layout?.display === 'grid' ? section.layout.grid?.columns ?? 1 : 1,
+            ...sectionLayout.grid,
+            columns: sectionLayout.display === 'grid' ? sectionLayout.grid?.columns ?? 1 : 1,
           },
         },
-        styling: section.styling ?? {},
+        styling: deepNormalize(section.styling),
         subsectionIds: orderedSubsections.map((subsection) => subsection.id),
         pageNumber: 1,
       };
@@ -104,8 +156,8 @@ const normalizeResumeFromApi = (apiResume) => {
           sectionId: subsection.sectionId,
           label: subsection.label ?? '',
           position: subsection.position ?? 0,
-          layout: subsection.layout ?? {},
-          styling: subsection.styling ?? {},
+          layout: normalizeLayout(subsection.layout),
+          styling: deepNormalize(subsection.styling),
           fieldIds: orderedFields.map((field) => field.id),
           pageNumber: 1,
         };
@@ -119,8 +171,8 @@ const normalizeResumeFromApi = (apiResume) => {
             label: field.label ?? '',
             position: field.position ?? 0,
             value: normalizeSlateValue(field.value ?? []),
-            layout: field.layout ?? {},
-            styling: field.styling ?? {},
+            layout: normalizeLayout(field.layout),
+            styling: deepNormalize(field.styling),
             pageNumber: 1,
           };
 
@@ -129,7 +181,6 @@ const normalizeResumeFromApi = (apiResume) => {
       });
     });
   });
-
   return normalizedResume;
 };
 

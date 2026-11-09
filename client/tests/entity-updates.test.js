@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import reducer, { updateField, updateSubsection } from '../src/store/resumeSlice.js';
+import reducer, { updateResume, updateContainer, updateSection, updateField, updateSubsection } from '../src/store/resumeSlice.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
 const document = () => ({
@@ -48,5 +48,34 @@ test('field value updates retain the missing-subsection guard', () => {
     assert.equal(reducer(before, updateField({ id: 'f', value: value('New') })), before);
   } finally {
     console.error = originalError;
+  }
+});
+
+test('all five updating reducers normalize formatting while preserving unrelated data', () => {
+  const original = document();
+  original.containers = { byId: { c: { id: 'c', sectionIds: ['s'] } }, allIds: ['c'] };
+  const changes = {
+    styling: { fontSizeOffset: -0.456, lineHeightOffset: 0.126 },
+    layout: { padding: { top: '0.126rem' } },
+  };
+  const originalChanges = structuredClone(changes);
+  const cases = [
+    [updateResume(changes), state => state],
+    [updateContainer({ id: 'c', ...changes }), state => state.containers.byId.c],
+    [updateSection({ id: 's', ...changes }), state => state.sections.byId.s],
+    [updateSubsection({ id: 'a', ...changes }), state => state.subsections.byId.a],
+    [updateField({ id: 'f', ...changes }), state => state.fields.byId.f],
+  ];
+
+  for (const [action, selectEntity] of cases) {
+    const before = structuredClone(original);
+    const after = reducer(original, action);
+    const entity = selectEntity(after);
+    assert.equal(entity.styling.fontSizeOffset, -0.46);
+    assert.equal(entity.styling.lineHeightOffset, 0.13);
+    assert.equal(entity.layout.padding.top, '0.13rem');
+    assert.deepEqual(after.fields.byId.f.value, original.fields.byId.f.value);
+    assert.deepEqual(original, before);
+    assert.deepEqual(changes, originalChanges);
   }
 });
