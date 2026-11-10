@@ -1,17 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import ContainerSettings from "./ContainerSettings/ContainerSettings";
 import SectionSettings from "./SectionSettings/SectionSettings";
 
 import styles from "./SettingsModal.module.css";
 
 const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
+  const anchorRef = useRef(null);
   const modalRef = useRef(null);
-
-  // console.log(modalRef.current)
-
-  let translateY = 0;
-
-  const [modalStylingDict, setModalStylingDict] = useState({});
+  const portalTarget = document.getElementById("resume-editor") ?? document.body;
 
   useEffect(() => {
     if (!isSettingsModalOpen) return;
@@ -29,44 +26,48 @@ const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
     };
   }, [isSettingsModalOpen, setIsSettingsModalOpen]);
 
-  useEffect(() => {
-    if (!modalRef.current) return;
+  useLayoutEffect(() => {
+    if (!isSettingsModalOpen) return;
 
-    const modalRect = modalRef.current.getBoundingClientRect();
+    const modal = modalRef.current;
+    const anchor = anchorRef.current.getBoundingClientRect();
+    const parent = modal.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    const { width, height } = modal.getBoundingClientRect();
+    const left = Math.max(16, Math.min(anchor.left, window.innerWidth - width - 16));
+    const top = Math.max(16, Math.min(anchor.top, window.innerHeight - height - 16));
 
-    const screenHeight = window.innerHeight;
-    const screenMidPoint = screenHeight / 2;
-
-    const elementMidPoint = modalRect.top + modalRect.height / 2;
-    const elementBottomPoint = modalRect.bottom;
-    const isBelowMiddle = elementMidPoint > screenMidPoint;
-    const isOverFlowing = elementBottomPoint > screenHeight;
-
-    let translateYValue = "0";
-    if (isOverFlowing) translateYValue = "-90%";
-
-    setModalStylingDict((prevState) => ({
-      ...prevState,
-      transform: `translateY(${translateYValue})`,
-    }));
-  }, [modalRef.current, isSettingsModalOpen]);
+    // Position once in the editor's coordinates; scrolling then follows normal document flow.
+    modal.style.setProperty("--settings-left", `${left - parent.left}px`);
+    modal.style.setProperty("--settings-top", `${top - parent.top}px`);
+  }, [isSettingsModalOpen, portalTarget]);
 
   return (
     <>
-      <div
+      {/* Keep the section-relative anchor while the modal escapes paper stacking contexts. */}
+      <span
+        ref={anchorRef}
+        className={styles.settingsModalAnchor}
+        aria-hidden="true"
         data-section-dnd-exclude="true"
-        className={styles.settingsModalOverlayDiv}
-        style={{ display: isSettingsModalOpen ? 'block' : 'none' }}            
       />
-      <div
-        data-section-dnd-exclude="true"
-        className={styles.settingsModalContainerDiv}
-        ref={modalRef}
-        style={modalStylingDict}
-      >
-        <ContainerSettings />
-        <SectionSettings setIsSettingsModalOpen={setIsSettingsModalOpen} />
-      </div>
+      {createPortal(
+        <>
+          <div
+            data-section-dnd-exclude="true"
+            className={styles.settingsModalOverlayDiv}
+            style={{ display: isSettingsModalOpen ? "block" : "none" }}
+          />
+          <div
+            data-section-dnd-exclude="true"
+            className={styles.settingsModalContainerDiv}
+            ref={modalRef}
+          >
+            <ContainerSettings />
+            <SectionSettings setIsSettingsModalOpen={setIsSettingsModalOpen} />
+          </div>
+        </>,
+        portalTarget,
+      )}
     </>
   );
 };

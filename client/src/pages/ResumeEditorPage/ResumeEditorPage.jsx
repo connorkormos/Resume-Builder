@@ -113,7 +113,7 @@ const ResumeEditorPage = () => {
    useResumePagination(editorPageRefMap);
 
    return (
-      <div className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
+      <div id="resume-editor" className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          <Toolbar handlePrint={usePrintResume(reduxResume, fullResumeRef)} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>

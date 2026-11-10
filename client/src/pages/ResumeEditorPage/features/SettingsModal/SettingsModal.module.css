@@ -9,19 +9,27 @@
 
 }
 
+.settingsModalAnchor {
+   position: absolute;
+   left: 101%;
+   top: 0;
+}
+
 .settingsModalContainerDiv {
    position: absolute;
-   overflow: visible;
+   overflow: auto;
    display: flex;
    flex-direction: column;
 
    height: auto;
    width: max-content;
+   max-width: calc(100vw - 2rem);
+   max-height: calc(100dvh - 2rem);
+   word-break: break-word;
 
    padding: 1rem 1.5rem;
-   left: 101%;
-   top: 0;
-   /* bottom: 100%; */
+   left: var(--settings-left, 0px);
+   top: var(--settings-top, 0px);
 
    color: white;
    font-size: 1rem;
@@ -37,8 +45,7 @@
 @media (max-width: 768px) {
    .settingsModalContainerDiv {
       position: fixed;
-      top: 0;
-      bottom: 0;
+      top: 1rem;
       left: 0;
       right: 0;
       margin: 0 auto;

@@ -2,9 +2,7 @@
    WHERE I LEFT OFF
 !--------------------!
 
--Added "normalizeNumbers" util for handling streamlined, max 2 decimal place numeric values for styling and layout objects
-   -Needs to be applied to other places such as column widths and potentially grid layouts
-      -Weren't applied yet as widths rely on each other for their values, and may result in fractions of a percent of unused width
+-Finished applying rounding functionality across the board, including for column widths
 
 !-------------------!
    THINGS TO CHECK
@@ -26,10 +24,15 @@ MAJOR BUGS:
 
 MEDIUM BUGS:
 
+-Drag handle intersections/interferences are frequent
+   -Sections can be hard to grab and drag, due to border resizing interferring/overlapping
+      -Same can apply for field dragging, subsection dragging, etc
+   -Settings modal button can get interferred with by borders, drag handles etc
+      -Results in a flickering visual effect, and difficulty clicking on settings button
+
 -Profile Links only apply to entire field
    -Needs to be applied to certain parts of the text too
       -May require using a slate editor for profile fields
-
 
 -Dragging Fields is Clunky/Buggy
    -Particularly when dragging within grid layouts
@@ -40,6 +43,8 @@ SMALL BUGS:
 
 -Indenting bullets can only go to a second level
    -Should continue, at least 3 levels deep
+
+-Settings modal doesn't show over second resume paper
 
 OTHER BUGS:
 
