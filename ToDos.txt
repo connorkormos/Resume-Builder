@@ -3,7 +3,6 @@
 !--------------------!
 
 -Added "normalizeNumbers" util for handling streamlined, max 2 decimal place numeric values for styling and layout objects
-   -Needs to be applied to slate elements and their children for things like fontSizeOffset and lineHeightOffset
    -Needs to be applied to other places such as column widths and potentially grid layouts
       -Weren't applied yet as widths rely on each other for their values, and may result in fractions of a percent of unused width
 

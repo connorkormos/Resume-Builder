@@ -2,6 +2,9 @@ import React, { useRef } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useFocused, useReadOnly, useSelected, useSlateStatic } from 'slate-react';
 import { ICONS_MAP } from '@/lib/iconLibrary';
+
+import { roundParseFloat } from "@/utils/formatters";
+
 import styles from './IconElement.module.css';
 
 const IconElement = ({ element, attributes, children, inheritedFontSize, inheritedLineHeight }) => {
@@ -48,7 +51,7 @@ const IconElement = ({ element, attributes, children, inheritedFontSize, inherit
             display: 'inline-block',
             color: element.iconColor ?? 'currentColor',
             maxHeight: 'auto',
-            fontSize: `${inheritedFontSize + (Number(element.children[0]?.fontSizeOffset) || 0)}px`,
+            fontSize: `${roundParseFloat(inheritedFontSize + roundParseFloat(element.children[0]?.fontSizeOffset))}px`,
             lineHeight:  inheritedLineHeight,
          }}
       >

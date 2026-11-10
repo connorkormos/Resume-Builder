@@ -4,6 +4,8 @@ import {
 } from "@/features/Slate/helpers/leafHelpers";
 import { ICONS_MAP } from "@/lib/iconLibrary";
 
+import { roundParseFloat } from "@/utils/formatters";
+
 const typography = (styling) => ({
   fontSize: `${getCascadedFontSize(styling)}px`,
   lineHeight: getCascadedLineHeight(styling),
@@ -54,7 +56,7 @@ export default function RichText({ value, styling, gap }) {
             verticalAlign: "bottom",
             lineHeight: 1,
             color: node.iconColor ?? "currentColor",
-            fontSize: `${getCascadedFontSize(styling) + (node.children?.[0]?.fontSizeOffset ?? 0)}px`,
+            fontSize: `${roundParseFloat(getCascadedFontSize(styling) + roundParseFloat(node.children?.[0]?.fontSizeOffset))}px`,
           }}
         >
           {Icon && <Icon aria-hidden="true" focusable="false" />}
