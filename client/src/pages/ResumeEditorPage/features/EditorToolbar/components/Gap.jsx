@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styles from "@/pages/ResumeEditorPage/features/TextFormatting/TextFormatting.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { updateResume } from "@/store/resumeSlice";
+import { roundParseFloat } from "@/utils/formatters";
 import { RxColumnSpacing, RxRowSpacing } from "react-icons/rx";
 import TextFormatDropdown from "../../TextFormatting/shared/TextFormatDropdown";
 import { MdArrowDropDown } from "react-icons/md";
@@ -13,13 +14,11 @@ const Gap = () => {
   const resumeGap = useSelector((state) => state.resume.present.layout.gap);
 
   const updateResumeGap = (incrementOrDecrement, gapType) => {
-    let parsedCurrentGap = 0;
-    if (resumeGap[gapType]) parsedCurrentGap = parseFloat(resumeGap[gapType]);
-    const updatedGap =
-      parseFloat(
-        parsedCurrentGap + (incrementOrDecrement == "increment" ? 0.1 : -0.1),
-      ).toFixed(1) + "rem";
-    if (parseFloat(updatedGap).toFixed(1) < 0) {
+    const parsedCurrentGap = roundParseFloat(resumeGap[gapType]);
+    const updatedGap = roundParseFloat(
+      parsedCurrentGap + (incrementOrDecrement == "increment" ? 0.1 : -0.1),
+    );
+    if (updatedGap < 0) {
       alert("Gap may not be a negative value.");
       return;
     }
@@ -27,7 +26,7 @@ const Gap = () => {
       updateResume({
         layout: {
           gap: {
-            [gapType]: updatedGap,
+            [gapType]: `${updatedGap}rem`,
           },
         },
       }),

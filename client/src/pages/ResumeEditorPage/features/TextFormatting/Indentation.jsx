@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 
 import { updateField, updateSection } from "@/store/resumeSlice";
+import { roundParseFloat } from "@/utils/formatters";
 import { BiRightIndent, BiLeftIndent } from "react-icons/bi";
 
 import styles from "./TextFormatting.module.css";
@@ -26,13 +27,13 @@ export default function Indentation() {
       activeTarget = reduxSections?.byId[activeSectionId];
     }
     if (!activeTarget) return;
-    let currentMarginLeft = parseFloat(activeTarget.layout?.marginLeft || 0).toFixed(1);
+    let currentMarginLeft = roundParseFloat(activeTarget.layout?.marginLeft);
     const indentationStep = 0.1;
 
     if (indentOrOutdent === "indent") {
-      currentMarginLeft = (parseFloat(currentMarginLeft) + indentationStep).toFixed(1);
+      currentMarginLeft = roundParseFloat(currentMarginLeft + indentationStep);
     } else if (indentOrOutdent === "outdent") {
-      currentMarginLeft = (parseFloat(currentMarginLeft) - indentationStep).toFixed(1);
+      currentMarginLeft = roundParseFloat(currentMarginLeft - indentationStep);
     }
 
     if (isSectionHeading) {
@@ -61,7 +62,7 @@ export default function Indentation() {
     ? reduxSections?.byId[activeSectionId]
     : activeField;
 
-  const marginLeft = parseFloat(activeTarget?.layout?.marginLeft || 0);
+  const marginLeft = roundParseFloat(activeTarget?.layout?.marginLeft);
   const isIndented = marginLeft > 0;
   const isOutdented = marginLeft < 0;
 
