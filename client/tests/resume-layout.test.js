@@ -108,7 +108,7 @@ test('moves cannot split the content group; resize pairs use column neighbors ac
   let state = { ...reducer(undefined, { type: 'init' }), containers: fixture([column('s', 20, true), row('h'), column('a', 40), column('b', 40)]) };
   assert.deepEqual(reducer(state, moveContainer({ id: 'h', direction: 1 })).containers.allIds, ['s', 'a', 'b', 'h']);
   state = reducer(state, resizeContainerPair({ leftContainerId: 's', rightContainerId: 'a', leftWidth: 25, rightWidth: 35 }));
-  assert.equal(state.containers.byId.s.layout.width.value, '25.00%');
+  assert.equal(state.containers.byId.s.layout.width.value, '25%');
   assert.deepEqual(reducer(state, resizeContainerPair({ leftContainerId: 's', rightContainerId: 'h', leftWidth: 25, rightWidth: 35 })), state);
 });
 

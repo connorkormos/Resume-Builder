@@ -37,7 +37,23 @@ export function resolveColumnWidths(containersById, columnIds, overrides = {}) {
   for (const id of automatic) widths[id] = share;
   // Treat the results as proportions so even inconsistent saved totals fit the page.
   const total = Object.values(widths).reduce((sum, width) => sum + width, 0);
-  for (const id of columnIds) widths[id] = widths[id] / total * 100;
+  // Allocate hundredths together so rounding never loses part of the page.
+  const shares = columnIds.map(id => {
+    const exact = widths[id] / total * 10000;
+    return { id, units: Math.floor(exact), remainder: exact % 1 };
+  });
+  const remaining = 10000 - shares.reduce((sum, share) => sum + share.units, 0);
+  const ranked = [...shares].sort((a, b) => b.remainder - a.remainder);
+  for (let i = 0; i < remaining && i < ranked.length; i++) ranked[i].units++;
+  // Keep very small legacy tracks positive at the supported precision.
+  for (const share of shares) {
+    if (share.units === 0) {
+      const largest = shares.reduce((a, b) => a.units >= b.units ? a : b);
+      largest.units--;
+      share.units = 1;
+    }
+  }
+  for (const { id, units } of shares) widths[id] = units / 100;
   return widths;
 }
 
@@ -296,10 +312,10 @@ export function planContainerMove(containers, id, direction) {
 // Both input methods preserve the pair's total and use the same lower bound.
 // Small existing pairs remain resizable instead of requiring 20% combined width.
 export function resizeColumnWidths(leftWidth, rightWidth, delta) {
-  const total = leftWidth + rightWidth;
-  const minimum = Math.min(10, total / 4);
-  const left = Math.min(Math.max(leftWidth + delta, minimum), total - minimum);
-  return { leftWidth: left, rightWidth: total - left };
+  const total = Math.round((leftWidth + rightWidth) * 100);
+  const minimum = Math.ceil(Math.min(1000, total / 4));
+  const left = Math.min(Math.max(Math.round((leftWidth + delta) * 100), minimum), total - minimum);
+  return { leftWidth: left / 100, rightWidth: (total - left) / 100 };
 }
 
 // A manual edit transfers width only within the same adjacent pair as resizing.
@@ -309,9 +325,9 @@ export function getColumnWidthLimits(layout, id) {
   // Prefer borrowing space from the right; the final track borrows from the left.
   const neighborId = layout.trackIds[index + 1] ?? layout.trackIds[index - 1];
   if (neighborId == null) return { neighborId: null, min: 100, max: 100, total: 100 };
-  const total = layout.widthsById[id] + layout.widthsById[neighborId];
-  const min = Math.min(10, total / 4);
-  return { neighborId, min, max: total - min, total };
+  const units = Math.round((layout.widthsById[id] + layout.widthsById[neighborId]) * 100);
+  const minimum = Math.ceil(Math.min(1000, units / 4));
+  return { neighborId, min: minimum / 100, max: (units - minimum) / 100, total: units / 100 };
 }
 
 

@@ -1,4 +1,4 @@
-import { resolveResumeLayout, planContainerRole, planContainerSettings, planContainerMove, getColumnWidthLimits, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
+import { resolveResumeLayout, planContainerRole, planContainerSettings, planContainerMove, getColumnWidthLimits, resizeColumnWidths, ROW_CONTENT_TRACK } from '../utils/resumeLayout.js';
 import { normalizeSlateValue } from "../utils/normalizers/normalizeSlateValue.js";
 import { createSlice } from '@reduxjs/toolkit';
 
@@ -357,8 +357,9 @@ const resumeSlice = createSlice({
          // Materialize current resolved widths so legacy unnormalized values do
          // not change unrelated columns when the edited pair becomes fixed.
          for (const trackId of layout.trackIds) writeTrackWidth(state, trackId, layout.widthsById[trackId]);
-         writeTrackWidth(state, id, value, false);
-         if (limits.neighborId != null) writeTrackWidth(state, limits.neighborId, limits.total - value, false);
+         const units = Math.round(value * 100);
+         writeTrackWidth(state, id, units / 100, false);
+         if (limits.neighborId != null) writeTrackWidth(state, limits.neighborId, (Math.round(limits.total * 100) - units) / 100, false);
       },
 
       resizeContainerPair(state, action) {
@@ -371,8 +372,12 @@ const resumeSlice = createSlice({
             return;
          }
          for (const trackId of layout.trackIds) writeTrackWidth(state, trackId, layout.widthsById[trackId]);
-         writeTrackWidth(state, leftContainerId, leftWidth.toFixed(2), false);
-         writeTrackWidth(state, rightContainerId, rightWidth.toFixed(2), false);
+         const pair = resizeColumnWidths(
+            layout.widthsById[leftContainerId], layout.widthsById[rightContainerId],
+            leftWidth - layout.widthsById[leftContainerId],
+         );
+         writeTrackWidth(state, leftContainerId, pair.leftWidth, false);
+         writeTrackWidth(state, rightContainerId, pair.rightWidth, false);
       },
 
       updateSection(state, action) {
