@@ -8,6 +8,69 @@
   /* width: 5.95in; */
   /* height: 11in; */
   /* width: 8.5in; */
+
+}
+
+.alertMessageWrapper {
+  position: absolute;
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  .alertMessage {
+    position: absolute;
+    background: grey;
+    color: white;
+    border-radius: var(--border-radius-main);
+    width: max-content;
+    max-width: 100%;
+    word-break: break-word;
+    padding: 0.5rem 1rem;
+    margin-top: 3rem;
+    margin: auto;
+    z-index: var(--z-modal);
+  }
+  .alertMessageCloseButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 0.75rem;
+    line-height: 1;
+    height: 1.25rem;
+    width: 1.25rem;
+
+    border: 1px solid black;
+    border-radius: 50%;
+
+    background: var(--background-toolbar);
+
+    cursor: pointer;
+  }
+}
+
+.addColumnButton {
+  position: absolute;
+  top: calc(var(--height-editor-page) / 2 + var(--height-toolbar));
+  right: 0;
+  /* bottom: 1rem; */
+  /* right: 1rem; */
+}
+
+.addRowButton {
+  position: absolute;
+  top: calc(var(--height-editor-page) + var(--height-toolbar) * 2 + 2rem);
+  left: 50%;
+  transform: translateX(-50%);
+  /* bottom: 0; */
+  /* bottom: 0%; */
+  /* transform: translateY(-100%); */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
 }
 
 .containerWrapperDiv {
@@ -184,7 +247,9 @@
   .containerResizeHandle,
   .containerPreviewWidthLeft,
   .containerPreviewWidthRight,
-  .endPageMarker {
+  .endPageMarker,
+  .addContainerButton,
+  .alertMessageWrapper {
     display: none !important;
   }
 }

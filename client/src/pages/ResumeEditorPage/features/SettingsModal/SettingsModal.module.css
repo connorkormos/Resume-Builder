@@ -42,6 +42,7 @@
    z-index: var(--z-modal);
 }
 
+
 @media (max-width: 768px) {
    .settingsModalContainerDiv {
       position: fixed;

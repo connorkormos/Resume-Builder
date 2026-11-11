@@ -5,6 +5,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
+import { resolveResumePresentation } from '@/utils/resumePresentation.js';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { getResumeFromApi } from '@/services/resumeServices';
 import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
@@ -112,9 +113,27 @@ const ResumeEditorPage = () => {
 
    useResumePagination(editorPageRefMap);
 
+
+   const handlePrint = usePrintResume(reduxResume, fullResumeRef);
+
+   const [hideAlert, setHideAlert] = useState(false);
+   
+   const presentation = resolveResumePresentation(reduxResume);
+
    return (
       <div id="resume-editor" className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
-         <Toolbar handlePrint={usePrintResume(reduxResume, fullResumeRef)} />
+         {presentation.layout.errors.length > 0 && !hideAlert && (
+               <p role="alert" className={styles.alertMessage}>
+                  <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+                  {presentation.layout.errors.join(" ")}
+                  <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+                  <button className={styles.alertMessageCloseButton} onClick={() => { setHideAlert(true); }}>
+                     <span>X</span>
+                     {/* ✖ */}
+                  </button>
+               </p>
+         )}
+         <Toolbar handlePrint={() => handlePrint()} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
             <div ref={fullResumeRef}>

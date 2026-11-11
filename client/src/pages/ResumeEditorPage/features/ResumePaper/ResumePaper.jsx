@@ -202,47 +202,66 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
     );
   });
 
+  // const [hideAlert, setHideAlert] = useState(false);
 
   return (
     <EditorLayoutContext.Provider value={presentation.sectionsById}>
-    <div className={styles.printPageRef} ref={ref} style={resumePageNumber > 1 ? { marginTop: "2rem" } : {}}>
-      {resolvedLayout.errors.length > 0 && <p role="alert">{resolvedLayout.errors.join(" ")}</p>}
-      {!isMobile && <MarginRuler pageRef={editorRef} resumePageNumber={resumePageNumber} />}
-      <div
-        className={styles.editingPageContainer}
-        style={presentation.pageStyle}
-        ref={editorRef}
-        id="editorPage"
-      >
-        <DragDropProvider
-          onDragOver={(event) => {
-            const { source } = event.operation;
+      {/* {resolvedLayout.errors.length > 0 && !hideAlert && (
+        <div className={styles.alertMessageWrapper}>
+          <p role="alert" className={styles.alertMessage}>
+            <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+            {resolvedLayout.errors.join(" ")}
+            <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+            <button className={styles.alertMessageCloseButton} onClick={() => { setHideAlert(true); }}>
+              <span>X</span> */}
+              {/* ✖ */}
+              {/* </button>
+          </p>
+        </div>
+      )} */}
+      <div className={styles.printPageRef} ref={ref} style={resumePageNumber > 1 ? { marginTop: "5rem" } : {}}>
+        {!isMobile && <MarginRuler pageRef={editorRef} resumePageNumber={resumePageNumber} />}
+        <div
+          className={styles.editingPageContainer}
+          style={presentation.pageStyle}
+          ref={editorRef}
+          id="editorPage"
+        >
+          <DragDropProvider
+            onDragOver={(event) => {
+              const { source } = event.operation;
 
-            if (source?.type === "container") return;
+              if (source?.type === "container") return;
 
-            setSectionOrderPreview((currentItems) => move(currentItems ?? storedSectionIds, event));
-          }}
-          onDragEnd={(event) => {
-            const { source } = event.operation;
+              setSectionOrderPreview((currentItems) => move(currentItems ?? storedSectionIds, event));
+            }}
+            onDragEnd={(event) => {
+              const { source } = event.operation;
 
-            if (event.canceled) {
-              if (source?.type === "section") {
-                setSectionOrderPreview(null);
+              if (event.canceled) {
+                if (source?.type === "section") {
+                  setSectionOrderPreview(null);
+                }
+
+                return;
               }
 
-              return;
-            }
-
-            if (source?.type === "container") return;
-            dispatch(dndReorderSections({ dndKitDict: containerSectionIds }));
-            setSectionOrderPreview(null);
-          }}
-        >
-          {resumeContainers}
-        </DragDropProvider>
-        {/* <EndPageMarker pageRef={editorRef} resumePageNumber={resumePageNumber} /> */}
+              if (source?.type === "container") return;
+              dispatch(dndReorderSections({ dndKitDict: containerSectionIds }));
+              setSectionOrderPreview(null);
+            }}
+          >
+            {resumeContainers}
+          </DragDropProvider>
+          {/* <EndPageMarker pageRef={editorRef} resumePageNumber={resumePageNumber} /> */}
+        </div>
       </div>
-    </div>
+      {/* <div className={styles.addContainerButton + " " + styles.addColumnButton}>
+          <button type="button">Add Column</button>
+        </div>
+        <div className={styles.addContainerButton + " " + styles.addRowButton}>
+          <button type="button">Add Row</button>
+        </div> */}
     </EditorLayoutContext.Provider>
   );
 });

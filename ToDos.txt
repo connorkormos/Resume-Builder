@@ -41,6 +41,8 @@ MEDIUM BUGS:
 
 SMALL BUGS:
 
+-Section Borders can overflow off page
+
 -Indenting bullets can only go to a second level
    -Should continue, at least 3 levels deep
 
