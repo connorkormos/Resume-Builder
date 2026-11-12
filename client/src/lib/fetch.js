@@ -3,11 +3,11 @@ import { BASE_URL } from "@/config";
 export const fetchApi = async ({ endpoint = "", options = {} } = {}) => {
    const response = await fetch(`${BASE_URL}${endpoint}`, {
       credentials: "include",
+      ...options,
       headers: {
          "Content-Type": "application/json",
          ...options.headers,
       },
-      ...options,
    });
 
    const contentType = response.headers.get("content-type");
