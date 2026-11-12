@@ -17,6 +17,7 @@
   display: flex;
   justify-content: center;
   width: 100%;
+
   .alertMessage {
     position: absolute;
     background: grey;
@@ -30,6 +31,7 @@
     margin: auto;
     z-index: var(--z-modal);
   }
+
   .alertMessageCloseButton {
     position: absolute;
     top: 0;
@@ -74,11 +76,70 @@
 }
 
 .containerWrapperDiv {
+  position: relative;
   align-self: stretch;
   min-width: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
+
+  .addSectionToContainerWrapper {
+    position: absolute;
+
+    visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: var(--z-main);
+
+    /* .addSectionToContainerWrapper > button {
+      position: absolute;
+      top: 100%;
+      transform: translateX(-50%);
+    }
+     */
+    &.column {
+      width: 100%;
+      padding-top: 1.5rem;
+      /* height: 3rem; */
+      top: 100%;
+    }
+
+    &.row {
+      height: 100%;
+      top: 0;
+      left: 100%;
+      padding-left: 1rem;
+      width: max-content;
+
+      button {
+        position: static;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+    }
+
+    button {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      line-height: 1;
+      background: var(--background-toolbar);
+      border: var(--border-toolbar-button);
+      border-radius: var(--border-radius-main);
+      cursor: pointer;
+      color: white;
+    }
+  }
+
+  &:hover>.addSectionToContainerWrapper,
+  &:focus-within>.addSectionToContainerWrapper {
+    visibility: visible;
+  }
 }
 
 .containerResizeHandle {

@@ -2,7 +2,14 @@
    WHERE I LEFT OFF
 !--------------------!
 
--Finished applying rounding functionality across the board, including for column widths
+-Played around with Add Container Buttons, one to the right of the page for Columns, and one below the page for Rows.
+   -Considering having them more closely related to the actual columns/rows on the page (physically) if there are already some
+   -TLDR, I need to make it much easier and more straight forward to add rows/columns
+
+-Inspecting error reporting on the resume, for issues such as mismatched column types, individual fields overflowing with no way to move to next page, etc
+   -Current errors from from resolveResumePresentation.layout.errors
+   -Looking to add more via useResumePagination
+   -Likely a good idea to hold all primary errors/alerts in Redux State
 
 !-------------------!
    THINGS TO CHECK

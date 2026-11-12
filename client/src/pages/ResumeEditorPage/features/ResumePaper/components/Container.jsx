@@ -75,12 +75,14 @@ const Container = ({
     ? [resizeTrackId, rightContainerId].map(id => `${containerPreviewWidths[id].toFixed(1)}%`)
     : [];
 
+    
+
   return (
     <div
       id={container.id}
       data-container-id={container.id}
       className={styles.containerWrapperDiv}
-      style={presentation.style}
+      style={{...presentation.style, flexDirection: container.type}}
       ref={ref}
     >
       {!renderedIds.length && <p>Drop a section here</p>}
@@ -106,6 +108,14 @@ const Container = ({
           )}
         </div>
       )}
+      <div className={styles.addSectionToContainerWrapper + " " + styles[container.type]}>
+        <button
+          className={container.type === 'column' ? styles.addSectionToColumnButton : styles.addSectionToRowButton}
+          type="button"
+        >
+          + Section
+        </button>
+      </div>
     </div>
   );
 };
