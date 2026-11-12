@@ -71,23 +71,34 @@ def add_section_to_resume(resume_id):
             )
 
         else:
-            first_container = (
+            container_id = form_data.get("container_id")
+            if container_id is not None:
+                container_to_add_to = Container.query.get(container_id)
+                if not container_to_add_to or container_to_add_to.resume_id != resume_id:
+                    return generate_error(
+                        error_type="NOT_FOUND",
+                        code="CONTAINER_NOT_FOUND",
+                        message=f"Container of ID {container_id} not found for this resume.",
+                    )
+                
+            else:
+                container_to_add_to = (
                 Container.query.filter_by(resume_id=resume_id)
                 .order_by(Container.position)
                 .first()
             )
 
-            if not first_container:
+            if not container_to_add_to:
                 return generate_error(
                     error_type="SERVER_ERROR",
                     code="NO_CONTAINERS_FOUND",
                     message="Cannot add a section because this resume has no containers.",
                 )
 
-            new_section_position = len(first_container.sections)
+            new_section_position = len(container_to_add_to.sections)
 
             section = add_section(
-                container_id=first_container.id,
+                container_id=container_to_add_to.id,
                 section_type=section_type,
                 position=new_section_position,
             )
@@ -119,7 +130,7 @@ def delete_section_from_resume(section_id):
             return generate_error(
                 error_type="NOT_FOUND",
                 code="SECTION_NOT_FOUND",
-                message=f"Seciton of ID {section_id} not found.",
+                message=f"Section of ID {section_id} not found.",
             )
 
         resume = section_to_delete.container.resume

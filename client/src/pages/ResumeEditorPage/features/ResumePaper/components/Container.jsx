@@ -1,10 +1,11 @@
-import React from "react";
-import { useDroppable } from "@dnd-kit/react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useDroppable } from "@dnd-kit/react";
+import { CollisionPriority } from "@dnd-kit/abstract";
+
 
 import Section from "./Section.jsx";
-
-import { CollisionPriority } from "@dnd-kit/abstract";
+import AddSectionModal from "./AddSectionModal.jsx";
 
 import styles from "../ResumePaper.module.css";
 
@@ -56,7 +57,7 @@ const Container = ({
       }
     };
     if (!sectionHasContentOnCurrentResumePage) return null;
-    
+
     return (
       <Section
         key={sectionId}
@@ -75,48 +76,59 @@ const Container = ({
     ? [resizeTrackId, rightContainerId].map(id => `${containerPreviewWidths[id].toFixed(1)}%`)
     : [];
 
-    
+
+  const [showAddSectionModal, setShowAddSectionModal] = useState(false);
 
   return (
-    <div
-      id={container.id}
-      data-container-id={container.id}
-      className={styles.containerWrapperDiv}
-      style={{...presentation.style, flexDirection: container.type}}
-      ref={ref}
-    >
-      {!renderedIds.length && <p>Drop a section here</p>}
-      {renderedSections}
-      {rightContainerId && (
-        <div>
-          {isResizingPair && (
-            <p className={styles.containerPreviewWidthLeft}>
-              {previewWidthStrings[0]}
-            </p>
-          )}
+    <>
+      <div
+        id={container.id}
+        data-container-id={container.id}
+        className={styles.containerWrapperDiv}
+        style={{ ...presentation.style, flexDirection: container.type }}
+        ref={ref}
+      >
+        {!renderedIds.length && <p>Drop a section here</p>}
+        {renderedSections}
+        {rightContainerId && (
+          <div>
+            {isResizingPair && (
+              <p className={styles.containerPreviewWidthLeft}>
+                {previewWidthStrings[0]}
+              </p>
+            )}
+            <button
+              type="button"
+              className={styles.containerResizeHandle}
+              aria-label="Resize adjacent containers"
+              onPointerDown={(event) => onStartResize(resizeTrackId, event)}
+              onKeyDown={(event) => onResizeWithKeyboard(resizeTrackId, event)}
+            />
+            {isResizingPair && (
+              <p className={styles.containerPreviewWidthRight}>
+                {previewWidthStrings[1]}
+              </p>
+            )}
+          </div>
+        )}
+        <div className={styles.addSectionToContainerWrapper + " " + styles[container.type]}>
           <button
+            className={container.type === 'column' ? styles.addSectionToColumnButton : styles.addSectionToRowButton}
             type="button"
-            className={styles.containerResizeHandle}
-            aria-label="Resize adjacent containers"
-            onPointerDown={(event) => onStartResize(resizeTrackId, event)}
-            onKeyDown={(event) => onResizeWithKeyboard(resizeTrackId, event)}
-          />
-          {isResizingPair && (
-            <p className={styles.containerPreviewWidthRight}>
-              {previewWidthStrings[1]}
-            </p>
-          )}
+            onClick={() => setShowAddSectionModal(true)}
+          >
+            + Section
+          </button>
         </div>
-      )}
-      <div className={styles.addSectionToContainerWrapper + " " + styles[container.type]}>
-        <button
-          className={container.type === 'column' ? styles.addSectionToColumnButton : styles.addSectionToRowButton}
-          type="button"
-        >
-          + Section
-        </button>
       </div>
-    </div>
+      {showAddSectionModal && (
+        <AddSectionModal
+          container={container}
+          show={showAddSectionModal}
+          onClose={() => setShowAddSectionModal(false)}
+        />
+      )}
+    </>
   );
 };
 

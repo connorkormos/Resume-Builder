@@ -8,7 +8,76 @@
   /* width: 5.95in; */
   /* height: 11in; */
   /* width: 8.5in; */
+}
 
+
+
+.addSectionModalContainer {
+  position: absolute;
+  height: clamp(calc(var(--height-editor-page) / 2), max-content, 100vh);
+  width: clamp(calc(var(--width-editor-page) / 2), max-content, 100vw);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 1.5rem 2.5rem;
+
+  color: white;
+  background: var(--background-toolbar);
+  border: var(--border-main);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.25);
+  border-radius: var(--border-radius-rounded-main);
+
+  z-index: var(--z-modal);
+
+  h3 {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .addSectionModalContent {
+    margin: auto;
+    width: max-content;
+    font-size: 1rem;
+    display: flex;
+    /* flex-direction: column; */
+    gap: 2.5rem;
+
+    .addSectionToContainerColumn {
+      display: flex;
+      flex-direction: column;
+      /* justify-content: space-between; */
+      align-items: center;
+      gap: 1rem;
+      width: max-content;
+    }
+    .addSectionToContainerButton {
+      width: 100%;
+      background: var(--bootstrap-blue);
+      padding: 0 1rem;
+      border: none;
+      border-radius: var(--border-radius-main);
+    }
+  }
+
+  .closeButton {
+    font-size: 0.75rem;
+    line-height: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(25%, -25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.25rem;
+    width: 1.25rem;
+    border: 1px solid grey;
+    border-radius: 50%;
+    background: var(--background-toolbar);
+    cursor: pointer;
+  }
 }
 
 .alertMessageWrapper {
@@ -48,7 +117,6 @@
 
     border: 1px solid black;
     border-radius: 50%;
-
     background: var(--background-toolbar);
 
     cursor: pointer;
@@ -59,8 +127,6 @@
   position: absolute;
   top: calc(var(--height-editor-page) / 2 + var(--height-toolbar));
   right: 0;
-  /* bottom: 1rem; */
-  /* right: 1rem; */
 }
 
 .addRowButton {
@@ -68,11 +134,6 @@
   top: calc(var(--height-editor-page) + var(--height-toolbar) * 2 + 2rem);
   left: 50%;
   transform: translateX(-50%);
-  /* bottom: 0; */
-  /* bottom: 0%; */
-  /* transform: translateY(-100%); */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
 }
 
 .containerWrapperDiv {
@@ -93,12 +154,6 @@
 
     z-index: var(--z-main);
 
-    /* .addSectionToContainerWrapper > button {
-      position: absolute;
-      top: 100%;
-      transform: translateX(-50%);
-    }
-     */
     &.column {
       width: 100%;
       padding-top: 1.5rem;

@@ -115,11 +115,11 @@ export const getSectionTypesFromApi = async () => {
    }
 }
 
-export const addSectionToApi = async (resumeId, sectionType) => {
+export const addSectionToApi = async (resumeId, sectionType, containerId = null) => {
    try {
       const data = await fetchApi({
          endpoint: `/sections/${resumeId}`,
-         options: { method: 'POST', body: JSON.stringify({ type: sectionType }) }
+         options: { method: 'POST', body: JSON.stringify({ type: sectionType, container_id: containerId }) }
       })
 
       return data;
