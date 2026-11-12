@@ -6,6 +6,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
 import { resolveResumePresentation } from '@/utils/resumePresentation.js';
+import { getResumePageCount } from '@/utils/getResumePageCount.js';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
 import { getResumeFromApi } from '@/services/resumeServices';
 import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
@@ -91,22 +92,7 @@ const ResumeEditorPage = () => {
    const [resumePageCount, setResumePageCount] = useState(1);
 
    useEffect(() => {
-      let resumePageCount = 1;
-      resumePageCount = Math.max(...Object.values(reduxResume.containers.byId).map(container => {
-         const containerSections = container.sectionIds.map(sectionId => reduxResume.sections.byId[sectionId]);
-         const maxSectionPage = Math.max(...containerSections.map(section => {
-            const sectionSubsections = section.subsectionIds.map(subsectionId => reduxResume.subsections.byId[subsectionId]);
-            const maxSubsectionPage = Math.max(...sectionSubsections.map(subsection => {
-               const subsectionFields = subsection.fieldIds.map(fieldId => reduxResume.fields.byId[fieldId]);
-               const maxFieldPage = Math.max(...subsectionFields.map(field => field.pageNumber));
-               return Math.max(subsection.pageNumber, maxFieldPage);
-            }));
-            return Math.max(section.pageNumber, maxSubsectionPage);
-         }));
-         return maxSectionPage;
-      }));
-
-      setResumePageCount(resumePageCount);
+      setResumePageCount(getResumePageCount(reduxResume));
    }, [reduxResume]);
 
    const editorPageRefMap = useRef(new Map());

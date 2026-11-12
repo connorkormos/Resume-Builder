@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import reducer, { addSection, addSubsection, updateField } from '../src/store/resumeSlice.js';
+import reducer, { addSection, addSubsection, addField, updateField } from '../src/store/resumeSlice.js';
 
 const value = text => [{ type: 'paragraph', children: [{ text }] }];
 const field = (id, subsectionId, position = 0) => ({
@@ -28,7 +28,7 @@ test('new sections register ordered descendants and preserve existing edits acro
   assert.deepEqual(state.sections.byId[5].subsectionIds, [6, 8]);
   assert.deepEqual(state.subsections.byId[6].fieldIds, [7, 9]);
   assert.deepEqual(state.subsections.byId[8].fieldIds, []);
-  assert.deepEqual(state.fields.byId[7], field(7, 6));
+  assert.deepEqual(state.fields.byId[7], { ...field(7, 6), pageNumber: 1 });
   assert.equal(state.sections.byId[5].subsections, undefined);
   assert.equal(state.subsections.byId[6].fields, undefined);
   state = reducer(state, updateField({ id: 7, value: value('New project text') }));
@@ -49,6 +49,31 @@ test('existing-section response appends only the new subsection and fields', () 
   assert.deepEqual(state.sections.byId[2], { ...before.sections.byId[2], subsectionIds: [3, 5] });
   assert.deepEqual(state.subsections.byId[5].fieldIds, [6]);
   assert.deepEqual(state.fields.allIds, [4, 6]);
-  assert.deepEqual(state.fields.byId[6], field(6, 5));
+  assert.deepEqual(state.fields.byId[6], { ...field(6, 5), pageNumber: 1 });
   assert.deepEqual(state.fields.byId[4], before.fields.byId[4]);
+});
+
+for (const supplied of [false, true]) {
+  test(`page inheritance preserves supplied numbers (${supplied})`, () => {
+    const before = initialResume();
+    before.containers.byId[1].pageNumber = 2;
+    let state = reducer(before, addSection({ sectionData: {
+      id: 5, containerId: 1, ...(supplied ? { pageNumber: 3 } : {}),
+      subsections: [{ id: 6, sectionId: 5, ...(supplied ? { pageNumber: 4 } : {}),
+        fields: [field(7, 6), { ...field(8, 6), pageNumber: 5 }] }],
+    } }));
+    assert.equal(state.sections.byId[5].pageNumber, supplied ? 3 : 2);
+    assert.equal(state.subsections.byId[6].pageNumber, supplied ? 4 : 2);
+    assert.equal(state.fields.byId[7].pageNumber, supplied ? 4 : 2);
+    assert.equal(state.fields.byId[8].pageNumber, 5);
+    state = reducer(state, addField({ fieldData: field(9, 6) }));
+    assert.equal(state.fields.byId[9].pageNumber, supplied ? 4 : 2);
+    state = reducer(state, addField({ fieldData: { ...field(10, 6), pageNumber: 6 } }));
+    assert.equal(state.fields.byId[10].pageNumber, 6);
+  });
+}
+
+test('standalone field defaults to one without a parent page', () => {
+  const state = reducer(initialResume(), addField({ fieldData: field(5, 3) }));
+  assert.equal(state.fields.byId[5].pageNumber, 1);
 });

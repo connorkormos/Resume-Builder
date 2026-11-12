@@ -5,21 +5,29 @@ import { createSlice } from '@reduxjs/toolkit';
 import { mergeDeep } from "./helpers/mergeDeep.js";
 
 const insertSubsection = (state, subsectionData) => {
+   console.log('SUBSECTION DATA', subsectionData)
    const { fields = [], ...subsection } = subsectionData;
    const sortedFields = [...fields].sort(
       (a, b) => a.position - b.position
    );
 
+   const subsectionSection = state.sections.byId[subsection.sectionId];
+
    state.subsections.byId[subsection.id] = {
       ...subsection,
       fieldIds: sortedFields.map(field => field.id),
+      pageNumber: subsection.pageNumber ?? subsectionSection.pageNumber ?? 1,
    };
    state.subsections.allIds.push(subsection.id);
    state.sections.byId[subsection.sectionId]
       .subsectionIds.push(subsection.id);
 
    for (const field of sortedFields) {
-      state.fields.byId[field.id] = { ...field, value: normalizeSlateValue(field.value) };
+      state.fields.byId[field.id] = {
+         ...field,
+         value: normalizeSlateValue(field.value),
+         pageNumber: field.pageNumber ?? state.subsections.byId[subsection.id].pageNumber ?? 1,
+      };
       state.fields.allIds.push(field.id);
    }
 };
@@ -238,6 +246,10 @@ const resumeSlice = createSlice({
             (a, b) => a.position - b.position
          );
 
+         console.log('SECTION DATA', sectionData)
+         const sectionContainer = state.containers.byId[section.containerId];
+         console.log('SECTION CONTAINER', sectionContainer)
+
          state.sections.byId[section.id] = {
             ...section,
             value: normalizeSlateValue(section.value),
@@ -250,9 +262,10 @@ const resumeSlice = createSlice({
                },
             },
             subsectionIds: [],
+            pageNumber: section.pageNumber ?? sectionContainer.pageNumber ?? 1,
          };
          state.sections.allIds.push(section.id);
-         state.containers.byId[section.containerId].sectionIds.push(section.id);
+         sectionContainer.sectionIds.push(section.id);
 
          for (const subsection of sortedSubsections) {
             insertSubsection(state, subsection);
@@ -267,7 +280,11 @@ const resumeSlice = createSlice({
       addField(state, action) {
          const { fieldData } = action.payload;
          console.log("Adding field with data: ", fieldData);
-         state.fields.byId[fieldData.id] = { ...fieldData, value: normalizeSlateValue(fieldData.value) };
+         state.fields.byId[fieldData.id] = {
+            ...fieldData,
+            value: normalizeSlateValue(fieldData.value),
+            pageNumber: fieldData.pageNumber ?? state.subsections.byId[fieldData.subsectionId].pageNumber ?? 1,
+         };
          state.fields.allIds.push(fieldData.id);
          state.subsections.byId[fieldData.subsectionId].fieldIds.push(fieldData.id);
       },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
+import { addSection, addSubsection } from "@/store/resumeSlice";
 import { getSectionTypesFromApi, addSectionToApi } from "@/services/resumeServices";
 
 import styles from "../ResumePaper.module.css";
@@ -9,6 +10,7 @@ export default function AddSectionModal({ container, show, onClose }) {
 
     const reduxSectionsById = useSelector(state => state.resume.present.sections.byId);
     const reduxContainer = useSelector(state => state.resume.present.containers.byId[container.id]);
+    const dispatch = useDispatch();
 
     const [containerSections, setContainerSections] = useState([]);
     const [availableSections, setAvailableSections] = useState([]);
@@ -48,11 +50,17 @@ export default function AddSectionModal({ container, show, onClose }) {
     }, [reduxContainer.sectionIds, reduxSectionsById]);
 
     const addSectionToContainer = async (sectionType) => {
-        const addedSection = await addSectionToApi(container.resumeId, sectionType, container.id);
-        if (addedSection) {
+        const createdData = await addSectionToApi(container.resumeId, sectionType, container.id);
+        if (createdData) {
+            if (createdData.section) {
+                dispatch(addSection({ sectionData: createdData.section }));
+            } else if (createdData.subsection) {
+                dispatch(addSubsection({ subsectionData: createdData.subsection }));
+            }
+            console.log('Added section:', createdData);
             // Optionally, you can update the local state or trigger a Redux action to reflect the new section
-            console.log('Added section:', addedSection);
         }
+        onClose();
     }
 
     if (!show) return null;
@@ -68,6 +76,8 @@ export default function AddSectionModal({ container, show, onClose }) {
                             <button
                                 key={section.id}
                                 className={styles.addSectionToContainerButton}
+                                onClick={() => addSectionToContainer(section.type)}
+
                             >
                                 + {section.label}
                             </button>
