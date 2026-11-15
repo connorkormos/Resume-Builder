@@ -55,7 +55,7 @@ const IconElement = ({ element, attributes, children, inheritedFontSize, inherit
             lineHeight:  inheritedLineHeight,
          }}
       >
-         {Icon && <Icon aria-hidden="true" focusable="false" style={{transform: 'translateY(25%)'}} />}
+         {Icon && <Icon aria-hidden="true" focusable="false" style={{transform: 'translateY(12.5%)'}} />}
          {children}
       </span>
    );

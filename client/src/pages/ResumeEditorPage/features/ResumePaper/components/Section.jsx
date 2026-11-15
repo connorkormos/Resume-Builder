@@ -148,19 +148,22 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
       }}
       onClick={(e) => handleSetActiveSection(e)}
     >
+        <div className={styles.sectionSettingsIconWrapper}>
+          {/* <span
+            className={styles.sectionSettingsButtonIcon}
+            onClick={handleSettingsIconClick}
+          > */}
+          <MdSettings
+            className={styles.sectionSettingsIcon}
+            onClick={handleSettingsIconClick}
+          />
+          {/* </span> */}
+        </div>
       <div
         className={`${styles.sectionContentWrapper} ${sectionIsActive && styles.active}`}
         data-section-id={section.id}
         style={{ cursor: "auto" }}
       >
-        <button className={styles.sectionSettingsButton}>
-          <span
-            className={styles.sectionSettingsButtonIcon}
-            onClick={handleSettingsIconClick}
-          >
-            <MdSettings />
-          </span>
-        </button>
         {section.showHeading !== false && (
           <SlateHeading key={section.id} section={section} id={section.id} />
         )}

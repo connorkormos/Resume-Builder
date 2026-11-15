@@ -201,7 +201,7 @@
   position: absolute;
   top: 0;
   right: -8px;
-  z-index: 10;
+  z-index: 1;
   display: grid;
   place-items: center;
   width: 16px;
