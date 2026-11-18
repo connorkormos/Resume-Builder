@@ -9,7 +9,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery.js';
 import { resolveResumePresentation } from '@/utils/resumePresentation.js';
 import { getResumePageCount } from '@/utils/getResumePageCount.js';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
-import { getResumeFromApi } from '@/services/resumeServices';
+import { getResumeFromApi, addContainerToApi } from '@/services/resumeServices';
 import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
 
 import { usePrintResume } from './hooks/usePrintResume.js';
@@ -109,6 +109,16 @@ const ResumeEditorPage = () => {
 
    const presentation = resolveResumePresentation(reduxResume);
 
+   const handleAddContainer = async (type) => {
+      if (reduxResume.containers.allIds.length >= 10) {
+         alert('Resumes cannot have more than 10 containers.');
+         return;
+      }
+
+      const updatedResume = await addContainerToApi(reduxResume, type);
+      if (updatedResume) dispatch(setResume(updatedResume));
+   };
+
    return (
       <div id="resume-editor" className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          {presentation.layout.errors.length > 0 && !hideAlert && (
@@ -143,17 +153,17 @@ const ResumeEditorPage = () => {
          {!isMobile && (
             <>
                <div className={styles.addRowButtonWrapper}>
-                  <button className={styles.addRowButton}>+ Row</button>
+                  <button className={styles.addRowButton} onClick={() => handleAddContainer('row')}>+ Row</button>
                </div>
                <div className={styles.addColumnButtonWrapper}>
-                  <button className={styles.addColumnButton}>+ Column</button>
+                  <button className={styles.addColumnButton} onClick={() => handleAddContainer('column')}>+ Column</button>
                </div>
             </>
          )}
          {isMobile && (
             <div className={styles.addContainerButtonsWrapper}>
-               <button className={styles.addRowButton}>+ Row</button>
-               <button className={styles.addColumnButton}>+ Column</button>
+               <button className={styles.addRowButton} onClick={() => handleAddContainer('row')}>+ Row</button>
+               <button className={styles.addColumnButton} onClick={() => handleAddContainer('column')}>+ Column</button>
             </div>
          )}
       </div>

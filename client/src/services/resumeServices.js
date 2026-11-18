@@ -187,13 +187,17 @@ export const deleteSectionFromApi = async (sectionId) => {
 //    }
 // }
 
-export const addContainerToApi = async (resumeId, containerType = 'column', spanFullPage = false) => {
+export const addContainerToApi = async (resume, containerType = 'column') => {
+   const resumeId = resume.id;
    try {
+      const saved = await saveResumeToApi(resume);
+      if (!saved) return null;
+
       const data = await fetchApi({
          endpoint: `/containers/${resumeId}`,
          options: {
             method: 'POST',
-            body: JSON.stringify({ type: containerType, spanFullPage: spanFullPage })
+            body: JSON.stringify({ type: containerType })
          }
       });
 

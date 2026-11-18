@@ -12,6 +12,7 @@ from services.builders import (
 )
 
 from services.updaters import update_container_widths
+from services.normalizers import normalize_resume_containers
 
 from services.resume_updater import update_resume_with_form_data
 
@@ -49,16 +50,42 @@ def add_container(resume_id):
             )
         
         data = request.get_json(silent=True) or {}
-        new_container = Container(
-            resume_id=resume_id,
-            position=container_count,
-            type=data.get("type", "column"),
-            span_full_page=data.get("spanFullPage", False),
-            # width=None
+        if not isinstance(data, dict):
+            return generate_error(
+                error_type="BAD_REQUEST", code="INVALID_DATA",
+                message="Container data must be an object.",
+            )
+        container_type = data.get("type", "column")
+        span_full_page = data.get("spanFullPage", False)
+        if container_type not in ("column", "row") or not isinstance(span_full_page, bool):
+            return generate_error(
+                error_type="BAD_REQUEST", code="INVALID_CONTAINER_SETTINGS",
+                message="Container type must be column or row, and spanFullPage must be a boolean.",
+            )
+
+        normalize_resume_containers(resume)
+        position = container_count
+        has_columns = any(
+            container.type == "column" and not container.span_full_page
+            for container in resume.containers
         )
-        db.session.add(new_container)
+        rows = [container for container in resume.containers if container.type == "row"]
+        if container_type == "column" and not span_full_page and not has_columns and rows:
+            # Keep existing right sidebars to the right of the first ordinary column.
+            position = max(container.position for container in rows) + 1
+            for container in resume.containers:
+                if container.position >= position:
+                    container.position += 1
+
+        new_container = Container(
+            position=position,
+            type=container_type,
+            span_full_page=span_full_page,
+        )
+        resume.containers.append(new_container)
         db.session.flush()
-        
+
+        normalize_resume_containers(resume)
         update_container_widths(resume_id)
 
         db.session.commit()

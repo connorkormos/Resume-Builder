@@ -8,7 +8,6 @@ import styles from "@/pages/ResumeEditorPage/features/TextFormatting/TextFormatt
 import {
   addContainerToApi,
   deleteLastContainerFromApi,
-  saveResumeToApi,
 } from "@/services/resumeServices.js";
 import { TfiLayoutColumn3Alt } from "react-icons/tfi";
 
@@ -32,11 +31,7 @@ const Containers = () => {
      alert("Resumes cannot have more than 10 containers.");
      return;
    }
-    const saved = await saveResumeToApi(reduxResume);
-   
-    if (!saved) return;
-    
-    const updatedNormalizedResumeData = await addContainerToApi(reduxResume.id);
+    const updatedNormalizedResumeData = await addContainerToApi(reduxResume);
 
     if (!updatedNormalizedResumeData) {
       return;

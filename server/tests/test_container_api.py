@@ -11,7 +11,7 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 import sqlalchemy as sa
 from app import app, db
-from models import User, Section
+from models import User, Section, Resume, Container
 from services.builders import build_resume_copy
 
 
@@ -44,6 +44,55 @@ class ContainerApiTest(unittest.TestCase):
         db.session.remove()
         db.drop_all()
         self.context.pop()
+
+    def test_first_column_preserves_right_sidebars(self):
+        resume = Resume(user_id=1, title='Rows and sidebars')
+        resume.containers = [
+            Container(type=kind, span_full_page=sidebar, position=index)
+            for index, (kind, sidebar) in enumerate([
+                ('column', True), ('row', False), ('row', False),
+                ('column', True), ('column', True),
+            ])
+        ]
+        db.session.add(resume)
+        db.session.commit()
+        original_ids = [container.id for container in resume.containers]
+
+        added = self.client.post(f'/containers/{resume.id}', json={'type': 'column'})
+        self.assertEqual(added.status_code, 201)
+        containers = added.json['containers']
+        self.assertEqual([c['id'] for c in containers[:3]], original_ids[:3])
+        self.assertEqual([c['id'] for c in containers[4:]], original_ids[3:])
+        self.assertFalse(containers[3]['spanFullPage'])
+        self.assertEqual([c['position'] for c in containers], list(range(6)))
+
+    def test_save_repairs_order_before_adding_and_excludes_deleted_containers(self):
+        resume = Resume(user_id=1, title='Mixed layout')
+        resume.containers = [
+            Container(type='column', span_full_page=False, position=index)
+            for index in range(5)
+        ]
+        db.session.add(resume)
+        db.session.commit()
+        ids = [container.id for container in resume.containers]
+        data = normalize_for_save(resume.to_dict())
+        data['containers']['byId'].pop(str(ids[4]))
+        for index, (kind, sidebar) in enumerate([
+            ('column', False), ('row', False), ('column', True), ('column', False),
+        ]):
+            data['containers']['byId'][str(ids[index])].update(
+                type=kind, spanFullPage=sidebar, position=index * 2,
+            )
+
+        saved = self.client.put(f'/resumes/{resume.id}', json=data)
+        self.assertEqual(saved.status_code, 200)
+        self.assertEqual([c['id'] for c in saved.json['containers']], [ids[0], ids[3], ids[1], ids[2]])
+        added = self.client.post(f'/containers/{resume.id}', json={'type': 'row'})
+        self.assertEqual(added.status_code, 201)
+        containers = added.json['containers']
+        self.assertEqual(containers[-1]['id'], ids[2])
+        self.assertEqual(containers[-2]['type'], 'row')
+        self.assertEqual([c['position'] for c in containers], list(range(5)))
 
     def test_create_save_reload_copy_and_delete_use_container_names(self):
         created = self.client.post('/resumes', json={'title': 'Example', 'sections': {'header': True}})

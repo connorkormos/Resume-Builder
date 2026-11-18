@@ -5,6 +5,7 @@ from models import db, Resume, Container, Section, Subsection, Field
 from lib.defaults import SECTION_DEFINITIONS
 
 from services.updaters import update_container_widths
+from services.normalizers import normalize_resume_containers
 from services.plain_text import build_resume_plain_text
 from services.resume_tags import normalize_resume_tags
 
@@ -130,6 +131,9 @@ def update_resume_with_form_data(resume_id, data):
             
     db.session.flush()
             
+    # Reload the relationship after deletions so only surviving containers are normalized.
+    db.session.expire(resume, ["containers"])
+    normalize_resume_containers(resume)
     update_container_widths(resume_id)
     
 
