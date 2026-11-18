@@ -119,7 +119,15 @@ export const addSectionToApi = async (resumeId, sectionType, containerId = null)
    try {
       const data = await fetchApi({
          endpoint: `/sections/${resumeId}`,
-         options: { method: 'POST', body: JSON.stringify({ type: sectionType, container_id: containerId }) }
+         options: {
+            method: 'POST',
+            body: JSON.stringify(
+               {
+                  type: sectionType,
+                  container_id: containerId
+               }
+            )
+         }
       })
 
       return data;
@@ -158,22 +166,47 @@ export const deleteSectionFromApi = async (sectionId) => {
    }
 }
 
-export const addContainerToApi = async (resumeId) => {
+// export const addContainerToApi = async (resumeId) => {
+//    try {
+//       const data = await fetchApi({
+//          endpoint: `/containers/${resumeId}`,
+//          options: { method: 'POST' }
+//       })
+//       const normalizedResume = normalizeResumeFromApi(data);
+//       return normalizedResume;
+
+//    } catch (error) {
+//       console.error(`Error adding container to resume of ID ${resumeId}: `, error)
+//       alert(
+//          error?.code && error?.message
+//             ? error.code + '\n' + error.message
+//             : `Error adding container to resume of ID ${resumeId}.`
+//       )
+
+//       return null;
+//    }
+// }
+
+export const addContainerToApi = async (resumeId, containerType = 'column', spanFullPage = false) => {
    try {
       const data = await fetchApi({
          endpoint: `/containers/${resumeId}`,
-         options: { method: 'POST' }
-      })
+         options: {
+            method: 'POST',
+            body: JSON.stringify({ type: containerType, spanFullPage: spanFullPage })
+         }
+      });
+
       const normalizedResume = normalizeResumeFromApi(data);
       return normalizedResume;
 
    } catch (error) {
-      console.error(`Error adding container to resume of ID ${resumeId}: `, error)
+      console.error(`Error adding container to resume of ID ${resumeId}: `, error);
       alert(
          error?.code && error?.message
             ? error.code + '\n' + error.message
             : `Error adding container to resume of ID ${resumeId}.`
-      )
+      );
 
       return null;
    }

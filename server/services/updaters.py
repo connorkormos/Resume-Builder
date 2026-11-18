@@ -2,7 +2,6 @@ from copy import deepcopy
 from decimal import Decimal, ROUND_FLOOR, ROUND_HALF_UP
 from models import Container, Field, Section, Subsection, db, Resume
 
-
 # ** Helper function to set container widths based on manual and auto width settings **
 def update_container_widths(resume_id):
     containers = Container.query.filter_by(resume_id=resume_id).order_by(Container.position, Container.id).all()

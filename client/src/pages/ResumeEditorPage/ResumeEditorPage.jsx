@@ -5,6 +5,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
+import { useMediaQuery } from '@/hooks/useMediaQuery.js';
 import { resolveResumePresentation } from '@/utils/resumePresentation.js';
 import { getResumePageCount } from '@/utils/getResumePageCount.js';
 import { handleGlobalHotKey } from '@/utils/hotKeys';
@@ -26,6 +27,8 @@ const ResumeEditorPage = () => {
    const location = useLocation();
    const dispatch = useDispatch();
    const { resumeId } = useParams();
+
+   const isMobile = useMediaQuery('(max-width: 768px)');
 
    const reduxResume = useSelector(state => state.resume.present)
 
@@ -103,21 +106,21 @@ const ResumeEditorPage = () => {
    const handlePrint = usePrintResume(reduxResume, fullResumeRef);
 
    const [hideAlert, setHideAlert] = useState(false);
-   
+
    const presentation = resolveResumePresentation(reduxResume);
 
    return (
       <div id="resume-editor" className={styles.resumeEditorContainer} onClick={handleBackgroundClick}>
          {presentation.layout.errors.length > 0 && !hideAlert && (
-               <p role="alert" className={styles.alertMessage}>
-                  <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
-                  {presentation.layout.errors.join(" ")}
-                  <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
-                  <button className={styles.alertMessageCloseButton} onClick={() => { setHideAlert(true); }}>
-                     <span>X</span>
-                     {/* ✖ */}
-                  </button>
-               </p>
+            <p role="alert" className={styles.alertMessage}>
+               <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+               {presentation.layout.errors.join(" ")}
+               <span role="alert" className={styles.alertMessageIcon}>⚠️</span>
+               <button className={styles.alertMessageCloseButton} onClick={() => { setHideAlert(true); }}>
+                  <span>X</span>
+                  {/* ✖ */}
+               </button>
+            </p>
          )}
          <Toolbar handlePrint={() => handlePrint()} />
          <Outline />
@@ -137,6 +140,22 @@ const ResumeEditorPage = () => {
          {showNewResumeModal &&
             <NewResumeModal />
          }
+         {!isMobile && (
+            <>
+               <div className={styles.addRowButtonWrapper}>
+                  <button className={styles.addRowButton}>+ Row</button>
+               </div>
+               <div className={styles.addColumnButtonWrapper}>
+                  <button className={styles.addColumnButton}>+ Column</button>
+               </div>
+            </>
+         )}
+         {isMobile && (
+            <div className={styles.addContainerButtonsWrapper}>
+               <button className={styles.addRowButton}>+ Row</button>
+               <button className={styles.addColumnButton}>+ Column</button>
+            </div>
+         )}
       </div>
    )
 };

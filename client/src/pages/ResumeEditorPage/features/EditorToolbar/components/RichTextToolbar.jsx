@@ -145,10 +145,10 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
             {iconsComponent}
           </div>
           <div className={styles.mobileToolbarRow}>
-            {containersComponent}
+            {/* {containersComponent} */}
             {gapComponent}
             {bordersComponent}
-            {addSectionComponent}
+            {/* {addSectionComponent} */}
             {resetStylingComponent}
             {undoRedoComponent}
             <div>
@@ -180,10 +180,10 @@ const RichTextToolbar = ({ editor, handlePrint }) => {
         {indentationComponent}
         {linksComponent}
         {iconsComponent}
-        {containersComponent}
+        {/* {containersComponent} */}
         {bordersComponent}
         {gapComponent}
-        {addSectionComponent}
+        {/* {addSectionComponent} */}
         {resetStylingComponent}
         {undoRedoComponent}
       </div>

@@ -11,6 +11,24 @@
    -Looking to add more via useResumePagination
    -Likely a good idea to hold all primary errors/alerts in Redux State
 
+
+EASE OF USE MISSING PIECES/IN NEED OF IMPROVEMENT:
+
+-Adding Sections to Containers
+   -Added the button below columns and next to rows.
+      -In need of improvement, particularly in overlapping content or once adding containers is updated
+
+-Adding Containers
+   -Very clunky right now.  Can only add columns, and said columns can get adding incorrectly such as when there are full height sidebars on the right already.
+
+-Adding Subsections
+   -Consider adding this to settings modal, else as a separate "+" icon of sorts next to settings modal icon?
+
+-Adding Fields
+   -Plus Icon?  In settings modal?
+      -Option to choose label if label is missing?
+
+
 !-------------------!
    THINGS TO CHECK
 !-------------------!
@@ -25,6 +43,7 @@
 !--------!
    BUGS
 !--------!
+
 
 MAJOR BUGS:
 

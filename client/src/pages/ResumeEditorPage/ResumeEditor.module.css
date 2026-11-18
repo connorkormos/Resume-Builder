@@ -1,11 +1,66 @@
 .resumeEditorContainer {
-   min-height: 100%;
-   width: 100%;
-   position: relative;
-   /* padding-bottom: 10%; */
-   padding-bottom: calc(var(--height-toolbar) * 1.5);
+  min-height: 100%;
+  width: 100%;
+  position: relative;
+  /* padding-bottom: 10%; */
+  padding-bottom: calc(var(--height-toolbar) * 1.5);
 }
 
+.addRowButtonWrapper {
+  width: 100%;
+  position: absolute;
+  bottom: 5%;
+  /* top: calc(var(--height-editor-page) + var(--height-toolbar) * 3); */
+
+  .addRowButton {
+    margin: auto auto 0 auto;
+
+  }
+}
+
+.addContainerButtonsWrapper {
+  width: 90%;
+  margin: auto;
+  /* width: var(--width-editor-page); */
+  display: flex;
+  justify-content: space-between;
+}
+
+.addRowButton, .addColumnButton {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background: var(--background-toolbar);
+    border: var(--border-toolbar-button);
+    border-radius: var(--border-radius-main);
+    cursor: pointer;
+    color: white;
+}
+
+.addColumnButtonWrapper {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .addColumnButton {
+    margin: auto;
+  }
+}
+
+@media print {
+  .addRowButtonWrapper {
+    display: none !important;
+
+    .addRowButton {
+      display: none !important;
+    }
+  }
+}
 
 .alertMessage {
   background: lightgray;
@@ -19,6 +74,7 @@
   margin: auto;
   z-index: var(--z-modal);
 }
+
 .alertMessageCloseButton {
   position: absolute;
   top: 0;

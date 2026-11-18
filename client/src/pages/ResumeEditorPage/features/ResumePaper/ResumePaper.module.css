@@ -1,16 +1,15 @@
 .printPageRef {
   position: relative;
   margin: auto;
-  height: var(--height-editor-page);
-  width: var(--width-editor-page);
+  max-height: var(--height-editor-page);
+  max-width: var(--width-editor-page);
+  aspect-ratio: 8.5 / 11;
   padding-bottom: -20vh;
   /* height: 7.7in; */
   /* width: 5.95in; */
   /* height: 11in; */
   /* width: 8.5in; */
 }
-
-
 
 .addSectionModalContainer {
   position: absolute;
@@ -365,7 +364,10 @@
   .containerPreviewWidthRight,
   .endPageMarker,
   .addContainerButton,
-  .alertMessageWrapper {
+  .alertMessageWrapper,
+
+  .addSectionToContainerWrapper,
+  .addRowButtonWrapper {
     display: none !important;
   }
 }
