@@ -22,6 +22,7 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const dispatch = useDispatch();
   const localEditorRef = useRef(null);
+  const toolbarRect = props.toolbarRect;
   const editorRef = props.editorPageRef ?? localEditorRef;
 
   const resumePageNumber = props.resumePageNumber ?? 1;
@@ -219,8 +220,13 @@ const ResumePaper = forwardRef(function ResumePaper(props, ref) {
           </p>
         </div>
       )} */}
-      <div className={styles.printPageRef} ref={ref} style={resumePageNumber > 1 ? { marginTop: "5rem" } : {}}>
-        {!isMobile && <MarginRuler pageRef={editorRef} resumePageNumber={resumePageNumber} />}
+      <div
+        className={styles.printPageRef}
+        ref={ref}
+        style={resumePageNumber > 1 && !isMobile ? { marginTop: "5rem" } : {}}
+      >
+        {/* {!isMobile && <MarginRuler pageRef={editorRef} resumePageNumber={resumePageNumber} />} */}
+        <MarginRuler toolbarRect={toolbarRect} pageRef={editorRef} resumePageNumber={resumePageNumber} />
         <div
           className={styles.editingPageContainer}
           style={presentation.pageStyle}

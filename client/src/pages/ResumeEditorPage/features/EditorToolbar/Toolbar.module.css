@@ -252,7 +252,7 @@
 @media (max-width: 768px) {
   .toolbarContainer {
     height: fit-content;
-    margin-bottom: 5%;
+    margin-bottom: 1rem;
 
     .homeLink {
       margin-left: 0;

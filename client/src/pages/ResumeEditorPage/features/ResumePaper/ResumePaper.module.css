@@ -335,7 +335,6 @@
   }
 
   .printPageRef>.editingPageContainer {
-    /* position: absolute; */
     position: relative;
 
     inset: auto;

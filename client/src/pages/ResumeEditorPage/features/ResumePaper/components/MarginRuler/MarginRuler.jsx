@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useMarginGeometry from '@/hooks/useMarginGeometry';
 import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
 
-const MarginRuler = ({ pageRef, resumePageNumber }) => {
+const MarginRuler = ({ toolbarRect, pageRef, resumePageNumber }) => {
 
    const dispatch = useDispatch();
    const { preview } = useContext(PaddingPreviewContext);
@@ -119,15 +119,18 @@ const MarginRuler = ({ pageRef, resumePageNumber }) => {
          className={styles.marginsContainer}
          onClick={(e) => handleEditorBlur(e)}
       >
-         <MarginRulerTop
-            visibleMarginLabels={displayedMarginLabels}
-            showMarginLabel={showMarginLabel}
-            delayHideMarginLabel={delayHideMarginLabel}
-            flashLabel={flashLabel}
-            geometry={geometry}
-            pageRef={pageRef}
-            renderMarginRuler={renderMarginRuler}
-         />
+         {resumePageNumber === 1 && (
+            <MarginRulerTop
+               visibleMarginLabels={displayedMarginLabels}
+               showMarginLabel={showMarginLabel}
+               delayHideMarginLabel={delayHideMarginLabel}
+               flashLabel={flashLabel}
+               geometry={geometry}
+               pageRef={pageRef}
+               renderMarginRuler={renderMarginRuler}
+               toolbarRect={toolbarRect}
+            />
+         )}
          <MarginRulerSide
             visibleMarginLabels={displayedMarginLabels}
             showMarginLabel={showMarginLabel}

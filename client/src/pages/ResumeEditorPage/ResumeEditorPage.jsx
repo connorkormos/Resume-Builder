@@ -5,6 +5,7 @@ import { ActionCreators as UndoActionCreators } from "redux-undo";
 
 import { toggleAllSectionIds, setResume, setActiveEditorId, setActiveSectionId } from '@/store/resumeSlice.js';
 
+import { useElementRect } from '@/hooks/useElementRect.js';
 import { useMediaQuery } from '@/hooks/useMediaQuery.js';
 import { resolveResumePresentation } from '@/utils/resumePresentation.js';
 import { getResumePageCount } from '@/utils/getResumePageCount.js';
@@ -24,6 +25,12 @@ import styles from './ResumeEditor.module.css';
 
 const ResumeEditorPage = () => {
 
+   const toolbarRef = useRef(null);
+   const toolbarRect = useElementRect(toolbarRef);
+   useEffect(() => {
+      if (!toolbarRect) return;
+      console.log(`Toolbar rect: ${Object.entries(toolbarRect).map(([key, value]) => `${key}: ${value}`).join(', ')}`);
+   }, [toolbarRect]);
    const location = useLocation();
    const dispatch = useDispatch();
    const { resumeId } = useParams();
@@ -132,7 +139,7 @@ const ResumeEditorPage = () => {
                </button>
             </p>
          )}
-         <Toolbar handlePrint={() => handlePrint()} />
+         <Toolbar toolbarRef={toolbarRef} handlePrint={() => handlePrint()} />
          <Outline />
          <PaddingPreviewContext.Provider value={{ preview: paddingPreview, setPreview: setPaddingPreview }}>
             <div ref={fullResumeRef}>
@@ -140,7 +147,7 @@ const ResumeEditorPage = () => {
                   if (!editorPageRefMap.current.has(index)) {
                      editorPageRefMap.current.set(index, React.createRef());
                   } return (
-                     <ResumePaper key={index} resumePageNumber={index + 1} editorPageRef={editorPageRefMap.current.get(index)} />
+                     <ResumePaper toolbarRect={toolbarRect} key={index} resumePageNumber={index + 1} editorPageRef={editorPageRefMap.current.get(index)} />
                   );
                }
                )}

@@ -16,6 +16,7 @@ export default function MarginRulerTop({
   showMarginLabel,
   delayHideMarginLabel,
   flashLabel,
+  toolbarRect,
 }) {
   const resume = useSelector((state) => state.resume.present);
   const { preview } = useContext(PaddingPreviewContext);
@@ -37,7 +38,11 @@ export default function MarginRulerTop({
   );
 
   return (
-    <div className={styles.marginRulerTopWrapper} data-prevent-blur="true">
+    <div
+      className={styles.marginRulerTopWrapper}
+      data-prevent-blur="true"
+      style={{ '--toolbar-bottom': `${toolbarRect?.bottom ?? 0}px` }}
+    >
       <MarginIndicator
         target="resume"
         side="left"

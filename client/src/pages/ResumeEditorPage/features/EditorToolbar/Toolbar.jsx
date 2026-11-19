@@ -1,9 +1,9 @@
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { editorRegistry } from "@/lib/editorRegistry.js";
 
 import { FaArrowLeft } from "react-icons/fa6";
@@ -13,7 +13,7 @@ import TopBar from "./components/TopBar.jsx";
 
 import styles from "./Toolbar.module.css";
 
-const Toolbar = ({ handlePrint }) => {
+export default function Toolbar ({ handlePrint, toolbarRef }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [tooltip, setTooltip] = useState(null);
@@ -44,6 +44,7 @@ const Toolbar = ({ handlePrint }) => {
   return (
     <>
     <div
+      ref={toolbarRef}
       className={styles.toolbarContainer}
       onMouseOver={showTooltip}
       onMouseLeave={() => setTooltip(null)}
@@ -76,5 +77,3 @@ const Toolbar = ({ handlePrint }) => {
         </>
   );
 };
-
-export default Toolbar;

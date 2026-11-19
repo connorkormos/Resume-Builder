@@ -4,52 +4,38 @@
   height: 100%;
   width: 100%;
   color: white;
-  z-index: var(--z-base);
-
+  
   .marginRulerTopWrapper {
-    /* position: fixed; */
-    position: sticky;
-    /* top: calc(var(--height-toolbar)); */
-    /* top: 5rem; */
-
+    position: fixed;
+    top: var(--toolbar-bottom);
     height: 1rem;
-    /* width: 5.95in; */
     width: var(--width-editor-page);
     display: flex;
     justify-content: space-between;
     background-color: grey;
-    /* margin: auto; */
-    /* margin-top: -5rem; */
-    margin-top: calc(var(--height-toolbar) * -1);
-    /* left: 49.5%; */
-    /* transform: translateX(-49.65%); */
-
-
+    z-index: var(--z-modal);
+    
     .topMarginRulerSpan {
       font-size: 0.5rem;
       width: 0px;
       transform: translateX(-0.125rem);
     }
-
+    
     .topHiddenMarginSpan {
       height: 0.25rem;
       width: 0;
       border-right: 0.1px solid rgba(0, 0, 0, 0.25);
     }
   }
-
+  
   .marginRulerSideWrapper {
     position: sticky;
-    /* height: 7.7in; */
     height: var(--height-editor-page);
     width: 1rem;
     left: 0;
-    /* margin-left: -5rem; */
     margin-left: calc(var(--height-toolbar) * -1);
-    /* margin: auto auto auto calc(60% - var(--width-editor-page)); */
-    /* margin: auto auto auto 22.5vw; */
-    margin-top: calc(var(--height-toolbar) - 1rem);
-    /* top: auto; */
+    /* margin-top: calc(var(--height-toolbar) - 1rem); */
+    z-index: var(--z-base);
 
     display: flex;
     flex-direction: column;
@@ -71,6 +57,54 @@
 
   }
 }
+
+@media screen and (max-width: 768px) {
+  .marginsContainer {
+    top: 0;
+
+    .marginRulerTopWrapper {
+      left: calc((100% - var(--width-editor-page)) * 0.5);
+      top: calc(var(--toolbar-bottom) / min(var(--scale-factor), 1));
+    }
+    .marginRulerTopWrapper,
+    .marginRulerSideWrapper {
+      zoom: min(var(--scale-factor), 1);
+    }
+  }
+}
+
+
+/* 
+/* @media screen and (max-width: 768px) {
+  .marginsContainer {
+    width: var(--width-editor-page);
+    height: var(--height-editor-page);
+
+    top: 0;
+    left: 50%;
+    translate: -50% 0;
+    transform-origin: top center;
+    scale: min(var(--scale-factor), 1);
+
+    pointer-events: none;
+
+    .marginRulerTopWrapper {
+      position: absolute;
+      top: -1rem;
+      left: 0;
+      margin: 0;
+      pointer-events: auto;
+    }
+
+    .marginRulerSideWrapper {
+      position: absolute;
+      top: 0;
+      left: -1rem;
+      margin: 0;
+      pointer-events: auto;
+    }
+  }
+} */
 
 .indentationIndicator {
   position: absolute;
