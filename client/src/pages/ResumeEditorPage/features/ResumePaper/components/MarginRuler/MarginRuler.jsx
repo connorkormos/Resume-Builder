@@ -7,6 +7,7 @@ import MarginRulerSide from './MarginRulerSide';
 import { PaddingPreviewContext } from '@/context/PaddingPreviewContext.js';
 import { useDispatch, useSelector } from 'react-redux';
 import useMarginGeometry from '@/hooks/useMarginGeometry';
+import { resolvePageNumbers } from '@/utils/resolvePageNumbers';
 import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from '@/store/resumeSlice';
 
 const MarginRuler = ({ toolbarRect, pageRef, resumePageNumber }) => {
@@ -15,6 +16,17 @@ const MarginRuler = ({ toolbarRect, pageRef, resumePageNumber }) => {
    const { preview } = useContext(PaddingPreviewContext);
    const activeSectionId = useSelector(state => state.resume.present.activeSectionIds[0] ?? null);
    const sectionId = preview?.target === 'section' ? preview.id : activeSectionId;
+   const topRulerPage = useSelector(state => {
+      const resume = state.resume.present;
+      const field = resume.fields.byId[resume.activeEditorId];
+      const fieldSectionId = resume.subsections.byId[field?.subsectionId]?.sectionId;
+      const section = resume.sections.byId[sectionId];
+
+      // Prefer the edited field's page for sections that span several papers.
+      if (section && fieldSectionId === sectionId && field?.pageNumber) return field.pageNumber;
+      if (section && resume.activeEditorId === sectionId && section.pageNumber) return section.pageNumber;
+      return section ? resolvePageNumbers(resume, 'section', sectionId)[0] ?? 1 : 1;
+   });
    const layoutContexts = useContext(EditorLayoutContext);
    const storedContainerId = useSelector(state => state.resume.present.sections.byId[sectionId]?.containerId);
    const containerId = layoutContexts[sectionId]?.containerId ?? storedContainerId;
@@ -119,7 +131,7 @@ const MarginRuler = ({ toolbarRect, pageRef, resumePageNumber }) => {
          className={styles.marginsContainer}
          onClick={(e) => handleEditorBlur(e)}
       >
-         {resumePageNumber === 1 && (
+         {resumePageNumber === topRulerPage && (
             <MarginRulerTop
                visibleMarginLabels={displayedMarginLabels}
                showMarginLabel={showMarginLabel}
