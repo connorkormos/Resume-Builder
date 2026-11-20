@@ -243,8 +243,8 @@ def update_resume_with_form_data(resume_id, data):
         if not field:
             continue
 
-        if "label" in field_data:
-            field.label = field_data["label"]
+        # if "label" in field_data:
+            # field.label = field_data["label"]
 
         if "value" in field_data:
             field.value = field_data["value"]
