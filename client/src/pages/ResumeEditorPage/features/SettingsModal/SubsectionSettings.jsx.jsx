@@ -60,7 +60,7 @@ export default function SubsectionSettings ({ section, gridColumnsInput }) {
 
   return (
     <>
-      <div className="flexColumn">
+      <div className="settingsModalWrapper">
         {/* Advanced Orientation (Check Box to Start a New Row): */}
         {section.subsectionIds.map((subsectionId, index) => {
           const subsection = subsectionsById[subsectionId];
@@ -70,6 +70,7 @@ export default function SubsectionSettings ({ section, gridColumnsInput }) {
                 Subsection {index + 1}
               </p>
               <div
+                className={styles.fieldGridWrapper}
                 style={{
                   display: "grid",
                   gridTemplateColumns: `repeat(${gridColumnsInput}, 1fr)`,

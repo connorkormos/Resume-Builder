@@ -23,12 +23,14 @@
 
    height: auto;
    width: max-content;
-   max-width: calc(100vw - 2rem);
+   /* max-width: calc(100vw - 2rem); */
    max-height: calc(100dvh - 2rem);
    word-break: break-word;
 
    padding: 1rem 1.5rem;
    left: var(--settings-left, 0px);
+   max-width: calc(100vw - var(--settings-left, 0px) - 1rem);
+
    top: var(--settings-top, 0px);
 
    color: white;
@@ -59,6 +61,7 @@
    display: flex;
    flex-direction: column;
    gap: 1rem;
+   width: 100%;
 
    .settingsModalRow {
       display: flex;
@@ -101,32 +104,49 @@ input[type=number] {
    -moz-appearance: textfield;
 }
 
-.fieldGridItemWrapper {
-   position: relative;
+.fieldGridWrapper {
    width: 100%;
-   background-color: var(--background-main);
-   color: white;
-   border: var(--border-main);
-   border-radius: var(--border-radius-main);
-   padding: 0.25rem;
+
+   .fieldGridItemWrapper {
+      position: relative;
+      width: 100%;
+      background-color: var(--background-main);
+      color: white;
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      padding: 0.25rem;
+
+      .fieldText {
+         max-width: 95%;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+         font-size: 0.875rem;
+         margin-bottom: 0.25rem;
+         word-break: break-word;
+      }
+
+      .deleteFieldButton {
+         position: absolute;
+         /* top: 0.25rem; */
+         top: 50%;
+         transform: translateY(-50%);
+         right: 0.5rem;
+         height: 1rem;
+         width: 1rem;
+         font-size: 0.75rem;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         background-color: var(--bootstrap-darker-red);
+         border: var(--border-main);
+         border-radius: var(--border-radius-main);
+         color: white;
+         cursor: pointer;
+      }
+   }
 }
 
-.deleteFieldButton {
-   position: absolute;
-   top: 0.25rem;
-   right: 0.25rem;
-   height: 1rem;
-   width: 1rem;
-   font-size: 0.75rem;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   background-color: var(--bootstrap-darker-red);
-   border: var(--border-main);
-   border-radius: var(--border-radius-main);
-   color: white;
-   cursor: pointer;
-}
 
 .subsectionSettingsRowWrapper {
    display: flex;

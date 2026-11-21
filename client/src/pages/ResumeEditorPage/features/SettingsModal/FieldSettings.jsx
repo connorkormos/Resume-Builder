@@ -53,8 +53,8 @@ export default function FieldSettings({ fieldId, index, gridColumnsInput }) {
         fieldShouldFillRow && isOnlyItemInRow;
 
     let fieldString = getTrimmedNodeString(field);
-    if (fieldString.length > 20) fieldString = fieldString.slice(0, 15) + "...";
-    else if (!fieldString.length) fieldString = `Field ${index + 1} (Empty)`;
+    // if (fieldString.length > 20) fieldString = fieldString.slice(0, 15) + "...";
+    // else if (!fieldString.length) fieldString = `Field ${index + 1} (Empty)`;
 
 
     const handleDeleteField = async (fieldId) => {
@@ -85,7 +85,7 @@ export default function FieldSettings({ fieldId, index, gridColumnsInput }) {
             }}
         >
             {/* <p>Field {index + 1}</p> */}
-            <p>{fieldString}</p>
+            <p className={styles.fieldText}>{fieldString}</p>
             <button
                 className={styles.deleteFieldButton}
                 onClick={() => handleDeleteField(fieldId)}
