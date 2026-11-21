@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import { addSubsectionToApi } from "@/services/resumeServices.js";
 import { useMediaQuery } from "@/hooks/useMediaQuery.js";
+import { useSectionPaddingResize } from "../hooks/useSectionPaddingResize.js";
 import {
+  addSubsection,
   dndReorderSubsections,
   setActiveEditorId,
   setActiveEditorSelection,
   setActiveSectionId,
   setActiveSectionIds,
 } from "@/store/resumeSlice.js";
-// import { setActiveSectionId, setActiveEditorId, setActiveEditorSelection } from "../../../../../resumeSlice.js";
 
 
-import useSectionPaddingResize from "../hooks/useSectionPaddingResize.js";
 import { useSortable } from "@dnd-kit/react/sortable";
 import {
   DragDropProvider,
@@ -19,7 +21,7 @@ import {
   PointerSensor,
 } from "@dnd-kit/react";
 
-import { MdSettings } from "react-icons/md";
+import { MdSettings, MdAdd } from "react-icons/md";
 
 import Subsection from "./Subsection.jsx";
 import SlateHeading from "@/features/Slate/SlateHeading.jsx";
@@ -112,6 +114,14 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
     setIsSettingsModalOpen(!isSettingsModalOpen);
   };
 
+  const handleAddSubsection = async () => {
+    const subsectionData = await addSubsectionToApi(section.id);
+    if (!subsectionData) {
+      return;
+    }
+    dispatch(addSubsection({ subsectionData }));
+  };
+
   const handleSetActiveSection = (e) => {
     if (e.ctrlKey) {
       dispatch(setActiveSectionIds(section.id));
@@ -128,6 +138,10 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
   const sectionIsActive = activeSectionIds.includes(section.id);
 
   const sectionBorder = section.styling?.border;
+
+  const [showAddSubsectionTooltip, setShowAddSubsectionTooltip] = useState(false);
+  const [showSettingsTooltip, setShowSettingsTooltip] = useState(false);
+  console.log('SECTION: ', presentation)
 
   return (
     <div
@@ -148,17 +162,36 @@ const Section = ({ section, index, presentation, orderedSectionIds, resumePageNu
       }}
       onClick={(e) => handleSetActiveSection(e)}
     >
-        <div className={styles.sectionSettingsIconWrapper}>
-          {/* <span
+      <div className={styles.sectionIconsWrapper}>
+        {/* <span
             className={styles.sectionSettingsButtonIcon}
             onClick={handleSettingsIconClick}
           > */}
+        <div className={styles.sectionSettingsIconWrapper}>
           <MdSettings
             className={styles.sectionSettingsIcon}
             onClick={handleSettingsIconClick}
+            onMouseEnter={() => setShowSettingsTooltip(true)}
+            onMouseLeave={() => setShowSettingsTooltip(false)}
           />
-          {/* </span> */}
+          {showSettingsTooltip && (
+            <div className={styles.sectionTooltip}>Settings</div>
+          )}
         </div>
+        {/* </span> */}
+        <div className={styles.addSubsectionIconWrapper}>
+          <MdAdd
+            className={styles.addSubsectionIcon}
+            onClick={handleAddSubsection}
+            onMouseEnter={() => setShowAddSubsectionTooltip(true)}
+            onMouseLeave={() => setShowAddSubsectionTooltip(false)}
+          />
+          {showAddSubsectionTooltip && (
+            <div className={styles.sectionTooltip}>Add Subsection</div>
+          )}
+        </div>
+      </div>
+
       <div
         className={`${styles.sectionContentWrapper} ${sectionIsActive && styles.active}`}
         data-section-id={section.id}

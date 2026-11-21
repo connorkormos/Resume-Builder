@@ -30,7 +30,7 @@ export function resolveSectionPadding({ boundaries, resumeLayout, containerLayou
 }
 
 
-export default function useSectionPaddingResize(
+export function useSectionPaddingResize(
   section, container, orderedSectionIds = container.sectionIds,
   { edge = 'bottom', boundaries } = {},
 ) {

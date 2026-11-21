@@ -10,7 +10,7 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app import app, db
-from models import Section, User
+from models import Section, Subsection, Field, User
 from lib.defaults import SECTION_DEFAULTS, SECTION_DEFINITIONS, get_section_definition
 
 
@@ -93,6 +93,44 @@ class SectionDefaultsTest(unittest.TestCase):
             self.assertEqual(copied_field["subsectionId"], copied_subsection["id"])
             for key in ("label", "value", "styling", "layout", "position"):
                 self.assertEqual(copied_field[key], source_field[key])
+
+    def test_add_subsection_persists_only_under_requested_section(self):
+        created = self.client.post('/resumes', json={
+            'title': 'Multiple sections',
+            'sections': {'workHistory': True, 'education': True},
+        })
+        self.assertEqual(created.status_code, 201)
+        sections = [section for container in created.json['containers']
+                    for section in container['sections']]
+        target, other = sections
+        original_ids = [sub['id'] for sub in target['subsections']]
+        other_ids = [sub['id'] for sub in other['subsections']]
+        next_position = max(sub['position'] for sub in target['subsections']) + 1
+
+        for offset in range(2):
+            response = self.client.post(f'/subsections/{target["id"]}')
+            self.assertEqual(response.status_code, 201)
+            added = response.json
+            self.assertEqual(added['sectionId'], target['id'])
+            self.assertEqual(added['position'], next_position + offset)
+            self.assertTrue(added['fields'])
+            original_ids.append(added['id'])
+
+            # Clear the session so assertions read committed database records.
+            db.session.remove()
+            stored = db.session.get(Subsection, added['id'])
+            self.assertEqual(stored.section_id, target['id'])
+            for field in added['fields']:
+                self.assertEqual(field['subsectionId'], added['id'])
+                self.assertEqual(db.session.get(Field, field['id']).subsection_id, added['id'])
+            self.assertEqual(
+                [sub.id for sub in db.session.get(Section, target['id']).subsections],
+                original_ids,
+            )
+            self.assertEqual(
+                [sub.id for sub in db.session.get(Section, other['id']).subsections],
+                other_ids,
+            )
 
     def test_resolved_definitions_are_independent_and_preserve_unknown_type_fallback(self):
         before = deepcopy(SECTION_DEFAULTS)

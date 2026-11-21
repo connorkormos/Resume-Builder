@@ -77,3 +77,24 @@ test('standalone field defaults to one without a parent page', () => {
   const state = reducer(initialResume(), addField({ fieldData: field(5, 3) }));
   assert.equal(state.fields.byId[5].pageNumber, 1);
 });
+
+test('subsection additions target the requested section and inherit its rendering page', () => {
+  const before = initialResume();
+  before.sections.byId[10] = { id: 10, containerId: 1, pageNumber: 2, subsectionIds: [] };
+  before.sections.allIds.push(10);
+  before.containers.byId[1].sectionIds.push(10);
+  const state = reducer(before, addSubsection({ subsectionData: {
+    id: 11, sectionId: 10, position: 0,
+    fields: [field(13, 11, 1), field(12, 11, 0)],
+  } }));
+  assert.deepEqual(state.sections.byId[2], before.sections.byId[2]);
+  assert.deepEqual(state.sections.byId[10].subsectionIds, [11]);
+  assert.deepEqual(state.subsections.allIds, [3, 11]);
+  assert.deepEqual(state.subsections.byId[11].fieldIds, [12, 13]);
+  assert.equal(state.subsections.byId[11].pageNumber, 2);
+  for (const id of state.subsections.byId[11].fieldIds) {
+    assert.equal(state.fields.byId[id].subsectionId, 11);
+    assert.equal(state.fields.byId[id].pageNumber, 2);
+    assert.ok(state.fields.allIds.includes(id));
+  }
+});

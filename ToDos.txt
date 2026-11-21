@@ -47,6 +47,11 @@ EASE OF USE MISSING PIECES/IN NEED OF IMPROVEMENT:
 
 MAJOR BUGS:
 
+-Site crashes when dragging and dropping sometimes.
+   -"Uncaught NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node."
+      -I got this error when dragging a section from the right of two columns into the row above both columns
+
+
 
 MEDIUM BUGS:
 

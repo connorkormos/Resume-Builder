@@ -87,15 +87,19 @@
   opacity: 0.8;
 }
 
-.sectionContainerDiv:hover .sectionSettingsIconWrapper {
+.sectionContainerDiv:hover .sectionIconsWrapper {
   opacity: 1;
   transition: opacity 0.1s ease;
 }
 
-.sectionSettingsIconWrapper {
+.sectionIconsWrapper {
   position: absolute;
-  height: 2.5rem;
-  width: 2.5rem;
+  height: min(2.5rem, 100%);
+  font-size: 1.5rem;
+  line-height: 1;
+  padding-top: 0.25rem;
+  padding-right: 0.25rem;
+  width: fit-content;
   opacity: 0;
   top: 0;
   right: 0;
@@ -104,13 +108,34 @@
   cursor: pointer;
   transition: opacity 0.1s ease;
   z-index: var(--z-modal);
-  
-  .sectionSettingsIcon {
+
+  .sectionSettingsIconWrapper,
+  .addSubsectionIconWrapper {
     position: absolute;
-    top: 0.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .sectionSettingsIconWrapper {
     right: 0.25rem;
-    font-size: 1.5rem;
-    z-index: var(--z-modal);
+  }
+
+  .addSubsectionIconWrapper {
+    right: 1.75rem;
+  }
+
+  .sectionTooltip {
+    position: absolute;
+    top: -1.5rem;
+    background: var(--background-toolbar);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-main);
+    border: var(--border-main);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    pointer-events: none;
   }
 }
 
