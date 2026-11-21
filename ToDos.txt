@@ -2,14 +2,13 @@
    WHERE I LEFT OFF
 !--------------------!
 
--Played around with Add Container Buttons, one to the right of the page for Columns, and one below the page for Rows.
-   -Considering having them more closely related to the actual columns/rows on the page (physically) if there are already some
-   -TLDR, I need to make it much easier and more straight forward to add rows/columns
+-Just added ability to add subsections with icon next to settings button
+   -Also can now delete fields and delete subsections from settings modal
 
--Inspecting error reporting on the resume, for issues such as mismatched column types, individual fields overflowing with no way to move to next page, etc
-   -Current errors from from resolveResumePresentation.layout.errors
-   -Looking to add more via useResumePagination
-   -Likely a good idea to hold all primary errors/alerts in Redux State
+-NEXT UP:
+   -Ability to Add Fields from Settings modal
+   -Ability to Reorder Fields from settings modal?
+   -Potentially move the "add section" buttons from below container into the settings modal?
 
 
 EASE OF USE MISSING PIECES/IN NEED OF IMPROVEMENT:
@@ -20,9 +19,6 @@ EASE OF USE MISSING PIECES/IN NEED OF IMPROVEMENT:
 
 -Adding Containers
    -Very clunky right now.  Can only add columns, and said columns can get adding incorrectly such as when there are full height sidebars on the right already.
-
--Adding Subsections
-   -Consider adding this to settings modal, else as a separate "+" icon of sorts next to settings modal icon?
 
 -Adding Fields
    -Plus Icon?  In settings modal?

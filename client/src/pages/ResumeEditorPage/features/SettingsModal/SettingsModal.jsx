@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import ContainerSettings from "./ContainerSettings/ContainerSettings";
-import SectionSettings from "./SectionSettings/SectionSettings";
+import ContainerSettings from "./ContainerSettings";
+import SectionSettings from "./SectionSettings";
 
 import styles from "./SettingsModal.module.css";
 

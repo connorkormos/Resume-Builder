@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateContainer, configureContainer, moveContainer, setColumnWidth } from '@/store/resumeSlice.js';
 import { planContainerMove, resolveResumeLayout, getColumnWidthLimits, ROW_CONTENT_TRACK } from '@/utils/resumeLayout.js';
-import styles from '../SettingsModal.module.css';
+import styles from './SettingsModal.module.css';
 
 export default function ContainerSettings() {
   const dispatch = useDispatch();
