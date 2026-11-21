@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updateField, updateSection, deleteSubsection } from "@/store/resumeSlice.js";
+import { addSubsectionToApi, deleteSubsectionFromApi, deleteFieldFromApi } from "@/services/resumeServices.js";
+import { updateField, deleteField, updateSection, addSubsection, deleteSubsection } from "@/store/resumeSlice.js";
 import { getTrimmedNodeString } from "@/features/Slate/helpers/getNodeString";
 
 import styles from "../SettingsModal.module.css";
@@ -64,6 +65,29 @@ const SectionGrid = ({ section }) => {
     dispatch(deleteSubsection(subId));
   };
 
+  const handleAddSubsection = async () => {
+    const subsectionData = await addSubsectionToApi(section.id);
+    if (!subsectionData) {
+      return;
+    }
+    dispatch(addSubsection({ subsectionData }));
+  };
+
+  const handleDeleteField = async (fieldId) => {
+    if (!confirm(`Are you sure you want to delete this field?`)) {
+      return;
+    }
+    const autoSave = false;
+
+    if (autoSave) {
+      const fieldIsDeleted = await deleteFieldFromApi(fieldId);
+      if (!fieldIsDeleted) {
+        return;
+      }
+    }
+    dispatch(deleteField(fieldId));
+  };
+
   return (
     <>
       {/* <h2>Grid Settings</h2> */}
@@ -88,6 +112,14 @@ const SectionGrid = ({ section }) => {
           </button>
 
         </label>
+        {/* <div className={styles.subsectionSettingsRowWrapper}>
+          <button
+            className={styles.addSubsectionButton}
+            onClick={handleAddSubsection}
+          >
+            Add Subsection
+          </button>
+        </div> */}
       </div>
 
       <div className="flexColumn">
@@ -158,24 +190,23 @@ const SectionGrid = ({ section }) => {
                   return (
                     <div
                       key={fieldId}
+                      className={styles.fieldGridItemWrapper}
                       style={{
                         gridColumnEnd: shouldSpanRemainingColumns
                           ? `span ${columnSpanValue}`
                           : "auto",
                         gridColumnStart: fieldIsNewRow ? 1 : "auto",
-                        width: "100%",
-                        backgroundColor: "var(--background-main)",
-                        color: "white",
-                        border: "var(--border-main)",
-                        borderRadius: "var(--border-radius-main)",
-                        // textAlign: shouldSpanRemainingColumns && 'right',
-                        // border: '1px solid white',
-                        // borderRight: 'none',
-                        padding: "0.25rem",
+
                       }}
                     >
                       {/* <p>Field {index + 1}</p> */}
                       <p>{fieldString}</p>
+                      <button
+                        className={styles.deleteFieldButton}
+                        onClick={() => handleDeleteField(fieldId)}
+                      >
+                        X
+                      </button>
                       <div className="flexColumn">
                         {(currentColumn !== 1 || fieldIsNewRow) && (
                           <div className="flexRow">
@@ -227,7 +258,7 @@ const SectionGrid = ({ section }) => {
                   );
                 })}
               </div>
-              <div className={styles.subsectionSettingsFooterWrapper}>
+              <div className={styles.subsectionSettingsRowWrapper}>
                 <button
                   className={styles.deleteSubsectionButton}
                   onClick={() => handleDeleteSubsection(subsection.id, index)}

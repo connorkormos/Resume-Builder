@@ -33,7 +33,7 @@
 
    color: white;
    font-size: 1rem;
-   
+
    border: var(--border-main);
 
    border-radius: var(--border-radius-rounded-main);
@@ -69,6 +69,7 @@
          width: 4rem;
          padding-right: 1rem;
       }
+
       .percentSpan {
          margin-left: -1.75rem;
          margin-right: 0.5rem;
@@ -91,19 +92,56 @@
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+   -webkit-appearance: none;
+   margin: 0;
 }
 
 /* Firefox */
 input[type=number] {
-  -moz-appearance: textfield;
+   -moz-appearance: textfield;
 }
 
-.subsectionSettingsFooterWrapper {
+.fieldGridItemWrapper {
+   position: relative;
+   width: 100%;
+   background-color: var(--background-main);
+   color: white;
+   border: var(--border-main);
+   border-radius: var(--border-radius-main);
+   padding: 0.25rem;
+}
+
+.deleteFieldButton {
+   position: absolute;
+   top: 0.25rem;
+   right: 0.25rem;
+   height: 1rem;
+   width: 1rem;
+   font-size: 0.75rem;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   background-color: var(--bootstrap-darker-red);
+   border: var(--border-main);
+   border-radius: var(--border-radius-main);
+   color: white;
+   cursor: pointer;
+}
+
+.subsectionSettingsRowWrapper {
    display: flex;
    justify-content: center;
    margin-top: 1rem;
+
+   .addSubsectionButton {
+      padding: 0.5rem 1rem;
+      background-color: var(--bootstrap-blue-soft);
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      color: white;
+      cursor: pointer;
+   }
+
    .deleteSubsectionButton {
       padding: 0.5rem 1rem;
       background-color: var(--bootstrap-darker-red);
