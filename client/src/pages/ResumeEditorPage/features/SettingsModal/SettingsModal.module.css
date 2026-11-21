@@ -99,3 +99,17 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+.subsectionSettingsFooterWrapper {
+   display: flex;
+   justify-content: center;
+   margin-top: 1rem;
+   .deleteSubsectionButton {
+      padding: 0.5rem 1rem;
+      background-color: var(--bootstrap-darker-red);
+      border: var(--border-main);
+      border-radius: var(--border-radius-main);
+      color: white;
+      cursor: pointer;
+   }
+}

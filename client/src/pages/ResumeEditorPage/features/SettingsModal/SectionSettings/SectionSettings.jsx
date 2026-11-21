@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { updateSection } from "@/store/resumeSlice.js";
 
+import SectionGrid from "./SectionGrid.jsx";
 
 import styles from "../SettingsModal.module.css";
-import SectionGrid from "./SectionGrid.jsx";
 
 const SectionSettings = () => {
   const dispatch = useDispatch();

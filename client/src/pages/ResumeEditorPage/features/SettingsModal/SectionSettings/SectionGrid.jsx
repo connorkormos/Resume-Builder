@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updateField, updateSection } from "@/store/resumeSlice.js";
+import { updateField, updateSection, deleteSubsection } from "@/store/resumeSlice.js";
 import { getTrimmedNodeString } from "@/features/Slate/helpers/getNodeString";
 
-
+import styles from "../SettingsModal.module.css";
 
 const SectionGrid = ({ section }) => {
   const dispatch = useDispatch();
@@ -44,6 +44,26 @@ const SectionGrid = ({ section }) => {
       }),
     );
   };
+
+  const handleDeleteSubsection = async (subId, subIndex) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete the ${section.title} subsection at index ${subIndex}?`,
+      )
+    ) {
+      return;
+    }
+    const autoSave = false;
+
+    if (autoSave) {
+      const subsectionIsDeleted = await deleteSubsectionFromApi(subId);
+      if (!subsectionIsDeleted) {
+        return;
+      }
+    }
+    dispatch(deleteSubsection(subId));
+  };
+
   return (
     <>
       {/* <h2>Grid Settings</h2> */}
@@ -206,6 +226,14 @@ const SectionGrid = ({ section }) => {
                     // <span>{fieldId}</span>
                   );
                 })}
+              </div>
+              <div className={styles.subsectionSettingsFooterWrapper}>
+                <button
+                  className={styles.deleteSubsectionButton}
+                  onClick={() => handleDeleteSubsection(subsection.id, index)}
+                >
+                  Delete Subsection
+                </button>
               </div>
             </div>
           );
