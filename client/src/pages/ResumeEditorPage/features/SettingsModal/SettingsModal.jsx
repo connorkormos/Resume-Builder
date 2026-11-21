@@ -1,11 +1,16 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+
+import { MdClose } from "react-icons/md";
+
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import ContainerSettings from "./ContainerSettings";
 import SectionSettings from "./SectionSettings";
 
 import styles from "./SettingsModal.module.css";
 
 const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
   const anchorRef = useRef(null);
   const modalRef = useRef(null);
   const portalTarget = document.getElementById("resume-editor") ?? document.body;
@@ -29,17 +34,29 @@ const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
   useLayoutEffect(() => {
     if (!isSettingsModalOpen) return;
 
-    const modal = modalRef.current;
-    const anchor = anchorRef.current.getBoundingClientRect();
-    const parent = modal.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    const { width, height } = modal.getBoundingClientRect();
-    const left = Math.max(16, Math.min(anchor.left, window.innerWidth - width - 16));
-    const top = Math.max(16, Math.min(anchor.top, window.innerHeight - height - 16));
+    const updatePosition = () => {
+      if (isMobile) return;
 
-    // Position once in the editor's coordinates; scrolling then follows normal document flow.
-    modal.style.setProperty("--settings-left", `${left - parent.left}px`);
-    modal.style.setProperty("--settings-top", `${top - parent.top}px`);
-  }, [isSettingsModalOpen, portalTarget]);
+      const modal = modalRef.current;
+      const anchor = anchorRef.current.getBoundingClientRect();
+      const parent = modal.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+      const left = Math.max(16, anchor.left);
+      const availableWidth = Math.max(0, document.documentElement.clientWidth - left - 16);
+
+      // Position in the editor's coordinates, but constrain width in viewport coordinates.
+      modal.style.setProperty("--settings-left", `${left - parent.left}px`);
+      modal.style.setProperty("--settings-available-width", `${availableWidth}px`);
+
+      // Wrapping can change the height, so measure after applying the width constraint.
+      const { height } = modal.getBoundingClientRect();
+      const top = Math.max(16, Math.min(anchor.top, window.innerHeight - height - 16));
+      modal.style.setProperty("--settings-top", `${top - parent.top}px`);
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [isSettingsModalOpen, portalTarget, isMobile]);
 
   return (
     <>
@@ -62,6 +79,10 @@ const SettingsModal = ({ isSettingsModalOpen, setIsSettingsModalOpen }) => {
             className={styles.settingsModalContainerDiv}
             ref={modalRef}
           >
+            <MdClose
+              className={styles.closeSettingsModalButton}
+              onClick={() => setIsSettingsModalOpen(false)}
+            />
             <ContainerSettings />
             <SectionSettings setIsSettingsModalOpen={setIsSettingsModalOpen} />
           </div>

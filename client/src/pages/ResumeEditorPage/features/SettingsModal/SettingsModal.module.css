@@ -17,19 +17,19 @@
 
 .settingsModalContainerDiv {
    position: absolute;
+   box-sizing: border-box;
    overflow: auto;
    display: flex;
    flex-direction: column;
 
    height: auto;
    width: max-content;
-   /* max-width: calc(100vw - 2rem); */
    max-height: calc(100dvh - 2rem);
    word-break: break-word;
 
    padding: 1rem 1.5rem;
    left: var(--settings-left, 0px);
-   max-width: calc(100vw - var(--settings-left, 0px) - 1rem);
+   max-width: min(33vw, var(--settings-available-width, 100vw));
 
    top: var(--settings-top, 0px);
 
@@ -42,6 +42,14 @@
 
    background: var(--background-toolbar);
    z-index: var(--z-modal);
+
+   .closeSettingsModalButton {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+   }
 }
 
 
@@ -53,6 +61,7 @@
       right: 0;
       margin: 0 auto;
       height: fit-content;
+      max-width: calc(100vw - 2rem);
    }
 }
 
